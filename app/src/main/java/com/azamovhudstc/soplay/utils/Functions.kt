@@ -24,11 +24,8 @@ import java.io.Serializable
 import kotlin.math.min
 import kotlin.reflect.KFunction
 fun initActivity(a: Activity) {
-    val window = a.window
-    WindowCompat.setDecorFitsSystemWindows(window, false)
-
         AppCompatDelegate.setDefaultNightMode(
-                 AppCompatDelegate.MODE_NIGHT_YES
+                 AppCompatDelegate.MODE_NIGHT_NO
         )
 
 }

@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.SoPlay" parent="Theme.Material3.Light.NoActionBar">
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorControlNormal</item>
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorOnBackground</item>
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/md_theme_dark_9_primary</item>
         <item name="colorOnPrimary">@color/md_theme_dark_9_onPrimary</item>

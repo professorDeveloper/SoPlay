@@ -15,6 +15,7 @@
         app:showAsAction="always" />
     <item
         android:id="@+id/devs"
+
         android:icon="@drawable/ic_baseline_clear_24"
         android:title="Developer" />
 </menu>

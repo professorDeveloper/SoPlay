@@ -7,24 +7,26 @@
     android:background="@color/md_theme_light_9_onBackground"
 
     tools:context=".ui.screens.home.HomeScreen">
+
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/md_theme_light_9_onBackground"
         android:orientation="vertical"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:elevation="0dp">
+        app:elevation="0dp"
+        app:liftOnScrollColor="@color/md_theme_light_9_onBackground">
 
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
-            android:background="@color/md_theme_light_9_onBackground"
-
             android:layout_marginTop="8dp"
+
+            android:background="@color/md_theme_light_9_onBackground"
             android:paddingHorizontal="10dp"
             android:paddingTop="4dp"
+            app:navigationIconTint="@color/white"
             app:layout_scrollEffect="compress"
             app:layout_scrollFlags="scroll|enterAlwaysCollapsed|snap"
             app:menu="@menu/home_menu"
@@ -37,7 +39,8 @@
             android:id="@+id/frameLayout"
             android:layout_width="match_parent"
             android:layout_height="55dp"
-            android:layout_margin="20dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginVertical="10dp"
             android:background="@drawable/search_bg"
             android:padding="5dp"
             android:requiresFadingEdge="vertical"
@@ -93,11 +96,11 @@
         android:id="@+id/searchRv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:paddingStart="10dp"
+        android:paddingTop="20dp"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layout_constraintEnd_toEndOf="parent"
 
         app:spanCount="2"
         tools:listitem="@layout/anime_item" />

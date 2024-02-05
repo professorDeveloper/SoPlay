@@ -54,6 +54,7 @@ class HomeScreen : Fragment() {
                         adapter.submitList(
                             it.data
                             )
+
                         searchRv.slideUp(700,1)
                     }
                 }
@@ -63,7 +64,8 @@ class HomeScreen : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.frameLayout.slideStart(700,1)
+        binding.frameLayout.slideStart(900,1)
+        binding.toolbar.slideUp(900,1)
         binding.apply {
             mainSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
