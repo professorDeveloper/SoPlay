@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.azamovhudstc.soplay.databinding.HomeScreenBinding
 import com.azamovhudstc.soplay.ui.adapter.SearchAdapter
-import com.azamovhudstc.soplay.utils.Resource
+import com.azamovhudstc.soplay.utils.*
 import com.azamovhudstc.soplay.viewmodel.imp.SearchViewModelImpl
 
 
@@ -36,17 +36,25 @@ class HomeScreen : Fragment() {
         model.searchData.observe(this) {
             when (it) {
                 is Resource.Error -> {
+                    binding.searchRv.hide()
+                    binding.progress.hide()
+
                     Log.e("TAG", "onCreate:${it.throwable.message.toString()} ")
                 }
                 Resource.Loading -> {
-                    Toast.makeText(requireActivity(), "Parsing Data..", Toast.LENGTH_SHORT).show()
+                    binding.progress.show()
+                    binding.searchRv.hide()
                 }
                 is Resource.Success -> {
+                    binding.progress.hide()
+                    binding.searchRv.show()
+
                     binding.apply {
                         searchRv.adapter = adapter
                         adapter.submitList(
                             it.data
                             )
+                        searchRv.slideUp(700,1)
                     }
                 }
             }
@@ -55,6 +63,7 @@ class HomeScreen : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.frameLayout.slideStart(700,1)
         binding.apply {
             mainSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
