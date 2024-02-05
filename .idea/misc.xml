@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_round_star_24.xml" value="0.2105" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/item_bg_format.xml" value="0.2105" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/item_round.xml" value="0.2105" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/search_bg.xml" value="0.2105" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/activity_main.xml" value="0.3078125" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/anime_item.xml" value="0.4528302049755674" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/home_screen.xml" value="0.321875" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/menu/home_menu.xml" value="0.321875" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

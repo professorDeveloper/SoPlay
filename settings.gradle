@@ -1,0 +1,22 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+        maven {
+            url = uri("https://storage.googleapis.com/r8-releases/raw")
+            url 'https://jitpack.io' }
+        jcenter() }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = uri("https://storage.googleapis.com/r8-releases/raw")
+            url 'https://jitpack.io' }
+        jcenter()  }
+}
+rootProject.name = "SoPlay"
+include ':app'
