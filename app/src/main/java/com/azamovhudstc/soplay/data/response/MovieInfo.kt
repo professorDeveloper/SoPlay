@@ -1,4 +1,7 @@
 package com.azamovhudstc.soplay.data.response
+
+import java.io.Serializable
+
 data class MovieInfo(
     val genre: String,
     val rating: String,
@@ -7,4 +10,4 @@ data class MovieInfo(
     val href: String,
     val quality: List<String>,
     val year: String
-)
+):Serializable

@@ -4,5 +4,5 @@
     <string name="get_recommendations">Watch/Read some Anime or Manga to get Recommendations</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-
+    <string name="episode_text">%1$s</string>
 </resources>

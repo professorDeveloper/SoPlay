@@ -4,6 +4,7 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorOnBackground</item>
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/md_theme_dark_9_primary</item>
+        <item name="android:textColor">@color/white</item>
         <item name="colorOnPrimary">@color/md_theme_dark_9_onPrimary</item>
         <item name="colorPrimaryContainer">@color/md_theme_dark_9_primaryContainer</item>
         <item name="colorOnPrimaryContainer">@color/md_theme_dark_9_onPrimaryContainer</item>

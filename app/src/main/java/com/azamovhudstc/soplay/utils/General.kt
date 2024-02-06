@@ -389,6 +389,9 @@ fun animationTransaction(): NavOptions.Builder {
     return navBuilder
 }
 
+
+
+
 fun brightnessConverter(it: Float, fromLog: Boolean) =
     MathUtils.clamp(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)

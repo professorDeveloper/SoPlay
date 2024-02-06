@@ -17,25 +17,34 @@ class SearchAdapter(
 ) : RecyclerView.Adapter<SearchAdapter.SearchVh>() {
     var list = ArrayList<MovieInfo>()
 
+    lateinit var setItemClickListener: (MovieInfo) -> Unit
+
+    fun setItemClickListener(block: (MovieInfo) -> Unit) {
+        setItemClickListener = block
+    }
+
     inner class SearchVh(private val binding: AnimeItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
         fun onBind(item: MovieInfo) {
             setAnimation(activity, binding.root)
             binding.apply {
-                titleItem.isSelected=true
+                titleItem.isSelected = true
                 titleItem.text = item.title
                 itemImg.loadImage(Constants.mainUrl + item.image)
                 itemCompactScore.text = item.rating ?: "+0"
                 yearTxt.text = item.year + "•"
                 if (item.quality.isEmpty()) {
-                    binding.itemFormat.isVisible=false
+                    binding.itemFormat.isVisible = false
                 } else {
                     if (item.quality.size >= 2) {
                         format1.text = item.quality.get(0) + "\n" + item.quality.get(1)
                     } else {
                         format1.text = item.quality.get(0)
                     }
+                }
+                binding.root.setOnClickListener {
+                    setItemClickListener.invoke(item)
                 }
                 movieType.text = item.genre
             }

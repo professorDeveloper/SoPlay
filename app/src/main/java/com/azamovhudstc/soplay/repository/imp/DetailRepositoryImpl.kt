@@ -68,8 +68,6 @@ class DetailRepositoryImpl : DetailRepository {
         // Extract the video URL from the iframe inside the "cn-content" div
         val videoDiv = document.selectFirst("#cn-content")
         val iframeElement = videoDiv?.selectFirst("iframe")
-        val videoUrl = iframeElement?.attr("src")
-        val parsedUrl = parseUrl(videoUrl!!)
         val data = FullMovieData(
             year = year,
             country = country,
@@ -78,10 +76,10 @@ class DetailRepositoryImpl : DetailRepository {
             genres = genres,
             directors = directors,
             actors = actors,
-            options = options.distinct(),
+            options = options.distinct().filterNot { it.second.toIntOrNull() !=null },
             imageUrls = imageUrls,
             description = nonRussianDescription!!,
-            videoUrl = parsedUrl!!,
+            videoUrl = "parsedUrl"!!,
             IMDB_rating = rating
         )
         emit(Result.success(data))

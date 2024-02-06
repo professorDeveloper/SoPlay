@@ -8,234 +8,456 @@
     android:clipToPadding="false"
     android:paddingBottom="16dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:gravity="center">
 
-        <FrameLayout
-            android:id="@+id/flBackdrop"
-            android:layout_width="0dp"
-            android:foreground="@drawable/shape_gradient"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/ivBackdrop"
-                android:layout_width="match_parent"
-                android:src="@tools:sample/backgrounds/scenic"
-                android:layout_height="240dp"
-                android:scaleType="centerCrop" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/ivFavorite"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="end|top"
-                android:layout_margin="16dp"
-                android:src="@drawable/ic_heart"
-                android:tint="?attr/colorOnPrimary" />
-
-        </FrameLayout>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardView2"
+        <ProgressBar
+            android:id="@+id/progress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            app:cardBackgroundColor="?attr/colorSurface"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/flBackdrop"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/flBackdrop">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/ivPoster"
-                android:layout_width="120dp"
-                android:layout_height="160dp"
-                android:scaleType="centerCrop" />
-
-        </androidx.cardview.widget.CardView>
-
-        <TextView
-            android:id="@+id/tvMovieTitleValue"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:ellipsize="marquee"
-            android:fontFamily="@font/poppins_bold"
-            android:marqueeRepeatLimit="marquee_forever"
-            android:singleLine="true"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            app:layout_constraintBottom_toBottomOf="@+id/flBackdrop"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/cardView2"
-            app:layout_constraintTop_toBottomOf="@+id/flBackdrop" />
-
-        <LinearLayout
-            android:id="@+id/linearLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/shape_vote_average"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:padding="5dp"
-            android:translationZ="9dp"
-            app:layout_constraintBottom_toTopOf="@+id/tvMovieTitleValue"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                app:srcCompat="@drawable/ic_round_star_24" />
-
-            <TextView
-                android:id="@+id/tvVoteAverage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:layout_marginEnd="5dp"
-                android:fontFamily="@font/poppins_family"
-                android:text="+89"
-                android:textColor="@color/white"
-                android:textSize="14sp" />
-
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/tvGnreValue"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_marginEnd="16dp"
-            android:ellipsize="end"
-            android:fontFamily="@font/ubuntu_medium"
-            android:maxLines="1"
-            android:textColor="@color/white"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/tvMovieTitleValue"
-            app:layout_constraintTop_toBottomOf="@+id/tvMovieTitleValue" />
-
-        <TextView
-            android:id="@+id/tvDuration"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:fontFamily="@font/ubuntu_medium"
-            android:gravity="center"
-            android:textColor="?attr/colorPrimary"
-            app:layout_constraintStart_toStartOf="@+id/tvGnreValue"
-            app:layout_constraintTop_toBottomOf="@+id/tvGnreValue" />
+            android:layout_gravity="center"
+            android:layout_marginTop="60dp"
+            android:visibility="visible"
+            tools:visibility="gone" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/contentDescription"
+            android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@+id/cardView2">
+            tools:visibility="visible">
 
-            <TextView
-                android:id="@+id/tvDescriptionTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:fontFamily="@font/poppins"
-                android:text="@string/get_recommendations"
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tvDescriptionValue"
+            <FrameLayout
+                android:id="@+id/flBackdrop"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:fontFamily="@font/poppins_family"
-                android:textColor="@color/white"
-                android:textSize="16sp"
+                android:foreground="@drawable/shape_gradient"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/tvDescriptionTitle"
-                app:layout_constraintTop_toBottomOf="@+id/tvDescriptionTitle" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/tvTaglineTitle"
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/ivBackdrop"
+                    android:layout_width="match_parent"
+                    android:layout_height="340dp"
+                    android:scaleType="centerCrop"
+                    tools:src="@tools:sample/backgrounds/scenic" />
+
+
+            </FrameLayout>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/poppins"
-                android:text="TagLine"
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                app:layout_constraintEnd_toEndOf="@+id/tvDescriptionValue"
-                app:layout_constraintStart_toStartOf="@+id/tvDescriptionValue"
-                app:layout_constraintTop_toBottomOf="@+id/actors" />
+                android:layout_marginStart="16dp"
+                app:cardBackgroundColor="?attr/colorSurface"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="8dp"
+                app:layout_constraintBottom_toBottomOf="@+id/flBackdrop"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/flBackdrop">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/ivPoster"
+                    android:layout_width="150dp"
+                    android:layout_height="220dp"
+                    android:scaleType="centerCrop" />
+
+            </androidx.cardview.widget.CardView>
 
             <TextView
-                android:id="@+id/tvQuoteValue"
+                android:id="@+id/tvMovieTitleValue"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp"
-                android:fontFamily="@font/inter_bold"
-                android:textAlignment="center"
+                android:ellipsize="marquee"
+                android:fontFamily="@font/poppins_bold"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:singleLine="true"
                 android:textColor="@color/white"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:textSize="20sp"
+                app:layout_constraintBottom_toBottomOf="@+id/flBackdrop"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvTaglineTitle" />
+                app:layout_constraintStart_toEndOf="@+id/cardView2"
+                app:layout_constraintTop_toBottomOf="@+id/flBackdrop" />
 
-            <TextView
-                android:id="@+id/tvActorsTitle"
+            <LinearLayout
+                android:id="@+id/linearLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/shape_vote_average"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="5dp"
+                android:translationZ="9dp"
+                app:layout_constraintBottom_toTopOf="@+id/tvMovieTitleValue"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    app:srcCompat="@drawable/ic_round_star_24" />
+
+                <TextView
+                    android:id="@+id/tvVoteAverage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:fontFamily="@font/poppins_family"
+                    android:text="+89"
+                    android:textColor="@color/white"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvGnreValue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="16dp"
+                android:ellipsize="end"
                 android:fontFamily="@font/ubuntu_medium"
-                android:text="Actors"
+                android:maxLines="1"
                 android:textColor="@color/white"
-                android:textSize="18sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvDescriptionValue" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tvMovieTitleValue"
+                app:layout_constraintTop_toBottomOf="@+id/tvMovieTitleValue" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/actors"
+            <TextView
+                android:id="@+id/tvDuration"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:fontFamily="@font/ubuntu_medium"
+                android:gravity="center"
+                android:textColor="?attr/colorPrimary"
+                app:layout_constraintStart_toStartOf="@+id/tvGnreValue"
+                app:layout_constraintTop_toBottomOf="@+id/tvGnreValue" />
+
+            <LinearLayout
+                android:id="@+id/linearLayout2"
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:clipToPadding="false"
-                android:nestedScrollingEnabled="false"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="start"
+                android:orientation="horizontal"
+                android:paddingTop="8dp"
+
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/mainContainer"
+                app:layout_constraintTop_toBottomOf="@+id/cardView2">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="55dp"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="24dp"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/yearValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/poppins_bold"
+                        android:text="2024"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/poppins_semi_bold"
+                        android:text="Year"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="55dp"
+                    android:layout_gravity="center"
+
+                    android:layout_marginHorizontal="34dp"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/durationValue"
+                        android:layout_width="wrap_content"
+
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/poppins_bold"
+                        android:text="105 MIN"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/poppins_semi_bold"
+                        android:text="Duration"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="55dp"
+                    android:layout_gravity="center"
+
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/countryValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:fontFamily="@font/poppins_bold"
+                        android:text="Brazilian"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/poppins_semi_bold"
+                        android:text="Country"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <View
+                android:id="@+id/line"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="4dp"
+                android:background="@color/md_theme_dark_9_onPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvActorsTitle"
-                tools:listitem="@layout/actor_view_layout"
-                tools:orientation="horizontal" />
+                app:layout_constraintTop_toBottomOf="@id/linearLayout2" />
+
+            <LinearLayout
+                android:id="@+id/mainContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingVertical="10dp"
+                app:layout_constraintTop_toBottomOf="@+id/line">
+
+                <!-- Favourites button -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/fav_card"
+                    style="@style/Widget.Material3.CardView.Filled"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorSurface">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp">
+
+                        <ImageView
+                            android:id="@+id/button_favorite"
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="Favorite"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/ic_heart_outline" />
+
+                        <TextView
+                            android:id="@+id/favButtonText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Favorite"
+                            android:textAlignment="center" />
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Episode button -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/ep_card"
+                    style="@style/Widget.Material3.CardView.Filled"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="6dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorSurface">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp">
+
+                        <RelativeLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:id="@+id/imageViewEp"
+                                android:layout_width="16dp"
+                                android:layout_height="18dp"
+                                android:layout_centerVertical="true"
+                                android:paddingTop="2dp"
+                                android:src="@drawable/ic_episode"
+                                app:tint="@color/white" />
+
+                            <TextView
+                                android:id="@+id/ep_text_view"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_centerVertical="true"
+                                android:layout_toEndOf="@+id/imageViewEp"
+                                android:fontFamily="sans-serif-condensed-medium"
+                                android:paddingHorizontal="6dp"
+                                android:textSize="16sp"
+                                tools:text="480p-" />
+                        </RelativeLayout>
+
+                        <TextView
+                            android:id="@+id/ep_button_text"
+
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/poppins"
+                            android:text="Select Episode"
+                            android:textAlignment="center"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Play button -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/play_card"
+                    style="@style/Widget.Material3.CardView.Filled"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorSurface">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp">
+
+                        <ImageView
+                            android:id="@+id/episodeButtonForSpinner"
+                            android:layout_width="30dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/ic_play"
+                            app:tint="@color/white" />
+
+                        <TextView
+                            android:id="@+id/playButtonText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Play"
+                            android:textAlignment="center" />
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/contentDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:visibility="visible"
+                app:layout_constraintTop_toBottomOf="@+id/mainContainer">
+
+                <TextView
+                    android:id="@+id/tvDescriptionTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:fontFamily="@font/poppins"
+                    android:text="Description"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvDescriptionValue"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="10dp"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/poppins_family"
+
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/tvDescriptionTitle"
+                    app:layout_constraintTop_toBottomOf="@+id/tvDescriptionTitle" />
+
+                <TextView
+                    android:id="@+id/tvActorsTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:fontFamily="@font/ubuntu_medium"
+                    android:text="Actors"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tvDescriptionValue" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/actors"
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp"
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="false"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tvActorsTitle"
+                    tools:listitem="@layout/actor_view_layout"
+                    tools:orientation="horizontal" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <com.azamovhudstc.soplay.utils.OverlapLoadingView
-            android:id="@+id/loadingView"
-            android:layout_width="0dp"
-            android:layout_height="160dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cardView2">
 
-        </com.azamovhudstc.soplay.utils.OverlapLoadingView>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
+    </FrameLayout>
 </androidx.core.widget.NestedScrollView>

@@ -7,8 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.databinding.HomeScreenBinding
 import com.azamovhudstc.soplay.ui.adapter.SearchAdapter
 import com.azamovhudstc.soplay.utils.*
@@ -33,7 +36,16 @@ class HomeScreen : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        model.searchData.observe(this) {
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.frameLayout.slideStart(900,1)
+        val window = requireActivity().window
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        window.statusBarColor = resources.getColor(R.color.md_theme_light_9_onBackground)
+        binding.toolbar.slideUp(900,1)
+        model.searchData.observe(viewLifecycleOwner) {
             when (it) {
                 is Resource.Error -> {
                     binding.searchRv.hide()
@@ -53,22 +65,23 @@ class HomeScreen : Fragment() {
                         searchRv.adapter = adapter
                         adapter.submitList(
                             it.data
-                            )
+                        )
+                        adapter.setItemClickListener {
+                            val bundle = Bundle()
+                            val data = it
+                            bundle.putSerializable("data", data)
+                            findNavController().navigate(R.id.detailScreen, bundle,animationTransaction().build())
+                        }
 
                         searchRv.slideUp(700,1)
                     }
                 }
             }
         }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        binding.frameLayout.slideStart(900,1)
-        binding.toolbar.slideUp(900,1)
         binding.apply {
             mainSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
+                    dismissKeyboard(binding.root)
                     model.searchMovie(query.toString())
                     return true
                 }

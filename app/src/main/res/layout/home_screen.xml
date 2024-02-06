@@ -65,7 +65,7 @@
                     android:theme="@style/ThemeOverlay.SearchView"
                     app:closeIcon="@drawable/ic_baseline_clear_24"
                     app:iconifiedByDefault="false"
-                    app:queryBackground="@color/transparent"
+                    app:queryBackground="@color/transparent2"
 
                     app:queryHint="Search Movie"
                     app:searchIcon="@drawable/search_icon"

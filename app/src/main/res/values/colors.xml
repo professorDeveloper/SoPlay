@@ -72,5 +72,6 @@
     <color name="md_theme_dark_9_surfaceTint">#979022</color>
     <color name="md_theme_dark_9_outlineVariant">#3F4948</color>
     <color name="md_theme_dark_9_scrim">#000000</color>
-    <color name="transparent">#00000000</color>
+    <color name="transparent">#4B000000</color>
+    <color name="transparent2">#00000000</color>
 </resources>
