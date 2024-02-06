@@ -30,7 +30,9 @@
         <item name="colorOutline">@color/md_theme_dark_9_outline</item>
         <item name="colorOnSurfaceInverse">@color/md_theme_dark_9_inverseOnSurface</item>
         <item name="colorSurfaceInverse">@color/md_theme_dark_9_inverseSurface</item>
-        <item name="colorPrimaryInverse">@color/md_theme_dark_9_inversePrimary</item> </style>
+        <item name="colorPrimaryInverse">@color/md_theme_dark_9_inversePrimary</item>
+    </style>
+
     <style name="ThemeOverlay.SearchView" parent="">
         <item name="android:editTextColor">@color/white</item>
         <item name="android:ambientShadowAlpha">0.08</item>
@@ -42,4 +44,15 @@
         <item name="android:textColorHint">@color/white</item>
         <item name="closeIconTint">@color/white</item>
     </style>
+
+    <style name="DialogTheme" parent="Theme.SoPlay">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">@drawable/shape_corner_16dp</item>
+    </style>
+
 </resources>

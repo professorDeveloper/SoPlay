@@ -10,6 +10,7 @@
 package com.azamovhudstc.soplay.utils
 
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -21,11 +22,13 @@ import android.graphics.drawable.shapes.RoundRectShape
 import android.os.*
 import android.provider.Settings
 import android.text.Html
+import android.util.AttributeSet
 import android.util.Log
 import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.animation.ScaleAnimation
+import android.widget.ArrayAdapter
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.core.math.MathUtils
@@ -44,6 +47,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CancellationException
 import kotlin.math.log2
+import kotlin.math.max
 import kotlin.math.pow
 
 val Int.dp: Float get() = (this / Resources.getSystem().displayMetrics.density)
@@ -62,6 +66,11 @@ suspend fun <T> tryWithSuspend(
         null
     }
 }
+val defaultHeaders = mapOf(
+    "User-Agent" to
+            "Mozilla/5.0 (Linux; Android %s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36"
+                .format(Build.VERSION.RELEASE, Build.MODEL)
+)
 
 fun randomColor(): Int {
     val color = listOf(
@@ -391,6 +400,35 @@ fun animationTransaction(): NavOptions.Builder {
 
 
 
+@SuppressLint("ClickableViewAccessibility")
+class SpinnerNoSwipe : androidx.appcompat.widget.AppCompatSpinner {
+    private var mGestureDetector: GestureDetector? = null
+
+    constructor(context: Context) : super(context) {
+        setup()
+    }
+
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
+        setup()
+    }
+
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        setup()
+    }
+
+    private fun setup() {
+        mGestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onSingleTapUp(e: MotionEvent): Boolean {
+                return performClick()
+            }
+        })
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        mGestureDetector!!.onTouchEvent(event)
+        return true
+    }
+}
 
 fun brightnessConverter(it: Float, fromLog: Boolean) =
     MathUtils.clamp(
@@ -433,5 +471,22 @@ fun View.slideStart(animTime: Long, startOffset: Long, hide: View? = null) {
     }
     startAnimation(slideUp)
 }
+fun View.circularReveal(ex: Int, ey: Int, subX: Boolean, time: Long) {
+    ViewAnimationUtils.createCircularReveal(
+        this,
+        if (subX) (ex - x.toInt()) else ex,
+        ey - y.toInt(),
+        0f,
+        max(height, width).toFloat()
+    ).setDuration(time).start()
+}
 
+open class NoPaddingArrayAdapter<T>(context: Context, layoutId: Int, items: List<T>) : ArrayAdapter<T>(context, layoutId, items) {
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val view = super.getView(position, convertView, parent)
+        view.setPadding(0, view.paddingTop, view.paddingRight, view.paddingBottom)
+        (view as TextView).setTextColor(Color.WHITE)
+        return view
+    }
+}
 

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~  Created by Azamov X ㋡ on 11/21/23, 2:02 AM
+  ~  Copyright (c) 2023 . All rights reserved.
+  ~  Last modified 11/21/23, 2:02 AM
+  ~
+  ~
+  -->
+
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">gogoanime.gr</domain>
+        <domain includeSubdomains="true">uzmovi.com</domain>
+        <domain includeSubdomains="true">asilmedia.org</domain>
+        <domain includeSubdomains="true">asilmedia.net</domain>
+        <domain includeSubdomains="true">gogoanimehd.to</domain>
+        <domain includeSubdomains="true">5.182.6.13</domain>
+        <domain includeSubdomains="true">212.41.14.162</domain>
+        <domain includeSubdomains="true">212.41.15.9</domain>
+        <domain includeSubdomains="true">212.41.14.155</domain>
+        <domain includeSubdomains="true">fayllar1.ru</domain>
+
+        <domain includeSubdomains="true">gogoanimes.fi</domain>
+        <domain includeSubdomains="true">gogoanime.hu</domain>
+        <domain includeSubdomains="true">gogoanime.llc</domain>
+        <domain includeSubdomains="true">gogoanime.bid</domain>
+        <domain includeSubdomains="true">gogoanime.lu</domain>
+        <domain includeSubdomains="true">gogoanime.tel</domain>
+        <domain includeSubdomains="true">gogoanime.cl</domain>
+        <domain includeSubdomains="true">ajax.gogocdn.net</domain>
+        <domain includeSubdomains="true">goload.pro</domain>
+        <domain includeSubdomains="true">api.myanimelist.net</domain>
+        <domain includeSubdomains="true">myanimelist.net</domain>
+    </domain-config>
+</network-security-config>

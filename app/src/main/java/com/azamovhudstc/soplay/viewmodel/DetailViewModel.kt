@@ -7,5 +7,7 @@ import com.azamovhudstc.soplay.utils.Resource
 
 interface DetailViewModel {
     fun parseDetailByMovieInfo(movieInfo: MovieInfo)
+    fun loadPlayer(movieInfo: MovieInfo)
     val movieDetailData: MutableLiveData<Resource<FullMovieData>>
+    val playerData: MutableLiveData<FullMovieData>
 }

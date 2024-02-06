@@ -1,5 +1,7 @@
 package com.azamovhudstc.soplay.data.response
 
+import java.io.Serializable
+
 
 data class FullMovieData(
 
@@ -15,7 +17,7 @@ data class FullMovieData(
     val description: String,
     val videoUrl: String,
     val IMDB_rating: String
-)
+):Serializable
 
 {
     override fun toString(): String {

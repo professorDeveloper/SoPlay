@@ -74,4 +74,19 @@
     <color name="md_theme_dark_9_scrim">#000000</color>
     <color name="transparent">#4B000000</color>
     <color name="transparent2">#00000000</color>
+    <color name="violet_400_50">#8091A6FF</color>
+    <color name="bg_black">#000000</color>
+    <color name="bg_white">#EEEEEE</color>
+    <color name="bg">@color/bg_white</color>
+    <color name="bg_opp">@color/bg_black</color>
+    <color name="fg">#A8000000</color>
+    <color name="nav_bg">#fff</color>
+    <color name="nav_bg_inv">#00FFFFFF</color>
+    <color name="nav_tab">#40000000</color>
+    <color name="nav_tab_disabled">#19000000</color>
+    <color name="status">#54EEEEEE</color>
+    <color name="button_icon">#A9FFFFFF</color>
+    <color name="nav_status">#80FFFFFF</color>
+    <color name="playerDoubleTapTouch">#18FFFFFF</color>
+    <color name="playerDoubleTapBackground">#20EEEEEE</color>
 </resources>

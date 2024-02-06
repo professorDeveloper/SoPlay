@@ -49,7 +49,7 @@ class DetailRepositoryImpl : DetailRepository {
             val value = it.groupValues[1]
             val text = it.groupValues[2]
             Pair(text, value)
-        }.toList()
+        }.toMutableList()
 
         val imageUrls = document.select(".xfieldimagegallery img.lazyload[data-src]")
             .map { it.attr("data-src") }
@@ -65,6 +65,10 @@ class DetailRepositoryImpl : DetailRepository {
         val rating = document.select(".r-im.txt-bold500.pfrate-count").text()
 
 
+//        options.forEachIndexed { index, pair ->
+//            options[index] = Pair(pair.first, parseUrl(pair.second)!!)
+//
+//        }
         // Extract the video URL from the iframe inside the "cn-content" div
         val videoDiv = document.selectFirst("#cn-content")
         val iframeElement = videoDiv?.selectFirst("iframe")
@@ -76,7 +80,7 @@ class DetailRepositoryImpl : DetailRepository {
             genres = genres,
             directors = directors,
             actors = actors,
-            options = options.distinct().filterNot { it.second.toIntOrNull() !=null },
+            options = options.distinct().filterNot { it.second.toIntOrNull() != null },
             imageUrls = imageUrls,
             description = nonRussianDescription!!,
             videoUrl = "parsedUrl"!!,
@@ -102,7 +106,7 @@ class DetailRepositoryImpl : DetailRepository {
             return fileParameter?.substringAfter("file=")
         }
 
-        return null
+        return url
     }
 
 }

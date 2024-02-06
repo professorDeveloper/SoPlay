@@ -4,14 +4,14 @@ import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
-
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.azamovhudstc.soplay.R
+import com.azamovhudstc.soplay.data.response.FullMovieData
 import com.azamovhudstc.soplay.data.response.MovieInfo
 import com.azamovhudstc.soplay.databinding.DetailScreenBinding
+import com.azamovhudstc.soplay.ui.activity.PlayerActivity
 import com.azamovhudstc.soplay.utils.Constants.mainUrl
 import com.azamovhudstc.soplay.utils.Resource
 import com.azamovhudstc.soplay.utils.hide
@@ -22,7 +22,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.request.RequestOptions
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import jp.wasabeef.glide.transformations.BlurTransformation
+
 
 class DetailScreen : Fragment() {
 
@@ -34,8 +36,8 @@ class DetailScreen : Fragment() {
 
     private lateinit var bottomSheet: com.google.android.material.bottomsheet.BottomSheetDialog
     private lateinit var epList: MutableList<Pair<String, String>>
-    private lateinit var epType: String
     private lateinit var epIndex: String
+    private var epIndexForEp: Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: android.view.ViewGroup?,
@@ -75,13 +77,28 @@ class DetailScreen : Fragment() {
                         .apply(RequestOptions.bitmapTransform(BlurTransformation(2, 3)))
                         .into(banner)
                     binding.ivPoster.loadImage(mainUrl + response.posterImageSrc)
-                    binding.tvVoteAverage.text = response.IMDB_rating
+                    binding.tvVoteAverage.text = data.rating
                     val listResponse = response.genres.map {
                         it.first
 
                     }
                     binding.tvGnreValue.text = listResponse.joinToString(", ")
                     binding.tvMovieTitleValue.isSelected = true
+
+                    binding.playCard.setOnClickListener {
+                        val hrefList = response.options.map {
+                            it.second
+                        }
+                        PlayerActivity.currentEpIndex = epIndexForEp
+                        PlayerActivity.epCount = hrefList.size
+                        PlayerActivity.epList = hrefList as ArrayList<String>
+                        PlayerActivity.epListByName = epList as ArrayList<Pair<String, String>>
+                        PlayerActivity.movieInfo = data
+                        PlayerActivity.pipStatus = true
+                        val intent = PlayerActivity.newIntent(requireContext(), response)
+                        startActivity(intent)
+
+                    }
 
 
                     binding.epTextView.text = response.options.get(0).first
@@ -90,111 +107,73 @@ class DetailScreen : Fragment() {
 
                     binding.yearValue.text = response.year
                     binding.countryValue.text = response.country
-
+                    epList = response.options.toMutableList()
+                    epIndex = epList.first().first
+                    setUpEpisodeSheet(it.data)
 
                     binding.epCard.setOnClickListener {
-
-                        bottomSheet =
-                            com.google.android.material.bottomsheet.BottomSheetDialog(
-                                requireContext()
-                            )
-                        bottomSheet.setContentView(R.layout.select_season_bottom_sheet_layout)
-                        bottomSheet.behavior.peekHeight = bottomSheet.behavior.maxHeight
-                        bottomSheet.behavior.state =
-                            com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
-                        bottomSheet.behavior.isDraggable = false
-
-
-                        val list =
-                            bottomSheet.findViewById<android.widget.ListView>(R.id.listView)
-                        val editText =
-                            bottomSheet.findViewById<android.widget.EditText>(R.id.text_input_edit_text)
-                        val ascDscImageBtn =
-                            bottomSheet.findViewById<android.widget.ImageView>(R.id.asc_dsc_image_button)
-                        val normalOrderIcon =
-                            ContextCompat.getDrawable(
-                                requireContext(),
-                                R.drawable.sort_numeric_normal
-                            )
-                        val reversedOrderIcon =
-                            ContextCompat.getDrawable(
-                                requireContext(),
-                                R.drawable.sort_numeric_reversed
-                            )
-                        epList = response.options.toMutableList()
-                        epIndex = epList.first().first
-                        var orderPref = "normal"
-                        if (orderPref == "reversed") {
-                            epList.reverse()
-                            ascDscImageBtn?.setImageDrawable(reversedOrderIcon)
-                        }
-
-                        binding.epTextView.text =
-                            resources.getString(R.string.episode_text, epIndex)
-
-                        // Episodes aye
-                        epList = response.options.toMutableList()
-                        epIndex = epList.first().first
-
-
-                        if (orderPref == "reversed") {
-                            epList.reverse()
-                            ascDscImageBtn?.setImageDrawable(reversedOrderIcon)
-                        }
-
-                        // Setup the views that uses the above
-                        // 1. Ep text
-                        binding.epTextView.text =
-                            resources.getString(R.string.episode_text, epIndex)
-
-
-                        val adapterForEpList = android.widget.ArrayAdapter(
-                            requireContext(), android.R.layout.simple_spinner_dropdown_item,
-                            epList.map { it.first }
-                        ).apply {
-                            list?.adapter = this
-                        }
-
-                        // Search
-                        editText?.addTextChangedListener {
-                            val searchedText = it.toString()
-                            adapterForEpList.filter.filter(searchedText)
-                        }
-
-
-                        // Toggle Asc/Desc
-                        ascDscImageBtn?.setOnClickListener {
-                            epList.reverse()
-                            adapterForEpList.notifyDataSetChanged()
-                            ascDscImageBtn.apply {
-                                if (this.drawable == reversedOrderIcon) this.setImageDrawable(
-                                    normalOrderIcon
-                                )
-                                else this.setImageDrawable(reversedOrderIcon)
-                            }
-                            list?.setSelection(0)
-                            val order =
-                                if (ascDscImageBtn.drawable == reversedOrderIcon) "reversed" else "normal"
-                            orderPref = order
-                        }
-
-
-                        val pos = adapterForEpList.getPosition(epIndex)
-                        list?.setSelection(pos)
-                        list?.setOnItemClickListener { _, view, _, _ ->
-                            val episodeString = (view as android.widget.TextView).text.toString()
-                            epIndex = episodeString
-                            binding.epTextView.text =
-                                resources.getString(R.string.episode_text, epIndex)
-                            bottomSheet.dismiss()
-                        }
-
-
                         bottomSheet.show()
                     }
                 }
             }
         }
+    }
+
+    private fun setUpEpisodeSheet(response: FullMovieData) {
+
+        bottomSheet =
+            com.google.android.material.bottomsheet.BottomSheetDialog(
+                requireContext()
+            )
+        bottomSheet.setContentView(R.layout.select_season_bottom_sheet_layout)
+        bottomSheet.behavior.peekHeight = bottomSheet.behavior.maxHeight
+        bottomSheet.behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        bottomSheet.behavior.isDraggable = false
+        val list =
+            bottomSheet.findViewById<android.widget.ListView>(R.id.listView)
+        val editText =
+            bottomSheet.findViewById<android.widget.EditText>(R.id.text_input_edit_text)
+
+        binding.epTextView.text =
+            resources.getString(R.string.episode_text, epIndex)
+
+        // Episodes aye
+        epList = response.options.toMutableList()
+        epIndex = epList.first().first
+
+
+        // Setup the views that uses the above
+        // 1. Ep text
+        binding.epTextView.text =
+            resources.getString(R.string.episode_text, epIndex)
+
+
+        val adapterForEpList = android.widget.ArrayAdapter(
+            requireContext(), android.R.layout.simple_spinner_dropdown_item,
+            epList.map { it.first }
+        ).apply {
+            list?.adapter = this
+        }
+
+        // Search
+        editText?.addTextChangedListener {
+            val searchedText = it.toString()
+            adapterForEpList.filter.filter(searchedText)
+        }
+
+
+        val pos = adapterForEpList.getPosition(epIndex)
+        list?.setSelection(pos)
+        list?.setOnItemClickListener { _, view, position, _ ->
+            val episodeString = (view as android.widget.TextView).text.toString()
+            epIndex = episodeString
+            epIndexForEp = position
+
+            binding.epTextView.text =
+                resources.getString(R.string.episode_text, epIndex)
+            bottomSheet.dismiss()
+        }
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

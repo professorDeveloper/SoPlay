@@ -2,9 +2,12 @@ package com.azamovhudstc.soplay.utils
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
+import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import android.view.animation.*
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatDelegate
@@ -13,14 +16,13 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.app.App
+import com.azamovhudstc.soplay.ui.activity.MainActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.lagradost.nicehttp.addGenericDns
 import okhttp3.OkHttpClient
-import java.io.FileOutputStream
-import java.io.ObjectOutputStream
-import java.io.Serializable
+import java.io.*
 import kotlin.math.min
 import kotlin.reflect.KFunction
 fun initActivity(a: Activity) {
@@ -30,6 +32,57 @@ fun initActivity(a: Activity) {
                  AppCompatDelegate.MODE_NIGHT_NO
         )
 
+}
+
+
+fun startMainActivity(activity: Activity, bundle: Bundle? = null) {
+    activity.finishAffinity()
+    activity.startActivity(
+        Intent(
+            activity,
+            MainActivity::class.java
+        ).apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+            if (bundle != null) putExtras(bundle)
+        }
+    )
+}
+
+
+@Suppress("UNCHECKED_CAST")
+fun <T> loadData(fileName: String, context: Context? = null, toast: Boolean = true): T? {
+    val a = context ?: App.instance
+    try {
+        if (a?.fileList() != null)
+            if (fileName in a.fileList()) {
+                val fileIS: FileInputStream = a.openFileInput(fileName)
+                val objIS = ObjectInputStream(fileIS)
+                val data = objIS.readObject() as T
+                objIS.close()
+                fileIS.close()
+                return data
+            }
+    } catch (e: Exception) {
+        if (toast) snackString("Error loading data $fileName")
+        e.printStackTrace()
+    }
+    return null
+}
+
+@Suppress("DEPRECATION")
+fun Activity.hideSystemBars() {
+    window.decorView.systemUiVisibility = (
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            )
+}
+
+@Suppress("DEPRECATION")
+fun Activity.hideStatusBar() {
+    window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
 }
 
 fun ImageView.loadImage(url: String?, size: Int = 0) {
