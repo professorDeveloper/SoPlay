@@ -3,35 +3,45 @@ package com.azamovhudstc.soplay.utils
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.*
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.app.App
+import com.azamovhudstc.soplay.data.response.MovieInfo
 import com.azamovhudstc.soplay.ui.activity.MainActivity
+import com.azamovhudstc.soplay.utils.Download.adm
+import com.azamovhudstc.soplay.utils.Download.defaultDownload
+import com.azamovhudstc.soplay.utils.Download.oneDM
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.lagradost.nicehttp.addGenericDns
 import okhttp3.OkHttpClient
 import java.io.*
-import kotlin.math.min
 import kotlin.reflect.KFunction
+
 fun initActivity(a: Activity) {
     val window = a.window
     WindowCompat.setDecorFitsSystemWindows(window, true)
-        AppCompatDelegate.setDefaultNightMode(
-                 AppCompatDelegate.MODE_NIGHT_NO
-        )
+    AppCompatDelegate.setDefaultNightMode(
+        AppCompatDelegate.MODE_NIGHT_NO
+    )
 
+}
+
+fun download(activity: Activity, episode: MovieInfo, link: String, animeTitle: String) {
+    Toast.makeText(activity, "Downloading...", Toast.LENGTH_SHORT).show()
+    when (loadData<Int>("settings_download_manager", activity, false) ?: 0) {
+        1 -> oneDM(activity, episode, link, animeTitle)
+        2 -> adm(activity, episode, link, animeTitle)
+        else -> defaultDownload(activity, episode, link, animeTitle)
+    }
 }
 
 

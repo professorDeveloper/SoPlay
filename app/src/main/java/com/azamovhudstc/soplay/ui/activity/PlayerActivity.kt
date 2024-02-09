@@ -1,6 +1,5 @@
 package com.azamovhudstc.soplay.ui.activity
 
-import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.*
 import android.content.Context
@@ -15,19 +14,18 @@ import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.view.*
-import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.*
-import androidx.lifecycle.lifecycleScope
-import com.azamovhudstc.soplay.ui.adapter.CustomAdapter
+import androidx.media3.common.Player
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.data.response.FullMovieData
 import com.azamovhudstc.soplay.data.response.MovieInfo
 import com.azamovhudstc.soplay.databinding.ActivityPlayerBinding
+import com.azamovhudstc.soplay.ui.adapter.CustomAdapter
 import com.azamovhudstc.soplay.utils.*
 import com.azamovhudstc.soplay.viewmodel.imp.PlayerViewModel
 import com.google.android.exoplayer2.C
@@ -37,15 +35,13 @@ import com.google.android.exoplayer2.ui.DefaultTimeBar
 import com.google.android.material.slider.Slider
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.net.CookieHandler
 import java.net.CookieManager
 import java.net.CookiePolicy
 import kotlin.math.min
 
 @AndroidEntryPoint
-class PlayerActivity : AppCompatActivity() {
+class PlayerActivity : AppCompatActivity(), Player.Listener {
     private var notchHeight: Int = 1
 
     private val model by viewModels<PlayerViewModel>()
@@ -71,6 +67,7 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var scaleBtn: ImageButton
     private lateinit var exoRotate: ImageButton
     private lateinit var qualityBtn: ImageButton
+    private lateinit var downloadBtn: ImageButton
     private lateinit var prevEpBtn: ImageButton
     private var doubleBackToExitPressedOnce: Boolean = false
     private lateinit var backPressSnackBar: Snackbar
@@ -134,6 +131,7 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.setFlags(
@@ -142,12 +140,9 @@ class PlayerActivity : AppCompatActivity() {
         )
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         // show video inside notch if API >= 28 and orientation is landscape
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
-            resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        ) {
-            window.attributes.layoutInDisplayCutoutMode =
-                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
-        }
+        window.attributes.layoutInDisplayCutoutMode =
+            WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+
         parseExtra()
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -167,6 +162,8 @@ class PlayerActivity : AppCompatActivity() {
         }
 
 
+
+
         mCookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL)
         CookieHandler.setDefault(mCookieManager)
         playerView = binding.exoPlayerView
@@ -179,6 +176,7 @@ class PlayerActivity : AppCompatActivity() {
         exoRotate = playerView.findViewById(R.id.exo_rotate)
         nextEpBtn = playerView.findViewById(R.id.exo_next_ep)
         videoEpTextView = playerView.findViewById(R.id.exo_title)
+        downloadBtn = playerView.findViewById(R.id.exo_download)
         exoLock = playerView.findViewById(R.id.exo_lock)
         exoPlay = playerView.findViewById(R.id.exo_play_pause)
         exoMiddleControllers = findViewById(R.id.exo_middle_controllers)
@@ -195,7 +193,6 @@ class PlayerActivity : AppCompatActivity() {
         playerView.subtitleView?.visibility = View.VISIBLE
         playerView.findViewById<ExtendedTimeBar>(R.id.exo_progress).setKeyTimeIncrement(10000)
         prepareButtons()
-
 
 
         model.isLoading.observe(this) { isLoading ->
@@ -228,10 +225,11 @@ class PlayerActivity : AppCompatActivity() {
     private fun setNewEpisode(increment: Int = 1) {
         currentEpIndex = currentEpIndex.toInt() + increment
         println(currentEpIndex)
-        if (currentEpIndex > epCount.toInt() || currentEpIndex.toInt() < 1)
+        if (currentEpIndex.toInt() > epCount.toInt() || currentEpIndex.toInt() < 1)
         else {
             model.setAnimeLink(
-                epList[currentEpIndex] as String
+                epList.get(currentEpIndex),
+                true
             )
             prevEpBtn.setImageViewEnabled(currentEpIndex.toInt() >= 2)
             nextEpBtn.setImageViewEnabled(currentEpIndex.toInt() != epCount.toInt())
@@ -261,80 +259,6 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun handleController() {
-        val overshoot = AnimationUtils.loadInterpolator(this, R.anim.over_shoot)
-        val controllerDuration = (1f * 200).toLong()
-
-        if (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) !isInPictureInPictureMode else true) {
-            if (playerView.isControllerFullyVisible) {
-                ObjectAnimator.ofFloat(
-                    playerView.findViewById(R.id.exo_controller),
-                    "alpha",
-                    1f,
-                    0f
-                )
-                    .setDuration(controllerDuration).start()
-                ObjectAnimator.ofFloat(
-                    playerView.findViewById(R.id.exo_bottom_controllers),
-                    "translationY",
-                    0f,
-                    128f
-                )
-                    .apply { interpolator = overshoot;duration = controllerDuration;start() }
-                ObjectAnimator.ofFloat(
-                    playerView.findViewById(R.id.exo_progress),
-                    "translationY",
-                    0f,
-                    128f
-                )
-                    .apply { interpolator = overshoot;duration = controllerDuration;start() }
-                ObjectAnimator.ofFloat(
-                    playerView.findViewById(R.id.exo_top_controllers),
-                    "translationY",
-                    0f,
-                    -128f
-                )
-                    .apply { interpolator = overshoot;duration = controllerDuration;start() }
-                playerView.postDelayed({ playerView.hideController() }, controllerDuration)
-
-
-            } else {
-
-
-                playerView.showController()
-                ObjectAnimator.ofFloat(
-                    playerView.findViewById(R.id.exo_controller),
-                    "alpha",
-                    0f,
-                    1f
-                )
-                    .setDuration(controllerDuration).start()
-                ObjectAnimator.ofFloat(
-                    playerView.findViewById(R.id.exo_bottom_controllers),
-                    "translationY",
-                    128f,
-                    0f
-                )
-                    .apply { interpolator = overshoot;duration = controllerDuration;start() }
-                ObjectAnimator.ofFloat(
-                    playerView.findViewById(R.id.exo_progress),
-                    "translationY",
-                    128f,
-                    0f
-                )
-                    .apply { interpolator = overshoot;duration = controllerDuration;start() }
-                ObjectAnimator.ofFloat(
-                    playerView.findViewById(R.id.exo_top_controllers),
-                    "translationY",
-                    -128f,
-                    0f
-                )
-                    .apply { interpolator = overshoot;duration = controllerDuration;start() }
-            }
-        }
-    }
-
 
     @SuppressLint("WrongConstant")
     private fun prepareButtons() {
@@ -354,19 +278,15 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
 
-
-        val gestureSpeed = (300 * 1f).toLong()
-        //Player UI Visibility Handler
-        val brightnessRunnable = Runnable {
-            if (exoBrightnessCont.alpha == 1f)
-                lifecycleScope.launch {
-                    ObjectAnimator.ofFloat(exoBrightnessCont, "alpha", 1f, 0f)
-                        .setDuration(gestureSpeed).start()
-                    delay(gestureSpeed)
-                    exoBrightnessCont.visibility = View.GONE
-                    checkNotch()
-                }
+        downloadBtn.setOnClickListener {
+            download(
+                this,
+                movieInfo!!,
+                epList.get(currentEpIndex),
+                epListByName.get(currentEpIndex).first
+            )
         }
+
 
         playerView.setLongPressListenerEvent {
             val currentSpeed = model.player.playbackParameters.speed
@@ -388,8 +308,6 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
 
-        brightnessRunnable.run()
-        // Custom player views
         exoLock.setOnClickListener {
             if (!isLocked) {
                 exoLock.setImageResource(R.drawable.ic_round_lock_24)
@@ -409,9 +327,9 @@ class PlayerActivity : AppCompatActivity() {
 
 //        model.player.playbackParameters =
 
-//        qualityBtn.setOnClickListener {
-//            initPopupQuality().show()
-//        }
+        qualityBtn.setOnClickListener {
+            initPopupQuality().show()
+        }
 
         exoSpeed.setOnClickListener {
             val builder =
@@ -580,8 +498,6 @@ class PlayerActivity : AppCompatActivity() {
         }
 
 
-        handleController()
-
     }
 
 
@@ -611,9 +527,13 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun updateEpisodeName() {
         if (epCount != 1) {
+            videoEpTextView.isSelected = true
+            videoEpTextView.isSingleLine = true
             videoEpTextView.text = epListByName[currentEpIndex.toInt()].first
 
         } else {
+            videoEpTextView.isSelected = true
+            videoEpTextView.isSingleLine = true
             videoEpTextView.text = movieInfo!!.title
         }
 
@@ -634,6 +554,11 @@ class PlayerActivity : AppCompatActivity() {
             orientationListener?.enable()
         }
         if (isInit) {
+            saveData(
+                "${animePlayingDetails.imageUrls}_${currentEpIndex}",
+                model.player.currentPosition,
+                this
+            )
             hideSystemBars()
             model.player.play()
         }

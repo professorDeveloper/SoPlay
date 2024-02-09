@@ -31,7 +31,9 @@ import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvicto
 import com.google.android.exoplayer2.upstream.cache.SimpleCache
 import com.lagradost.nicehttp.Requests
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import javax.inject.Inject
@@ -47,7 +49,7 @@ class PlayerViewModel @Inject constructor(
     private val _animeStreamLink: MutableLiveData<String> = MutableLiveData()
     private val animeStreamLink: LiveData<String> = _animeStreamLink
     private val isAutoPlayEnabled = true
-    private val isVideoCacheEnabled = false
+    private val isVideoCacheEnabled = true
 
     val isLoading = MutableLiveData(true)
     val keepScreenOn = MutableLiveData(false)
@@ -181,13 +183,7 @@ class PlayerViewModel @Inject constructor(
 
     private suspend fun reGenerateMp4(link: String) = withContext(Dispatchers.IO) {
         val requests = Requests(baseClient = Utils.httpClient, responseParser = parser)
-
-        val deffered = async {
-            requests.get(link)
-        }
-        val response = deffered.await()
-
-        deffered.cancelAndJoin()
+        val response = requests.get(link)
         return@withContext response.url.toString()
 
     }

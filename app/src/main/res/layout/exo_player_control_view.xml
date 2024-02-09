@@ -134,7 +134,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="26dp"
             android:layout_marginTop="16dp"
-            android:layout_marginEnd="80dp"
+            android:layout_marginEnd="40dp"
             android:clipToPadding="false">
 
             <ImageButton
@@ -158,9 +158,10 @@
 
                 <TextView
                     android:id="@+id/exo_title"
-                    android:layout_width="match_parent"
+                    android:layout_width="430dp"
                     android:layout_height="wrap_content"
                     android:backgroundTint="#fff"
+
                     android:backgroundTintMode="src_atop"
                     android:ellipsize="marquee"
                     android:focusableInTouchMode="true"
@@ -176,6 +177,16 @@
             </LinearLayout>
 
             <ImageButton
+                android:id="@+id/exo_download"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+
+                android:backgroundTint="@android:color/transparent"
+                android:src="@drawable/ic_round_download_24"
+                app:tint="@color/white"
+                tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
+
+            <ImageButton
                 android:id="@+id/exo_speed"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
@@ -185,20 +196,17 @@
                 app:tint="@color/white"
                 tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
+            <ImageButton
+                android:id="@+id/exo_lock"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:backgroundTint="#00FFFFFF"
+                android:src="@drawable/ic_round_lock_open_24"
+                app:tint="@color/white"
+                tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
         </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/exo_lock"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
-            android:layout_marginTop="18dp"
-            android:layout_marginEnd="26dp"
-            android:backgroundTint="#00FFFFFF"
-            android:src="@drawable/ic_round_lock_open_24"
-            app:tint="@color/white"
-            tools:ignore="ContentDescription,SpeakableTextPresentCheck" />
 
         <LinearLayout
             android:id="@+id/exo_middle_controllers"
