@@ -90,7 +90,7 @@ class DetailScreen : Fragment() {
                             it.second
                         }
                         PlayerActivity.currentEpIndex = epIndexForEp
-                        PlayerActivity.epCount = hrefList.size
+                        PlayerActivity.epCount = if (hrefList.size>3)epList.size else 1
                         PlayerActivity.epList = hrefList as ArrayList<String>
                         PlayerActivity.epListByName = epList as ArrayList<Pair<String, String>>
                         PlayerActivity.movieInfo = data

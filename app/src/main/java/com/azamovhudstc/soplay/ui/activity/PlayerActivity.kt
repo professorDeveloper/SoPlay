@@ -46,7 +46,7 @@ import kotlin.math.min
 
 @AndroidEntryPoint
 class PlayerActivity : AppCompatActivity() {
-    private var notchHeight: Int = 0
+    private var notchHeight: Int = 1
 
     private val model by viewModels<PlayerViewModel>()
     private var quality: String = "Auto"
@@ -409,9 +409,9 @@ class PlayerActivity : AppCompatActivity() {
 
 //        model.player.playbackParameters =
 
-        qualityBtn.setOnClickListener {
-            initPopupQuality().show()
-        }
+//        qualityBtn.setOnClickListener {
+//            initPopupQuality().show()
+//        }
 
         exoSpeed.setOnClickListener {
             val builder =
@@ -664,7 +664,6 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onStop() {
         model.player.pause()
-
         super.onStop()
 
     }

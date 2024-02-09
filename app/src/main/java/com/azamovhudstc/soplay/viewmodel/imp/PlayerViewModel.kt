@@ -31,9 +31,7 @@ import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvicto
 import com.google.android.exoplayer2.upstream.cache.SimpleCache
 import com.lagradost.nicehttp.Requests
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.File
 import java.io.IOException
 import javax.inject.Inject
@@ -183,8 +181,13 @@ class PlayerViewModel @Inject constructor(
 
     private suspend fun reGenerateMp4(link: String) = withContext(Dispatchers.IO) {
         val requests = Requests(baseClient = Utils.httpClient, responseParser = parser)
-        val response = requests.get(link)
 
+        val deffered = async {
+            requests.get(link)
+        }
+        val response = deffered.await()
+
+        deffered.cancelAndJoin()
         return@withContext response.url.toString()
 
     }
@@ -204,6 +207,7 @@ class PlayerViewModel @Inject constructor(
             // Extract the value after "file=" prefix
             return fileParameter?.substringAfter("file=")
         }
+
 
         return url
     }
