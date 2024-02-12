@@ -127,7 +127,7 @@ class DetailScreen : Fragment() {
             )
         bottomSheet.setContentView(R.layout.select_season_bottom_sheet_layout)
         bottomSheet.behavior.peekHeight = bottomSheet.behavior.maxHeight
-        bottomSheet.behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        bottomSheet.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         bottomSheet.behavior.isDraggable = false
         val list =
             bottomSheet.findViewById<android.widget.ListView>(R.id.listView)

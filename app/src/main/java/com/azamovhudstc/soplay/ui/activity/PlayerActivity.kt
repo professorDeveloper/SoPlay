@@ -200,6 +200,19 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
         prepareButtons()
 
 
+        model.downloadLink.observe(this) { link ->
+            downloadBtn.show()
+            downloadBtn.setOnClickListener {
+                download(
+                    this,
+                    movieInfo!!,
+                    link,
+                    epListByName.get(currentEpIndex).first
+                )
+            }
+        }
+
+
         model.isLoading.observe(this) { isLoading ->
             loadingLayout.isVisible = isLoading
             playerView.isVisible = !isLoading
@@ -283,14 +296,9 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
             }
         }
 
-        downloadBtn.setOnClickListener {
-            download(
-                this,
-                movieInfo!!,
-                epList.get(currentEpIndex),
-                epListByName.get(currentEpIndex).first
-            )
-        }
+
+
+
 
 
         playerView.setLongPressListenerEvent {

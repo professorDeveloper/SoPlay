@@ -45,6 +45,7 @@ class PlayerViewModel @Inject constructor(
         MediaSessionCompat(app, "AnimeScrap Media Session")
     private val _animeStreamLink: MutableLiveData<String> = MutableLiveData()
     private val animeStreamLink: LiveData<String> = _animeStreamLink
+    var downloadLink = MutableLiveData<String>()
     private val isAutoPlayEnabled = true
     private val isVideoCacheEnabled = true
 
@@ -168,7 +169,7 @@ class PlayerViewModel @Inject constructor(
                         if (!savedDone.value || getNextEp) {
                             println("prepare Media Source")
                             prepareMediaSource()
-                            println(this@apply)
+                            downloadLink.value = this@apply
                             savedStateHandle["done"] = true
                         }
                     }

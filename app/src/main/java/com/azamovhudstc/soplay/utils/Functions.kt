@@ -37,11 +37,7 @@ fun initActivity(a: Activity) {
 
 fun download(activity: Activity, episode: MovieInfo, link: String, animeTitle: String) {
     Toast.makeText(activity, "Downloading...", Toast.LENGTH_SHORT).show()
-    when (loadData<Int>("settings_download_manager", activity, false) ?: 0) {
-        1 -> oneDM(activity, episode, link, animeTitle)
-        2 -> adm(activity, episode, link, animeTitle)
-        else -> defaultDownload(activity, episode, link, animeTitle)
-    }
+        defaultDownload(activity, episode, link, animeTitle)
 }
 
 

@@ -26,10 +26,10 @@
             android:background="@color/md_theme_light_9_onBackground"
             android:paddingHorizontal="10dp"
             android:paddingTop="4dp"
-            app:navigationIconTint="@color/white"
             app:layout_scrollEffect="compress"
             app:layout_scrollFlags="scroll|enterAlwaysCollapsed|snap"
             app:menu="@menu/home_menu"
+            app:navigationIconTint="@color/white"
             app:title="SoPlay Demo"
             app:titleCentered="false"
             app:titleTextColor="@color/white" />
@@ -104,4 +104,7 @@
 
         app:spanCount="2"
         tools:listitem="@layout/anime_item" />
+
+
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

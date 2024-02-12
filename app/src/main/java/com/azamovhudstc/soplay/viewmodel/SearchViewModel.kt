@@ -7,4 +7,8 @@ import com.azamovhudstc.soplay.utils.Resource
 interface SearchViewModel {
     val searchData:MutableLiveData<Resource<ArrayList<MovieInfo>>>
     fun searchMovie(query:String)
+    var loadPagingData: MutableLiveData<Resource<ArrayList<MovieInfo>>>
+
+    fun loadNextPage(page: Int)
+
 }
