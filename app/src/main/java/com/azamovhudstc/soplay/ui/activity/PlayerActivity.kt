@@ -140,9 +140,14 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
         )
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         // show video inside notch if API >= 28 and orientation is landscape
-        window.attributes.layoutInDisplayCutoutMode =
-            WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
 
+        // show video inside notch if API >= 28 and orientation is landscape
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
+            resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        ) {
+            window.attributes.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        }
         parseExtra()
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)

@@ -21,10 +21,7 @@ import com.azamovhudstc.soplay.utils.parser
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.analytics.AnalyticsListener
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
-import com.google.android.exoplayer2.source.LoadEventInfo
-import com.google.android.exoplayer2.source.MediaLoadData
-import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.source.*
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.google.android.exoplayer2.upstream.cache.CacheDataSource
 import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor
@@ -100,7 +97,7 @@ class PlayerViewModel @Inject constructor(
         simpleCache = SimpleCache(
             File(
                 app.cacheDir,
-                "exoplayer"
+                "exoplayerSourceCache"
             ).also { it.deleteOnExit() }, // Ensures always fresh file
             LeastRecentlyUsedCacheEvictor(300L * 1024L * 1024L),
             databaseProvider
@@ -251,7 +248,7 @@ class PlayerViewModel @Inject constructor(
                 setCache(simpleCache!!)
                 setUpstreamDataSourceFactory(dataSourceFactory)
             }
-            ProgressiveMediaSource.Factory(cacheFactory)
+            DefaultMediaSourceFactory(cacheFactory)
                 .createMediaSource(mediaItem)
         } else {
             ProgressiveMediaSource.Factory(dataSourceFactory)
