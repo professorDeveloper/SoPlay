@@ -119,13 +119,17 @@ class HomeScreen : Fragment() {
             mainSearch.setOnCloseListener {
                 model.isSearch = false
                 model.loadNextPage(model.lastPage)
+                adapter = SearchAdapter(requireActivity(), model.pagingData)
                 true
             }
             mainSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     dismissKeyboard(binding.root)
-                    model.isSearch = true
-                    model.searchMovie(query.toString())
+                    if (query.toString().trim().isNotEmpty()) {
+                        model.isSearch = true
+                        model.searchMovie(query.toString())
+
+                    }
                     return true
                 }
 
