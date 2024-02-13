@@ -17,6 +17,7 @@ class SearchViewModelImpl : SearchViewModel, ViewModel() {
     private val repository = SearchRepositoryImpl()
     private val homeRepository = HomeRepositoryImpl()
     var lastPage: Int = 1
+    var isSearch=false
      var pagingData: ArrayList<MovieInfo > = arrayListOf()
     override val searchData: MutableLiveData<Resource<ArrayList<MovieInfo>>> = MutableLiveData()
     override var loadPagingData: MutableLiveData<Resource<ArrayList<MovieInfo>>> = MutableLiveData()

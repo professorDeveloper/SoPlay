@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.azamovhudstc.soplay.data.response.MovieInfo
@@ -13,9 +14,10 @@ import com.azamovhudstc.soplay.utils.loadImage
 import com.azamovhudstc.soplay.utils.setAnimation
 
 class SearchAdapter(
-    private val activity: FragmentActivity
+    private val activity: FragmentActivity,
+     val list: ArrayList<MovieInfo>
+
 ) : RecyclerView.Adapter<SearchAdapter.SearchVh>() {
-    var list = ArrayList<MovieInfo>()
 
     lateinit var setItemClickListener: (MovieInfo) -> Unit
 
@@ -64,14 +66,6 @@ class SearchAdapter(
 
     override fun onBindViewHolder(holder: SearchVh, position: Int) {
         holder.onBind(list.get(position))
-    }
-
-    fun submitList(newList: ArrayList<MovieInfo>) {
-        list.clear()
-        list.addAll(
-            newList
-        )
-        notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {

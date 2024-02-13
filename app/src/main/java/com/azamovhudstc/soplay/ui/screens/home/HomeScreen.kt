@@ -9,7 +9,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.azamovhudstc.soplay.R
@@ -17,17 +16,15 @@ import com.azamovhudstc.soplay.databinding.HomeScreenBinding
 import com.azamovhudstc.soplay.ui.adapter.SearchAdapter
 import com.azamovhudstc.soplay.utils.*
 import com.azamovhudstc.soplay.viewmodel.imp.SearchViewModelImpl
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 
 class HomeScreen : Fragment() {
 
     private val model by viewModels<SearchViewModelImpl>()
+    private lateinit var adapter: SearchAdapter
 
     private var _binding: HomeScreenBinding? = null
     private val binding get() = _binding!!
-    private val adapter by lazy { SearchAdapter(requireActivity()) }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -39,9 +36,21 @@ class HomeScreen : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        model.loadPagingData.observe(this) {
+
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.frameLayout.slideStart(900, 1)
+        val window = requireActivity().window
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        window.statusBarColor = resources.getColor(R.color.md_theme_light_9_onBackground)
+        binding.toolbar.slideUp(900, 1)
+        adapter = SearchAdapter(requireActivity(), model.pagingData)
+        model.loadPagingData.observe(viewLifecycleOwner) {
             when (it) {
                 is Resource.Error -> {
+                    Log.e("TAG", "onCreate:${it.throwable.message.toString()} ")
                 }
                 Resource.Loading -> {
                 }
@@ -49,15 +58,11 @@ class HomeScreen : Fragment() {
                     it.data?.let {
                         if (model.lastPage == 1) {
                             binding.searchRv.adapter = adapter
-                            adapter.submitList(it)
                             model.pagingData.addAll(it)
                         } else {
                             val prev = model.pagingData.size
                             model.pagingData.addAll(it)
-                            adapter.notifyItemRangeInserted(
-                                prev,
-                                it.size
-                            )
+                            adapter.notifyItemRangeInserted(prev, it.size)
                         }
 
                         adapter.setItemClickListener {
@@ -77,21 +82,11 @@ class HomeScreen : Fragment() {
             }
         }
 
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        binding.frameLayout.slideStart(900, 1)
-        val window = requireActivity().window
-        WindowCompat.setDecorFitsSystemWindows(window, true)
-        window.statusBarColor = resources.getColor(R.color.md_theme_light_9_onBackground)
-        binding.toolbar.slideUp(900, 1)
         model.searchData.observe(viewLifecycleOwner) {
             when (it) {
                 is Resource.Error -> {
                     binding.searchRv.hide()
                     binding.progress.hide()
-
                     Log.e("TAG", "onCreate:${it.throwable.message.toString()} ")
                 }
                 Resource.Loading -> {
@@ -101,12 +96,9 @@ class HomeScreen : Fragment() {
                 is Resource.Success -> {
                     binding.progress.hide()
                     binding.searchRv.show()
-
                     binding.apply {
+                        adapter = SearchAdapter(requireActivity(), it.data)
                         searchRv.adapter = adapter
-                        adapter.submitList(
-                            it.data
-                        )
                         adapter.setItemClickListener {
                             val bundle = Bundle()
                             val data = it
@@ -124,9 +116,15 @@ class HomeScreen : Fragment() {
             }
         }
         binding.apply {
+            mainSearch.setOnCloseListener {
+                model.isSearch = false
+                model.loadNextPage(model.lastPage)
+                true
+            }
             mainSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     dismissKeyboard(binding.root)
+                    model.isSearch = true
                     model.searchMovie(query.toString())
                     return true
                 }
@@ -135,13 +133,12 @@ class HomeScreen : Fragment() {
                     return true
                 }
 
+
             })
         }
-//        initPagination()
+        initPagination()
 
-//        model.loadNextPage(1)
-
-
+        model.loadNextPage(1)
 
 
     }
@@ -150,10 +147,10 @@ class HomeScreen : Fragment() {
         binding.searchRv.addOnScrollListener(object :
             RecyclerView.OnScrollListener() {
             override fun onScrolled(v: RecyclerView, dx: Int, dy: Int) {
-                if (!v.canScrollVertically(1)) {
+                if (!v.canScrollVertically(1) && !model.isSearch) {
                     println(model.pagingData.isNotEmpty())
                     if (model.pagingData.isNotEmpty()) {
-                            model.loadNextPage(model.lastPage + 1)
+                        model.loadNextPage(model.lastPage + 1)
                     }
                 }
                 super.onScrolled(v, dx, dy)

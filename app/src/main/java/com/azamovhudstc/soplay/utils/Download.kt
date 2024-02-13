@@ -11,7 +11,6 @@ import android.os.Bundle
 import android.os.Environment
 import androidx.core.content.ContextCompat
 import com.azamovhudstc.soplay.data.response.MovieInfo
-import com.azamovhudstc.soplay.ui.activity.PlayerActivity.Companion.movieInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,7 +35,7 @@ object Download {
             direct = File(parentDirectory)
             if (!direct.exists()) direct.mkdirs()
         } else {
-            direct = File("storage/emulated/0/${Environment.DIRECTORY_DOWNLOADS}/Saikou/")
+            direct = File("storage/emulated/0/${Environment.DIRECTORY_DOWNLOADS}/SoPlay/")
             if (!direct.exists()) direct.mkdirs()
         }
         return direct
@@ -52,6 +51,7 @@ object Download {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                val fileExtension = ".mp4" // MP4 formatni belgilash
 
                 val externalDirs = ContextCompat.getExternalFilesDirs(activity, null)
                 if (loadData<Boolean>("sd_dl") == true && externalDirs.size > 1 && externalDirs[1] != null) {
@@ -66,7 +66,7 @@ object Download {
                     if (!directory.exists()) directory.mkdirs()
                     request.setDestinationInExternalPublicDir(
                         Environment.DIRECTORY_DOWNLOADS,
-                        "/SoPlay/${sanitizedTitle}/$epTitle"
+                        "/SoPlay/${sanitizedTitle}/$epTitle$fileExtension"
                     )
                 }
 
@@ -104,80 +104,4 @@ object Download {
     }
 
 
-    fun oneDM(activity: Activity, episode: MovieInfo, link: String, epTitle: String) {
-        val appName =
-            if (isPackageInstalled("idm.internet.download.manager.plus", activity.packageManager)) {
-                "idm.internet.download.manager.plus"
-            } else if (isPackageInstalled(
-                    "idm.internet.download.manager",
-                    activity.packageManager
-                )
-            ) {
-                "idm.internet.download.manager"
-            } else if (isPackageInstalled(
-                    "idm.internet.download.manager.adm.lite",
-                    activity.packageManager
-                )
-            ) {
-                "idm.internet.download.manager.adm.lite"
-            } else {
-                ""
-            }
-        if (appName.isNotEmpty()) {
-            val regex = "[\\\\/:*?\"<>|]".toRegex()
-            val aTitle = episode.title.replace(regex, "")
-            val bundle = Bundle()
-            defaultHeaders.forEach { a -> bundle.putString(a.key, a.value) }
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                component = ComponentName(appName, "idm.internet.download.manager.Downloader")
-                data = Uri.parse(link)
-                putExtra("extra_headers", bundle)
-                putExtra("extra_filename", "$aTitle - $epTitle")
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            ContextCompat.startActivity(activity.baseContext, intent, null)
-        } else {
-            ContextCompat.startActivity(
-                activity.baseContext,
-                Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse("market://details?id=idm.internet.download.manager")
-                ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                null
-            )
-            snackString("Please install 1DM")
-        }
-    }
-
-    fun adm(activity: Activity, episode: MovieInfo, link: String, epTitle: String) {
-        if (isPackageInstalled("com.dv.adm", activity.packageManager)) {
-
-            val regex = "[\\\\/:*?\"<>|]".toRegex()
-            val aTitle = episode.title.replace(regex, "")
-            val bundle = Bundle()
-            defaultHeaders.forEach { a -> bundle.putString(a.key, a.value) }
-            // unofficial documentation: https://pastebin.com/ScDNr2if (there is no official documentation)
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                component = ComponentName("com.dv.adm", "com.dv.adm.AEditor")
-                putExtra("com.dv.get.ACTION_LIST_ADD", "${link}<info>$epTitle.mp4")
-                putExtra(
-                    "com.dv.get.ACTION_LIST_PATH",
-                    "${getDownloadDir(activity)}/Movie/${aTitle}/"
-                )
-                putExtra("android.media.intent.extra.HTTP_HEADERS", bundle)
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }
-            ContextCompat.startActivity(activity.baseContext, intent, null)
-        } else {
-            ContextCompat.startActivity(
-                activity.baseContext,
-                Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.dv.adm")).addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK
-                ),
-                null
-            )
-            snackString("Please install ADM")
-        }
-    }
 }
