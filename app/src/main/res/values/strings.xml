@@ -5,6 +5,10 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="episode_text">%1$s</string>
+    <string name="title_trending">Trending</string>
+    <string name="title_latest">Latest</string>
+    <string name="title_favorite">Favorite</string>
+    <string name="title_search">Search</string>
     <string-array name="tips">
         <item>You can Long Click an episode/chapter to Mark it as Read.</item>
         <item>Long Clicking Shows can directly open List Editor.</item>

@@ -15,9 +15,7 @@ import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.app.App
 import com.azamovhudstc.soplay.data.response.MovieInfo
 import com.azamovhudstc.soplay.ui.activity.MainActivity
-import com.azamovhudstc.soplay.utils.Download.adm
 import com.azamovhudstc.soplay.utils.Download.defaultDownload
-import com.azamovhudstc.soplay.utils.Download.oneDM
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions

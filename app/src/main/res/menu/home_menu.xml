@@ -8,14 +8,19 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/donate"
-        android:icon="@drawable/ic_round_source_24"
-        android:title="Change Source"
-        app:showAsAction="always" />
-    <item
-        android:id="@+id/devs"
 
-        android:icon="@drawable/ic_baseline_clear_24"
-        android:title="Developer" />
+    <item
+        android:id="@+id/search"
+        android:icon="@drawable/ic_search_black_24"
+        android:title="Search"
+
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/setting"
+        android:icon="@drawable/ic_round_settings_24"
+        android:title="Setting"
+
+        app:showAsAction="always" />
+
 </menu>

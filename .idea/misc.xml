@@ -6,26 +6,38 @@
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/anim_play_to_pause.xml" value="0.3025" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/background_selector.xml" value="0.1245" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/background_selector_accent.xml" value="0.1245" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/bottom_nav_drawable.xml" value="0.1245" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/control_background_40dp.xml" value="0.3195" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/home.xml" value="0.23" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_cloud_off_black_24dp.xml" value="0.2105" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_episode.xml" value="0.2105" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_favorite_black_24.xml" value="0.23" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_heart_outline.xml" value="0.2105" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_latest_black_24.xml" value="0.1245" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_outline_latest_black_24.xml" value="0.1245" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_play.xml" value="0.2105" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_round_lock_open_24.xml" value="0.3195" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_round_settings_24.xml" value="0.293" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_round_slow_motion_video_24.xml" value="0.3195" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_round_star_24.xml" value="0.2105" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_search_black_24.xml" value="0.103" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_trending_black_24.xml" value="0.1245" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/item_bg.xml" value="0.23" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/item_bg_format.xml" value="0.2105" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/item_round.xml" value="0.2105" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/linear_gradient_black.xml" value="0.1245" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/round_corner.xml" value="0.3195" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/search_bg.xml" value="0.2105" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/search_icon.xml" value="0.293" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/select_fav.xml" value="0.1245" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/select_latest.xml" value="0.1245" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/shape_corner_16dp.xml" value="0.3195" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/shape_gradient.xml" value="0.2105" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/shape_gradient_round_corner.xml" value="0.2105" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/shape_vote_average.xml" value="0.2105" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/sort_numeric_normal.xml" value="0.2105" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/spinner_icon.xml" value="0.3195" />
-        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/activity_main.xml" value="0.3078125" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/activity_main.xml" value="0.2988679352838745" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/activity_player.xml" value="0.2988679352838745" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/actor_view_layout.xml" value="0.32083333333333336" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/alert_item.xml" value="0.321875" />
@@ -38,10 +50,15 @@
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/exo_player_view.xml" value="0.321875" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/home_screen.xml" value="0.321875" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/item_dropdown.xml" value="0.321875" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/main_screen.xml" value="0.2988679352838745" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/overlap_loading_view_layout.xml" value="0.32083333333333336" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/select_season_bottom_sheet_layout.xml" value="0.3067708333333333" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/spinner_dropdown_item.xml" value="0.32083333333333336" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/trending_screen.xml" value="0.3078125" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/menu/bottom_nav_menu.xml" value="0.321875" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/menu/home_menu.xml" value="0.321875" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/menu/rail_nav_menu.xml" value="0.2264151024877837" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/xml/root_preferences.xml" value="0.321875" />
       </map>
     </option>
   </component>

@@ -42,6 +42,8 @@
             android:supportsPictureInPicture="true" />
         <activity
             android:name=".ui.activity.MainActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout"
+            android:supportsPictureInPicture="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

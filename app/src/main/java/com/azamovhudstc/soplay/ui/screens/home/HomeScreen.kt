@@ -41,11 +41,9 @@ class HomeScreen : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.frameLayout.slideStart(900, 1)
         val window = requireActivity().window
         WindowCompat.setDecorFitsSystemWindows(window, true)
         window.statusBarColor = resources.getColor(R.color.md_theme_light_9_onBackground)
-        binding.toolbar.slideUp(900, 1)
         adapter = SearchAdapter(requireActivity(), model.pagingData)
         model.loadPagingData.observe(viewLifecycleOwner) {
             when (it) {
@@ -82,64 +80,64 @@ class HomeScreen : Fragment() {
             }
         }
 
-        model.searchData.observe(viewLifecycleOwner) {
-            when (it) {
-                is Resource.Error -> {
-                    binding.searchRv.hide()
-                    binding.progress.hide()
-                    Log.e("TAG", "onCreate:${it.throwable.message.toString()} ")
-                }
-                Resource.Loading -> {
-                    binding.progress.show()
-                    binding.searchRv.hide()
-                }
-                is Resource.Success -> {
-                    binding.progress.hide()
-                    binding.searchRv.show()
-                    binding.apply {
-                        adapter = SearchAdapter(requireActivity(), it.data)
-                        searchRv.adapter = adapter
-                        adapter.setItemClickListener {
-                            val bundle = Bundle()
-                            val data = it
-                            bundle.putSerializable("data", data)
-                            findNavController().navigate(
-                                R.id.detailScreen,
-                                bundle,
-                                animationTransaction().build()
-                            )
-                        }
-
-                        searchRv.slideUp(700, 1)
-                    }
-                }
-            }
-        }
-        binding.apply {
-            mainSearch.setOnCloseListener {
-                model.isSearch = false
-                model.loadNextPage(model.lastPage)
-                adapter = SearchAdapter(requireActivity(), model.pagingData)
-                true
-            }
-            mainSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String?): Boolean {
-                    dismissKeyboard(binding.root)
-                    if (query.toString().trim().isNotEmpty()) {
-                        model.isSearch = true
-                        model.searchMovie(query.toString())
-
-                    }
-                    return true
-                }
-
-                override fun onQueryTextChange(newText: String?): Boolean {
-                    return true
-                }
-
-
-            })
-        }
+//        model.searchData.observe(viewLifecycleOwner) {
+//            when (it) {
+//                is Resource.Error -> {
+//                    binding.searchRv.hide()
+//                    binding.progress.hide()
+//                    Log.e("TAG", "onCreate:${it.throwable.message.toString()} ")
+//                }
+//                Resource.Loading -> {
+//                    binding.progress.show()
+//                    binding.searchRv.hide()
+//                }
+//                is Resource.Success -> {
+//                    binding.progress.hide()
+//                    binding.searchRv.show()
+//                    binding.apply {
+//                        adapter = SearchAdapter(requireActivity(), it.data)
+//                        searchRv.adapter = adapter
+//                        adapter.setItemClickListener {
+//                            val bundle = Bundle()
+//                            val data = it
+//                            bundle.putSerializable("data", data)
+//                            findNavController().navigate(
+//                                R.id.detailScreen,
+//                                bundle,
+//                                animationTransaction().build()
+//                            )
+//                        }
+//
+//                        searchRv.slideUp(700, 1)
+//                    }
+//                }
+//            }
+//        }
+//        binding.apply {
+//            mainSearch.setOnCloseListener {
+//                model.isSearch = false
+//                model.loadNextPage(model.lastPage)
+//                adapter = SearchAdapter(requireActivity(), model.pagingData)
+//                true
+//            }
+//            mainSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+//                override fun onQueryTextSubmit(query: String?): Boolean {
+//                    dismissKeyboard(binding.root)
+//                    if (query.toString().trim().isNotEmpty()) {
+//                        model.isSearch = true
+//                        model.searchMovie(query.toString())
+//
+//                    }
+//                    return true
+//                }
+//
+//                override fun onQueryTextChange(newText: String?): Boolean {
+//                    return true
+//                }
+//
+//
+//            })
+//        }
         initPagination()
 
         model.loadNextPage(1)
