@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.SoPlay" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.SoPlay" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/md_theme_dark_9_primary</item>
         <item name="colorOnPrimary">@color/md_theme_dark_9_onPrimary</item>
         <item name="colorPrimaryContainer">@color/md_theme_dark_9_primaryContainer</item>
@@ -28,13 +28,5 @@
         <item name="colorOutline">@color/md_theme_dark_9_outline</item>
         <item name="colorOnSurfaceInverse">@color/md_theme_dark_9_inverseOnSurface</item>
         <item name="colorSurfaceInverse">@color/md_theme_dark_9_inverseSurface</item>
-        <item name="colorPrimaryInverse">@color/md_theme_dark_9_inversePrimary</item>
-
-
-
-
-    </style>
-
-
-
+        <item name="colorPrimaryInverse">@color/md_theme_dark_9_inversePrimary</item> </style>
 </resources>

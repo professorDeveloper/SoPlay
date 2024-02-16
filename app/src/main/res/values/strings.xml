@@ -26,4 +26,6 @@
     <string name="animations">Animations</string>
     <string name="seek_seconds_forward">+%d seconds</string>
     <string name="seek_seconds_backward">-%d seconds</string>
+    <string name="no_favorites_text">Your Favorites will show here</string>
+
 </resources>

@@ -31,13 +31,14 @@
         <item name="colorOnSurfaceInverse">@color/md_theme_dark_9_inverseOnSurface</item>
         <item name="colorSurfaceInverse">@color/md_theme_dark_9_inverseSurface</item>
         <item name="colorPrimaryInverse">@color/md_theme_dark_9_inversePrimary</item>
-
-
-
     </style>
     <style name="App.Custom.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
-        <item name="android:color">#7C6A6511</item>
+        <item name="android:color">?attr/colorOnBackground</item>
     </style>
+    <style name="MyBottomNavigationView.TextAppearance" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">14dp</item>
+    </style>
+
     <style name="ThemeOverlay.SearchView" parent="">
         <item name="android:editTextColor">@color/white</item>
         <item name="android:ambientShadowAlpha">0.08</item>
@@ -48,9 +49,6 @@
         <item name="elevationOverlayEnabled">false</item>
         <item name="android:textColorHint">@color/white</item>
         <item name="closeIconTint">@color/white</item>
-    </style>
-    <style name="MyBottomNavigationView.TextAppearance" parent="TextAppearance.MaterialComponents.Caption">
-        <item name="android:textSize">12sp</item>
     </style>
 
     <style name="DialogTheme" parent="Theme.SoPlay">

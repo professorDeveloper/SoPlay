@@ -12,7 +12,9 @@
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_cloud_off_black_24dp.xml" value="0.2105" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_episode.xml" value="0.2105" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_favorite_black_24.xml" value="0.23" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_heart_minus.xml" value="0.23" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_heart_outline.xml" value="0.2105" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_heart_plus.xml" value="0.23" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_latest_black_24.xml" value="0.1245" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_outline_latest_black_24.xml" value="0.1245" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/drawable/ic_play.xml" value="0.2105" />
@@ -48,6 +50,7 @@
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/double_tap_overlay.xml" value="0.2988679352838745" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/exo_player_control_view.xml" value="0.2988679352838745" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/exo_player_view.xml" value="0.321875" />
+        <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/favorite_screen.xml" value="0.321875" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/home_screen.xml" value="0.321875" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/item_dropdown.xml" value="0.321875" />
         <entry key="..\:/AndroidStudioProjects/SoPlay/app/src/main/res/layout/main_screen.xml" value="0.2988679352838745" />

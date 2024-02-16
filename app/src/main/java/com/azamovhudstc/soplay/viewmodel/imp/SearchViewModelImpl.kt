@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.azamovhudstc.soplay.data.response.MovieInfo
-import com.azamovhudstc.soplay.data.response.PagingData
 import com.azamovhudstc.soplay.repository.imp.HomeRepositoryImpl
 import com.azamovhudstc.soplay.repository.imp.SearchRepositoryImpl
 import com.azamovhudstc.soplay.utils.Resource
@@ -17,10 +16,14 @@ class SearchViewModelImpl : SearchViewModel, ViewModel() {
     private val repository = SearchRepositoryImpl()
     private val homeRepository = HomeRepositoryImpl()
     var lastPage: Int = 1
-    var isSearch=false
-     var pagingData: ArrayList<MovieInfo > = arrayListOf()
+    var isSearch = false
+    var pagingData: ArrayList<MovieInfo> = arrayListOf()
     override val searchData: MutableLiveData<Resource<ArrayList<MovieInfo>>> = MutableLiveData()
     override var loadPagingData: MutableLiveData<Resource<ArrayList<MovieInfo>>> = MutableLiveData()
+
+init{
+    loadNextPage(1)
+}
     override fun searchMovie(query: String) {
         searchData.postValue(Resource.Loading)
         repository.searchMovies(query).onEach {
@@ -35,7 +38,7 @@ class SearchViewModelImpl : SearchViewModel, ViewModel() {
 
 
     override fun loadNextPage(page: Int) {
-        lastPage =page
+        lastPage = page
         loadPagingData.postValue(Resource.Loading)
         homeRepository.loadNextPage(page).onEach {
             it.onSuccess {

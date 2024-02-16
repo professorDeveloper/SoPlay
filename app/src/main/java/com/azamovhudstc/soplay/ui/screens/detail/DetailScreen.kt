@@ -12,20 +12,18 @@ import com.azamovhudstc.soplay.data.response.FullMovieData
 import com.azamovhudstc.soplay.data.response.MovieInfo
 import com.azamovhudstc.soplay.databinding.DetailScreenBinding
 import com.azamovhudstc.soplay.ui.activity.PlayerActivity
+import com.azamovhudstc.soplay.utils.*
 import com.azamovhudstc.soplay.utils.Constants.mainUrl
-import com.azamovhudstc.soplay.utils.Resource
-import com.azamovhudstc.soplay.utils.hide
-import com.azamovhudstc.soplay.utils.loadImage
-import com.azamovhudstc.soplay.utils.show
 import com.azamovhudstc.soplay.viewmodel.imp.DetailViewModelImpl
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import dagger.hilt.android.AndroidEntryPoint
 import jp.wasabeef.glide.transformations.BlurTransformation
 
-
+@AndroidEntryPoint
 class DetailScreen : Fragment() {
 
     private val viewModel by viewModels<DetailViewModelImpl>()
@@ -38,6 +36,16 @@ class DetailScreen : Fragment() {
     private lateinit var epList: MutableList<Pair<String, String>>
     private lateinit var epIndex: String
     private var epIndexForEp: Int = 0
+    private fun inFav() {
+        println("In Fav")
+        binding.buttonFavorite.setImageResource(R.drawable.ic_heart_minus)
+    }
+
+    private fun notInFav() {
+        println("Not in Fav")
+        binding.buttonFavorite.setImageResource(R.drawable.ic_heart_plus)
+
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: android.view.ViewGroup?,
@@ -65,9 +73,35 @@ class DetailScreen : Fragment() {
                     binding.container.hide()
                 }
                 is Resource.Success -> {
+                    // Check Favorite
+                    data.href.let { viewModel.isFavMovie(it) }
+
+                    viewModel.isFavMovieData.observe(this) {
+                        if (it) {
+                            inFav()
+                            binding.favCard.setOnClickListener {
+                                viewModel.removeFavMovie(data.href)
+                            }
+                        } else {
+                            notInFav()
+                            binding.favCard.setOnClickListener {
+                                viewModel.addFavMovie(
+                                    data
+                                )
+                            }
+                        }
+
+                    }
+
+
 
                     binding.progress.hide()
                     binding.container.show()
+                    binding.tvDescriptionValue.slideUp(700, 1)
+                    binding.linearLayout2.slideUp(700, 1)
+                    binding.mainContainer.slideStart(700, 1)
+                    binding.cardView2.slideUp(700, 1)
+
                     val response = it.data
                     binding.tvMovieTitleValue.text = data.title
                     val banner = binding.ivBackdrop
@@ -90,7 +124,7 @@ class DetailScreen : Fragment() {
                             it.second
                         }
                         PlayerActivity.currentEpIndex = epIndexForEp
-                        PlayerActivity.epCount = if (hrefList.size>3)epList.size else 1
+                        PlayerActivity.epCount = if (hrefList.size > 3) epList.size else 1
                         PlayerActivity.epList = hrefList as ArrayList<String>
                         PlayerActivity.epListByName = epList as ArrayList<Pair<String, String>>
                         PlayerActivity.movieInfo = data
@@ -179,7 +213,7 @@ class DetailScreen : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.parseDetailByMovieInfo(data)
-
+        isToolbarDisabledGoListener.invoke(true)
     }
 
 

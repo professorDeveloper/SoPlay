@@ -8,8 +8,8 @@
 
     <item
         android:id="@+id/navigation_latest"
-        android:icon="@drawable/home"
-        android:title="Home" />
+        android:icon="@drawable/select_latest"
+        android:title="@string/title_latest" />
 
     <item
         android:id="@+id/navigation_trending"

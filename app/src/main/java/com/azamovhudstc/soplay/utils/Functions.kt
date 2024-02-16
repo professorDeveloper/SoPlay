@@ -35,7 +35,7 @@ fun initActivity(a: Activity) {
 
 fun download(activity: Activity, episode: MovieInfo, link: String, animeTitle: String) {
     Toast.makeText(activity, "Downloading...", Toast.LENGTH_SHORT).show()
-        defaultDownload(activity, episode, link, animeTitle)
+    defaultDownload(activity, episode, link, animeTitle)
 }
 
 
@@ -103,6 +103,18 @@ fun ImageView.loadImage(file: FileUrl?, size: Int = 0) {
                 .transition(DrawableTransitionOptions.withCrossFade()).override(size).into(this)
         }
     }
+}
+
+
+lateinit var isToolbarDisabledGoListener: (Boolean) -> Unit
+
+fun disableToolbar(listener: (Boolean) -> Unit) {
+    isToolbarDisabledGoListener = listener
+}
+lateinit var changeToolbarColorListener: (Boolean) -> Unit
+
+fun changeToolbarColor(listener: (Boolean) -> Unit) {
+    changeToolbarColorListener = listener
 }
 
 data class FileUrl(

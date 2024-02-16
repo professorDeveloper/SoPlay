@@ -1,15 +1,11 @@
 package com.azamovhudstc.soplay.ui.activity
 
-import android.app.AlertDialog
-import android.app.DownloadManager
 import android.app.PictureInPictureParams
 import android.app.UiModeManager
 import android.content.SharedPreferences
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.preference.PreferenceManager
 import android.transition.Slide
 import android.transition.TransitionManager
@@ -18,6 +14,7 @@ import android.view.Menu
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -26,12 +23,12 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.databinding.ActivityMainBinding
-import com.azamovhudstc.soplay.utils.initActivity
+import com.azamovhudstc.soplay.utils.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigationrail.NavigationRailView
-import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -82,9 +79,10 @@ class MainActivity : AppCompatActivity() {
                 railViewNavTransition
             )
             when (destination.id) {
-                R.id.detailScreen,  -> {
+                R.id.detailScreen -> {
                     bottomNavView.isVisible = false
                     railView.isVisible = false
+                    binding.toolbar.isVisible = false
                 }
                 R.id.navigation_search, R.id.navigation_settings -> {
                     bottomNavView.isVisible = false
@@ -95,7 +93,12 @@ class MainActivity : AppCompatActivity() {
                     bottomNavView.isVisible = !isLandscape
                 }
             }
-            binding.toolbar.isVisible = destination.id != R.id.detailScreen
+            if (destination.id == R.id.detailScreen) {
+                binding.toolbar.hide()
+                println("tuhdiiii !!")
+            } else {
+                binding.toolbar.show()
+            }
             binding.toolbar.isVisible = !isLandscape
             isPipEnabled = destination.id == R.id.detailScreen
             println("Destination is player = ${destination.id == R.id.detailScreen}")
@@ -107,9 +110,18 @@ class MainActivity : AppCompatActivity() {
 
         binding.toolbar.isVisible =
             !isLandscape && navController.currentDestination?.id != R.id.detailScreen
+        disableToolbar {
+            if (
+                it
+            ) {
+                binding.toolbar.hide()
+            }
+        }
+        changeToolbarColor {
+            binding.toolbar.setNavigationIconTint(this.getColor(R.color.white))
 
+        }
     }
-
 
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -127,8 +139,9 @@ class MainActivity : AppCompatActivity() {
             return@setOnMenuItemClickListener true
         }
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            val notThis = destination.id == R.id.detailScreen || destination.id == R.id.navigation_search
-                    || destination.id == R.id.navigation_settings
+            val notThis =
+                destination.id == R.id.detailScreen || destination.id == R.id.navigation_search
+                        || destination.id == R.id.navigation_settings
             search.isVisible = !notThis
             settings.isVisible = !notThis
         }

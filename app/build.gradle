@@ -148,4 +148,14 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer-ui:$exo_version"
     implementation "com.google.android.exoplayer:exoplayer-hls:$exo_version"
     implementation "com.google.android.exoplayer:extension-mediasession:$exo_version"
+
+
+
+    // Room components
+    def roomVersion = '2.4.3'
+    implementation "androidx.room:room-ktx:$roomVersion"
+    kapt "androidx.room:room-compiler:$roomVersion"
+    androidTestImplementation "androidx.room:room-testing:$roomVersion"
+
+
 }

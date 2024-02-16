@@ -10,20 +10,24 @@ import androidx.lifecycle.viewModelScope
 import com.azamovhudstc.soplay.data.response.FullMovieData
 import com.azamovhudstc.soplay.data.response.MovieInfo
 import com.azamovhudstc.soplay.repository.imp.DetailRepositoryImpl
-import com.azamovhudstc.soplay.ui.activity.PlayerActivity
+import com.azamovhudstc.soplay.repository.imp.FavoriteRepositoryImpl
+import com.azamovhudstc.soplay.room.FavRoomModel
 import com.azamovhudstc.soplay.utils.Resource
 import com.azamovhudstc.soplay.utils.snackString
 import com.azamovhudstc.soplay.viewmodel.DetailViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-
-class DetailViewModelImpl : ViewModel(), DetailViewModel {
+@HiltViewModel
+class DetailViewModelImpl @Inject constructor(private val repositoryImpl: FavoriteRepositoryImpl) :
+    ViewModel(), DetailViewModel {
     private val repo = DetailRepositoryImpl()
-     var episode = MutableLiveData<Pair<String, String>?>(null)
+    var episode = MutableLiveData<Pair<String, String>?>(null)
     fun getEpisode(): LiveData<Pair<String, String>?> = episode
     override val movieDetailData: MutableLiveData<Resource<FullMovieData>> = MutableLiveData()
     override val playerData: MutableLiveData<FullMovieData> = MutableLiveData()
@@ -40,6 +44,7 @@ class DetailViewModelImpl : ViewModel(), DetailViewModel {
         }.launchIn(viewModelScope)
     }
 
+
     override fun loadPlayer(movieInfo: MovieInfo) {
         repo.parseMovieDetailByHref(movieInfo).onEach {
             it.onSuccess {
@@ -50,6 +55,39 @@ class DetailViewModelImpl : ViewModel(), DetailViewModel {
         }.launchIn(viewModelScope)
     }
 
+    override fun addFavMovie(movieInfo: MovieInfo) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repositoryImpl.addFavToRoom(
+                FavRoomModel(
+                    movieInfo.href,
+                    movieInfo.rating,
+                    movieInfo.year,
+                    movieInfo.genre,
+                    movieInfo.image,
+                    movieInfo.title,
+                    "asilmedia"
+                )
+            )
+            isFavMovieData.postValue(true)
+        }
+    }
+
+    override fun removeFavMovie(href: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repositoryImpl.removeFavFromRoom(href, "asilmedia")
+            isFavMovieData.postValue(false)
+        }
+    }
+
+    override fun isFavMovie(link: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            isFavMovieData.postValue(
+                repositoryImpl.checkFavoriteFromRoom(link, "asilmedia")
+            )
+        }
+    }
+
+    override val isFavMovieData: MutableLiveData<Boolean> = MutableLiveData()
     fun setEpisode(ep: Pair<String, String>?, who: String) {
         episode.postValue(ep)
         MainScope().launch(Dispatchers.Main) {
