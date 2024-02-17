@@ -11,15 +11,18 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.MutableLiveData
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.app.App
 import com.azamovhudstc.soplay.data.response.MovieInfo
+import com.azamovhudstc.soplay.repository.imp.HomeRepositoryImpl
 import com.azamovhudstc.soplay.ui.activity.MainActivity
 import com.azamovhudstc.soplay.utils.Download.defaultDownload
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.lagradost.nicehttp.addGenericDns
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import java.io.*
 import kotlin.reflect.KFunction
@@ -103,6 +106,26 @@ fun ImageView.loadImage(file: FileUrl?, size: Int = 0) {
                 .transition(DrawableTransitionOptions.withCrossFade()).override(size).into(this)
         }
     }
+}
+var loaded: Boolean = false
+var loadedFav: Boolean = false
+
+object Refresh {
+    fun all() {
+        for (i in activity) {
+            activity[i.key]!!.postValue(true)
+        }
+    }
+    fun all2() {
+        for (i in activity2) {
+            activity2[i.key]!!.postValue(true)
+        }
+    }
+
+    val activity = mutableMapOf<Int, MutableLiveData<Boolean>>()
+    val activity2 = mutableMapOf<Int, MutableLiveData<Boolean>>()
+
+
 }
 
 

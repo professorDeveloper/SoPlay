@@ -5,4 +5,5 @@ import java.util.concurrent.Flow
 
 interface HomeRepository {
     fun loadNextPage(page:Int):kotlinx.coroutines.flow.Flow<Result<ArrayList<MovieInfo>>>
+    fun loadPopularMovies():kotlinx.coroutines.flow.Flow<Result<ArrayList<MovieInfo>>>
 }

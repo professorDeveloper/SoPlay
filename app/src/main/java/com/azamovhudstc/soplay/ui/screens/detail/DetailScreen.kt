@@ -59,6 +59,7 @@ class DetailScreen : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        isToolbarDisabledGoListener.invoke(true)
         data = arguments?.getSerializable("data") as MovieInfo
         val window = requireActivity().window
         androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -213,7 +214,6 @@ class DetailScreen : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.parseDetailByMovieInfo(data)
-        isToolbarDisabledGoListener.invoke(true)
     }
 
 

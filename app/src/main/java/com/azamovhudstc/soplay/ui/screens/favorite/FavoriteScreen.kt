@@ -26,6 +26,30 @@ class FavoriteScreen : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        model.favoriteAnimeList.observe(this) {
+            binding.progressbarInMain.visibility = View.GONE
+            if (it.isNotEmpty()) {
+                binding.errorCard.visibility = View.GONE
+            } else {
+                binding.errorCard.visibility = View.VISIBLE
+            }
+            val adapter = SearchAdapter(requireActivity(), it)
+            binding.favoriteRv.adapter = adapter
+            if (binding.swipeContainer.isRefreshing) {
+                binding.swipeContainer.isRefreshing = false
+            }
+
+            adapter.setItemClickListener {
+                val bundle = Bundle()
+                val data = it
+                bundle.putSerializable("data", data)
+                findNavController().navigate(
+                    R.id.detailScreen,
+                    bundle,
+                    animationTransaction().build()
+                )
+            }
+        }
 
     }
 
@@ -49,30 +73,6 @@ class FavoriteScreen : Fragment() {
             binding.swipeContainer.setOnRefreshListener { model.loadFav() }
         }
         binding.progressbarInMain.visibility = View.VISIBLE
-        model.favoriteAnimeList.observe(viewLifecycleOwner) {
-            binding.progressbarInMain.visibility = View.GONE
-            if (it.isNotEmpty()) {
-                binding.errorCard.visibility = View.GONE
-            } else {
-                binding.errorCard.visibility = View.VISIBLE
-            }
-            val adapter = SearchAdapter(requireActivity(), it)
-            binding.favoriteRv.adapter = adapter
-            if (binding.swipeContainer.isRefreshing) {
-                binding.swipeContainer.isRefreshing = false
-            }
-
-            adapter.setItemClickListener {
-                val bundle = Bundle()
-                val data = it
-                                bundle.putSerializable("data", data)
-                findNavController().navigate(
-                    R.id.detailScreen,
-                    bundle,
-                    animationTransaction().build()
-                )
-            }
-        }
     }
 
     override fun onResume() {

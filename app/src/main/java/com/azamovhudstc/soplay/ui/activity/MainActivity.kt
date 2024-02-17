@@ -33,7 +33,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var settingsPreferenceManager: SharedPreferences
-    private var isPipEnabled: Boolean = true
     private var isTV: Boolean = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +42,6 @@ class MainActivity : AppCompatActivity() {
         // Check TV
         val uiModeManager = getSystemService(UI_MODE_SERVICE) as UiModeManager
         isTV = uiModeManager.currentModeType == Configuration.UI_MODE_TYPE_TELEVISION
-        isPipEnabled = settingsPreferenceManager.getBoolean("pip", true)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -100,9 +98,7 @@ class MainActivity : AppCompatActivity() {
                 binding.toolbar.show()
             }
             binding.toolbar.isVisible = !isLandscape
-            isPipEnabled = destination.id == R.id.detailScreen
             println("Destination is player = ${destination.id == R.id.detailScreen}")
-            preparePip()
         }
         setupActionBarWithNavController(navController, appBarConfiguration)
         bottomNavView.setupWithNavController(navController)
@@ -154,30 +150,5 @@ class MainActivity : AppCompatActivity() {
                 || super.onSupportNavigateUp()
     }
 
-    private fun preparePip() {
-        if (isTV || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
-        if (isPipEnabled) {
-            println("PIP enabled")
-            setPictureInPictureParams(
-                PictureInPictureParams.Builder()
-                    .setAutoEnterEnabled(true)
-                    .build()
-            )
 
-        } else {
-            println("PIP disabled")
-            setPictureInPictureParams(
-                PictureInPictureParams.Builder()
-                    .setAutoEnterEnabled(false)
-                    .build()
-            )
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    override fun onUserLeaveHint() {
-        super.onUserLeaveHint()
-        if (isPipEnabled && !isTV && Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
-            enterPictureInPictureMode(PictureInPictureParams.Builder().build())
-    }
 }
