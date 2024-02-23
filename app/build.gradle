@@ -158,6 +158,6 @@ dependencies {
     kapt "androidx.room:room-compiler:$roomVersion"
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
     implementation 'com.vmadalin:easypermissions-ktx:1.0.0'
-
+//
 
 }
