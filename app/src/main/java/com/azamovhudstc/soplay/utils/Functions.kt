@@ -14,6 +14,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.WindowCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.MutableLiveData
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.app.App
@@ -159,11 +160,9 @@ fun ImageView.loadImage(file: FileUrl?, size: Int = 0) {
 }
 var loaded: Boolean = false
 var loadedFav: Boolean = false
-fun openLinkInBrowser(link: String?) {
-    tryWith {
+fun openLinkInBrowser(link: String?,activity:FragmentActivity) {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-        App.instance.startActivity(intent)
-    }
+        activity.startActivity(intent)
 }
 
 object Refresh {

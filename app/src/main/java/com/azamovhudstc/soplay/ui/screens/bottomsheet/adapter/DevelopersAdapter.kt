@@ -2,21 +2,22 @@ package com.azamovhudstc.soplay.ui.screens.bottomsheet.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.azamovhudstc.soplay.databinding.ItemDeveloperBinding
 import com.azamovhudstc.soplay.utils.Developer
+import com.azamovhudstc.soplay.utils.Refresh.activity
 import com.azamovhudstc.soplay.utils.loadImage
 import com.azamovhudstc.soplay.utils.openLinkInBrowser
 import com.azamovhudstc.soplay.utils.setAnimation
 
-class DevelopersAdapter(private val developers: Array<Developer>) :
+class DevelopersAdapter(private val developers: Array<Developer>,private val activity: Fragment) :
     RecyclerView.Adapter<DevelopersAdapter.DeveloperViewHolder>() {
 
     inner class DeveloperViewHolder(val binding: ItemDeveloperBinding) :
         RecyclerView.ViewHolder(binding.root) {
         init {
             itemView.setOnClickListener {
-                openLinkInBrowser(developers[bindingAdapterPosition].url)
             }
         }
     }
@@ -38,6 +39,9 @@ class DevelopersAdapter(private val developers: Array<Developer>) :
         b.devName.text = dev.name
         b.devProfile.loadImage(dev.pfp)
         b.devRole.text = dev.role
+        b.root.setOnClickListener {
+            openLinkInBrowser(developers[position].url, activity.requireActivity())
+        }
     }
 
     override fun getItemCount(): Int = developers.size
