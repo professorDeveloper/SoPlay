@@ -65,6 +65,11 @@
         </action>
     </fragment>
 
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="com.azamovhudstc.soplay.ui.screens.settings.SettingsFragment"
+        android:label="Settings">
+    </fragment>
 
     <fragment
         android:id="@+id/homeScreen"

@@ -18,13 +18,14 @@ import com.azamovhudstc.soplay.utils.animationTransaction
 import com.azamovhudstc.soplay.utils.hide
 import com.azamovhudstc.soplay.utils.show
 import com.azamovhudstc.soplay.viewmodel.imp.SearchViewModelImpl
+import com.google.android.material.snackbar.Snackbar
 
 
 class HomeScreen : Fragment() {
 
     private val model by viewModels<SearchViewModelImpl>()
     private lateinit var adapter: SearchAdapter
-    private var isLoading =true
+    private var isLoading = true
     private var _binding: HomeScreenBinding? = null
     private val binding get() = _binding!!
     override fun onCreateView(
@@ -41,25 +42,32 @@ class HomeScreen : Fragment() {
         model.loadPagingData.observe(this) {
             when (it) {
                 is Resource.Error -> {
-                    if (isLoading){
+                    if (isLoading) {
 
                         binding.progress.hide()
                         binding.searchRv.show()
+                        Snackbar.make(
+                            binding.root,
+                            it.throwable.message.toString(),
+                            Snackbar.LENGTH_SHORT
+                        ).setAction("Reload") {
+                            model.loadNextPage(1)
+                        }.show()
                     }
                     Log.e("TAG", "onCreate:${it.throwable.message.toString()} ")
                 }
                 Resource.Loading -> {
-                    if (isLoading){
+                    if (isLoading) {
                         binding.progress.show()
                         binding.searchRv.hide()
                     }
                 }
                 is Resource.Success -> {
 
-                    if (isLoading){
+                    if (isLoading) {
                         binding.progress.hide()
                         binding.searchRv.show()
-                        isLoading=false
+                        isLoading = false
                     }
                     it.data?.let {
                         if (model.lastPage == 1) {
@@ -100,9 +108,9 @@ class HomeScreen : Fragment() {
         WindowCompat.setDecorFitsSystemWindows(window, true)
         window.statusBarColor = resources.getColor(R.color.md_theme_light_9_onBackground)
         adapter = SearchAdapter(requireActivity(), model.pagingData)
-        if (isLoading){
+        if (isLoading) {
             model.loadNextPage(1)
-        }else{
+        } else {
             model.loadNextPage(1)
         }
 
@@ -165,7 +173,6 @@ class HomeScreen : Fragment() {
 //            })
 //        }
         initPagination()
-
 
 
     }

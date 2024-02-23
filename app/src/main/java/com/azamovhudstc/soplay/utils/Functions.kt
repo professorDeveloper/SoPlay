@@ -1,8 +1,11 @@
 package com.azamovhudstc.soplay.utils
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
@@ -21,11 +24,58 @@ import com.azamovhudstc.soplay.utils.Download.defaultDownload
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.google.android.material.color.DynamicColors
+import com.google.android.material.color.DynamicColorsOptions
 import com.lagradost.nicehttp.addGenericDns
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import java.io.*
 import kotlin.reflect.KFunction
+
+
+
+
+
+@SuppressLint("RestrictedApi")
+ fun applyDynamicColors(
+    useMaterialYou: Boolean,
+    context: Context,
+    useOLED: Boolean,
+    bitmap: Bitmap? = null,
+    useCustom: Int? = null
+): Boolean {
+    val builder = DynamicColorsOptions.Builder()
+    var needMaterial = true
+
+    // Set content-based source if a bitmap is provided
+    if (bitmap != null) {
+        builder.setContentBasedSource(bitmap)
+        needMaterial = false
+    } else if (useCustom != null) {
+        builder.setContentBasedSource(bitmap!!)
+        needMaterial = false
+    }
+
+    if (useOLED) {
+    }
+    if (needMaterial && !useMaterialYou) return true
+
+    // Build the options
+    val options = builder.build()
+
+    // Apply the dynamic colors to the activity
+    val activity = context as Activity
+    DynamicColors.applyToActivityIfAvailable(activity, options)
+
+    if (useOLED) {
+        val options2 = DynamicColorsOptions.Builder()
+            .build()
+        DynamicColors.applyToActivityIfAvailable(activity, options2)
+    }
+
+    return false
+}
+
 
 fun initActivity(a: Activity) {
     val window = a.window
@@ -109,6 +159,12 @@ fun ImageView.loadImage(file: FileUrl?, size: Int = 0) {
 }
 var loaded: Boolean = false
 var loadedFav: Boolean = false
+fun openLinkInBrowser(link: String?) {
+    tryWith {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+        App.instance.startActivity(intent)
+    }
+}
 
 object Refresh {
     fun all() {

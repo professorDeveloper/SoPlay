@@ -27,5 +27,53 @@
     <string name="seek_seconds_forward">+%d seconds</string>
     <string name="seek_seconds_backward">-%d seconds</string>
     <string name="no_favorites_text">Your Favorites will show here</string>
+    <string name="imageview_in_main">ImageView in Main</string>
+
+    <string name="splash_c2_image">Splash C2 Image</string>
+
+    <string name="image_title">IMAGE TITLE</string>
+    <string name="cover_of_anime">coverOfAnime</string>
+    <string name="synopsis_header_title">Synopsis:</string>
+    <string name="not_started_yet">Not Started Yet</string>
+    <string name="select_episode">Select Episode</string>
+    <string name="episode">Episode %1$s</string>
+    <string name="last_watched_format">Last Watched: %1$s</string>
+    <string name="loading_episode">Loading Episode</string>
+    <string name="speed">%1$sx</string>
+    <string name="back_to_home">back to home</string>
+
+
+    <!-- Preference Titles -->
+    <string name="settings">Settings</string>
+    <string name="mx_player_summary">Will only work if you have MX Player installed on your device</string>
+    <string name="mx_player_title">Use MX player</string>
+    <string name="external_player_off_summary">Using internal player</string>
+    <string name="external_player_on_summary">Using external player</string>
+    <string name="external_player_title">Use external video player</string>
+    <string name="dynamic_colors_disabled_summary">Dynamic colors disabled</string>
+    <string name="dynamic_colors_enabled_summary">Dynamic colors enabled</string>
+    <string name="dynamic_colors_title">Use dynamic colors</string>
+    <string name="source_cat_title">Source</string>
+    <string name="source_list_pref_title">Select Source</string>
+    <string name="pip_disabled">Picture-in-picture disabled</string>
+    <string name="pip_enabled">Picture-in-picture enabled</string>
+    <string name="pip_title">Enable PiP</string>
+    <string name="theme_cat_title">Theme</string>
+    <string name="player_cat_title">Player</string>
+
+    <string name="player">Player</string>
+    <string name="dark_mode_pref_title">Dark Mode</string>
+    <string name="update_available">Update Available</string>
+    <string name="update_not_available">No Update Available</string>
+    <string name="downloading_update">Downloading Update</string>
+    <string name="check_update_pref_summary">Donate For Developers</string>
+    <string name="check_update_pref">Developers</string>
+    <string name="sort">Sort</string>
+    <string name="video_cache_perf_title">Enable Video Cache</string>
+    <string name="video_cache_perf_summray_disabled">Video cache disabled in player</string>
+    <string name="video_cache_perf_summray_enabled">Video cache enabled in player</string>
+    <string name="auto_play_summary">Autoplay next episode when the current episode ends</string>
+    <string name="auto_play_title">Autoplay next episode</string>
+    <string name="press_back_again_in_player">Press Back Again to Exit Player</string>
 
 </resources>

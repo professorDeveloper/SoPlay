@@ -20,6 +20,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import jp.wasabeef.glide.transformations.BlurTransformation
 
@@ -67,6 +68,15 @@ class DetailScreen : Fragment() {
         viewModel.movieDetailData.observe(this) {
             when (it) {
                 is Resource.Error -> {
+                    binding.progress.hide()
+                    binding.container.show()
+                    Snackbar.make(
+                        binding.root,
+                        it.throwable.message.toString(),
+                        Snackbar.LENGTH_SHORT
+                    ).setAction("Reload") {
+                        viewModel.parseDetailByMovieInfo(data)
+                    }
 
                 }
                 Resource.Loading -> {

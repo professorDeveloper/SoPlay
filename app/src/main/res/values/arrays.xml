@@ -1,0 +1,37 @@
+<resources>
+    <!-- Source Preference -->
+    <string-array name="sources_entries">
+        <item>Asilmedia</item>
+<!--        <item>Zoro</item>-->
+        <item>AllAnime</item>
+<!--        <item>Enime</item>-->
+        <item>KissKh</item>
+        <item>AnimePahe</item>
+        <item>Kawaiifu</item>
+        <item>MarinMoe</item>
+        <item>AsianLoad</item>
+        <item>MyAsianTv</item>
+    </string-array>
+
+    <string-array name="sources_values">
+        <item>asilmedia</item>
+<!--        <item>zoro</item>-->
+        <item>idubtv</item>
+<!--        <item>enime</item>-->
+        <item>amediatv</item>
+        <item>onlinetv</item>
+    </string-array>
+
+    <!-- Dark Mode Preference -->
+    <string-array name="dark_mode_entries">
+        <item>Off</item>
+        <item>On</item>
+        <item>Follow system</item>
+    </string-array>
+
+    <string-array name="dark_mode_values">
+        <item>off</item>
+        <item>on</item>
+        <item>follow_system</item>
+    </string-array>
+</resources>

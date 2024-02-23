@@ -19,7 +19,8 @@ class TrendingViewModelImpl : TrendingViewModel, ViewModel() {
             it.onSuccess {
                 trendingMovieList.postValue(it)
             }
-            it.onFailure { }
+            it.onFailure {
+            }
         }.launchIn(viewModelScope)
     }
 }

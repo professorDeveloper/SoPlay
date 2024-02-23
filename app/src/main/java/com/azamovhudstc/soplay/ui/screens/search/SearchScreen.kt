@@ -1,69 +1,97 @@
 package com.azamovhudstc.soplay.ui.screens.search
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.azamovhudstc.soplay.R
-import com.azamovhudstc.soplay.utils.changeToolbarColorListener
-import com.azamovhudstc.soplay.utils.isToolbarDisabledGoListener
+import com.azamovhudstc.soplay.databinding.SearchScreenBinding
+import com.azamovhudstc.soplay.ui.adapter.SearchAdapter
+import com.azamovhudstc.soplay.utils.*
+import com.azamovhudstc.soplay.viewmodel.imp.SearchViewModelImpl
+import com.google.android.material.snackbar.Snackbar
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [SearchScreen.newInstance] factory method to
- * create an instance of this fragment.
- */
 class SearchScreen : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private var _binding: SearchScreenBinding? = null
+    private val binding get() = _binding!!
+    private val model by viewModels<SearchViewModelImpl>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.search_screen, container, false)
+        _binding = SearchScreenBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         changeToolbarColorListener.invoke(true)
+        model.searchData.observe(viewLifecycleOwner) {
+            when (it) {
+                is Resource.Error -> {
+                    Snackbar.make(
+                        binding.root,
+                        it.throwable.message.toString(),
+                        Snackbar.LENGTH_SHORT
+                    ).setAction("Reload") {
+                        model.searchMovie(binding.mainSearch.query.toString())
 
-    }
+                    }.show()
+                    binding.searchRv.hide()
+                    binding.progress.hide()
+                }
+                Resource.Loading -> {
+                    binding.progress.show()
+                    binding.searchRv.hide()
+                }
+                is Resource.Success -> {
+                    binding.progress.hide()
+                    binding.searchRv.show()
+                    binding.apply {
+                        val adapter = SearchAdapter(requireActivity(), it.data)
+                        searchRv.adapter = adapter
+                        adapter.setItemClickListener {
+                            val bundle = Bundle()
+                            val data = it
+                            bundle.putSerializable("data", data)
+                            findNavController().navigate(
+                                R.id.detailScreen,
+                                bundle,
+                                animationTransaction().build()
+                            )
+                        }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment SearchScreen.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            SearchScreen().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+                        searchRv.slideUp(700, 1)
+                    }
                 }
             }
+        }
+        binding.apply {
+
+            mainSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    dismissKeyboard(binding.root)
+                    if (query.toString().trim().isNotEmpty()) {
+                        model.isSearch = true
+                        model.searchMovie(query.toString())
+
+                    }
+                    return true
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    return true
+                }
+
+
+            })
+        }
     }
+
 }

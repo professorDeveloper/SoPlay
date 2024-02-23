@@ -14,6 +14,7 @@
         <item name="colorOnSecondaryContainer">@color/md_theme_dark_9_onSecondaryContainer</item>
         <item name="colorTertiary">@color/md_theme_dark_9_tertiary</item>
         <item name="colorOnTertiary">@color/md_theme_dark_9_onTertiary</item>
+        <item name="alertDialogTheme">@style/DialogTheme</item>
         <item name="colorTertiaryContainer">@color/md_theme_dark_9_tertiaryContainer</item>
         <item name="colorOnTertiaryContainer">@color/md_theme_dark_9_onTertiaryContainer</item>
         <item name="titleTextColor">@color/white</item>
@@ -21,7 +22,8 @@
         <item name="colorErrorContainer">@color/md_theme_dark_9_errorContainer</item>
         <item name="colorOnError">@color/md_theme_dark_9_onError</item>
         <item name="colorOnErrorContainer">@color/md_theme_dark_9_onErrorContainer</item>
-        <item name="android:colorBackground">@color/md_theme_dark_9_background</item>
+        <item name="preferenceTheme">@style/ThemeOverlay.App.Preference</item>
+            <item name="android:colorBackground">@color/md_theme_dark_9_background</item>
         <item name="colorOnBackground">@color/md_theme_light_9_onBackground</item>
         <item name="colorSurface">@color/md_theme_dark_9_surface</item>
         <item name="colorOnSurface">@color/md_theme_dark_9_onSurface</item>
@@ -32,6 +34,16 @@
         <item name="colorSurfaceInverse">@color/md_theme_dark_9_inverseSurface</item>
         <item name="colorPrimaryInverse">@color/md_theme_dark_9_inversePrimary</item>
     </style>
+
+
+    <style name="ThemeOverlay.App.Preference" parent="PreferenceThemeOverlay">
+        <item name="switchPreferenceCompatStyle">@style/PreferenceMaterialSwitch</item>
+    </style>
+
+    <style name="PreferenceMaterialSwitch" parent="@style/Preference.SwitchPreferenceCompat.Material">
+        <item name="widgetLayout">@layout/preference_switch</item>
+    </style>
+
     <style name="App.Custom.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
         <item name="android:color">?attr/colorOnBackground</item>
     </style>
@@ -56,7 +68,11 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="android:windowIsFloating">true</item>
+        <item name="android:textColor">@color/white</item>
+
+<item name="titleTextColor">
+    @color/white
+</item>        <item name="android:windowIsFloating">true</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowBackground">@drawable/shape_corner_16dp</item>
     </style>

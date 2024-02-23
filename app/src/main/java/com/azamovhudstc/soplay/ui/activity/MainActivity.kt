@@ -1,6 +1,5 @@
 package com.azamovhudstc.soplay.ui.activity
 
-import android.app.PictureInPictureParams
 import android.app.UiModeManager
 import android.content.SharedPreferences
 import android.content.res.Configuration
@@ -12,9 +11,7 @@ import android.transition.TransitionManager
 import android.view.Gravity
 import android.view.Menu
 import android.view.ViewGroup
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -26,10 +23,12 @@ import com.azamovhudstc.soplay.databinding.ActivityMainBinding
 import com.azamovhudstc.soplay.utils.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigationrail.NavigationRailView
+import com.vmadalin.easypermissions.EasyPermissions
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
+    private val PERMISSION_REQUEST_CODE = 1
     private lateinit var binding: ActivityMainBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var settingsPreferenceManager: SharedPreferences
@@ -117,8 +116,33 @@ class MainActivity : AppCompatActivity() {
             binding.toolbar.setNavigationIconTint(this.getColor(R.color.white))
 
         }
+        hasPermission()
     }
 
+    private fun hasPermission() {
+        EasyPermissions.hasPermissions(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        if (Build.VERSION.SDK_INT >= 33) {
+            EasyPermissions.hasPermissions(this, android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+        requestFilePermission()
+    }
+
+    private fun requestFilePermission() {
+        EasyPermissions.requestPermissions(
+            this,
+            "This Permission For Download Movies",
+            PERMISSION_REQUEST_CODE,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
+        if (Build.VERSION.SDK_INT >= 33) {
+            EasyPermissions.requestPermissions(
+                this,
+                "This Permission For Download Movies",
+                PERMISSION_REQUEST_CODE,
+                android.Manifest.permission.POST_NOTIFICATIONS
+            )
+        }
+    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.home_menu, menu)
@@ -131,7 +155,7 @@ class MainActivity : AppCompatActivity() {
             return@setOnMenuItemClickListener true
         }
         settings.setOnMenuItemClickListener {
-//            navController.navigate(R.id.navigation_settings)
+            navController.navigate(R.id.navigation_settings)
             return@setOnMenuItemClickListener true
         }
         navController.addOnDestinationChangedListener { _, destination, _ ->
@@ -148,6 +172,14 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_main_bottom_nav)
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
+    }
+
+    override fun onPermissionsDenied(requestCode: Int, perms: List<String>) {
+        snackString("Permission Denied!")
+    }
+
+    override fun onPermissionsGranted(requestCode: Int, perms: List<String>) {
+        snackString("Permission Granted!")
     }
 
 

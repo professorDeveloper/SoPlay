@@ -332,7 +332,6 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
         }
 
         scaleBtn = playerView.findViewById(R.id.exo_screen)
-        qualityBtn = playerView.findViewById(R.id.exo_quality)
         prevEpBtn = playerView.findViewById(R.id.exo_prev_ep)
         nextEpBtn = playerView.findViewById(R.id.exo_next_ep)
         subsToggleButton = playerView.findViewById(R.id.subs_toggle_btn)
@@ -340,9 +339,6 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
 
 //        model.player.playbackParameters =
 
-        qualityBtn.setOnClickListener {
-            initPopupQuality().show()
-        }
 
         exoSpeed.setOnClickListener {
             val builder =

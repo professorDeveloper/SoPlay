@@ -30,6 +30,7 @@ class TrendingScreen : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.trendingMovieList.observe(this) {
+
             binding.progressbarInMain.visibility = View.GONE
             if (it.isNotEmpty()) {
                 binding.errorCard.visibility = View.GONE
@@ -93,11 +94,16 @@ class TrendingScreen : Fragment() {
             }
         }
         binding.progressbarInMain.visibility = View.VISIBLE
-          }
+    }
 
     override fun onResume() {
         super.onResume()
         if (!loaded) Refresh.activity[1]!!.postValue(true)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        loaded = false
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
