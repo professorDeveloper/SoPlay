@@ -80,7 +80,8 @@ class DetailRepositoryImpl : DetailRepository {
             val iframeElement = videoDiv?.selectFirst("iframe")
             val videoUrl = iframeElement?.attr("src")
             val parsedUrl = parseUrl(videoUrl!!)
-
+            var newOptions =options.toMutableList()
+            newOptions.removeAt(0)
             val data = FullMovieData(
                 year = year,
                 country = country,
@@ -89,7 +90,7 @@ class DetailRepositoryImpl : DetailRepository {
                 genres = genres,
                 directors = directors,
                 actors = actors,
-                options = options.distinct().filterNot { it.second.toIntOrNull() != null },
+                options = newOptions.distinct().filterNot { it.second.toIntOrNull() != null },
                 imageUrls = imageUrls,
                 description = nonRussianDescription!!,
                 videoUrl = parsedUrl!!,
