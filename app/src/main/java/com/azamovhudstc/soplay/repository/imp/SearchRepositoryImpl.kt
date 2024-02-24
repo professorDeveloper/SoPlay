@@ -3,35 +3,42 @@ package com.azamovhudstc.soplay.repository.imp
 import com.azamovhudstc.soplay.app.App
 import com.azamovhudstc.soplay.data.response.MovieInfo
 import com.azamovhudstc.soplay.repository.SearchRepository
-import com.azamovhudstc.soplay.utils.Constants.mainUrl
+import com.azamovhudstc.soplay.utils.Constants.host
 import com.azamovhudstc.soplay.utils.Utils
 import com.azamovhudstc.soplay.utils.isOnline
-import com.azamovhudstc.soplay.utils.parser
-import com.lagradost.nicehttp.Requests
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
 class SearchRepositoryImpl : SearchRepository {
     override fun searchMovies(query: String) = flow<Result<ArrayList<MovieInfo>>> {
-        if (isOnline(App.instance)){
+        if (isOnline(App.instance)) {
             val movieList = ArrayList<MovieInfo>()
 
-            val request = Requests(baseClient = Utils.httpClient, responseParser = parser)
-            val searchResponse = request.post(
-                mainUrl,
-                data = mapOf(
+            val searchResponse = Utils.getJsoupAsilMedia(
+                params = mapOf(
                     "story" to query,
                     "do" to "search",
                     "subaction" to "search"
-                ),
+                ), host = host, mapOfHeaders =
+                mapOf(
+                    "Accept" to "/*",
+                    "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.101.76 Safari/537.36",
+                    "Host" to "asilmedia.org",
+                    "Cache-Control" to "no-cache",
+                    "Pragma" to "no-cache",
+
+                    "Connection" to "keep-alive",
+                    "Upgrade-Insecure-Requests" to "1",
+
+                    )
             )
 
-            val document = searchResponse.document
+            val document = searchResponse
             val articles = document.select("article.shortstory-item")
             for (article in articles) {
                 val genre = article.select("div.genre").text()
-                val rating = article.select("span.ratingplus").text()?:"+0"
+                val rating = article.select("span.ratingplus").text() ?: "+0"
                 val title = article.select("header.moviebox-meta h2.title").text()
                 val image = article.select("picture.poster-img img").attr("data-src")
                 val href = article.select("a.flx-column-reverse").attr("href")
@@ -42,9 +49,15 @@ class SearchRepositoryImpl : SearchRepository {
                 movieList.add(movieInfo)
             }
 
-            emit(if (movieList.isNotEmpty()) Result.success(movieList) else Result.failure(Exception("Movie Not Found")))
+            emit(
+                if (movieList.isNotEmpty()) Result.success(movieList) else Result.failure(
+                    Exception(
+                        "Movie Not Found"
+                    )
+                )
+            )
 
-        }else {
+        } else {
             emit(Result.failure(Exception("No Internet Connection")))
         }
 

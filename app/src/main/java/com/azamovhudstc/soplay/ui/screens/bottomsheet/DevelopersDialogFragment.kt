@@ -28,10 +28,10 @@ class DevelopersDialogFragment : BottomSheetDialogFragment() {
             "https://t.me/KBOT09"
         ),
         Developer(
-            "Uzmodder",
+            "UzModder",
             "https://github.com/professorDeveloper/Scraping-Tutorial/assets/108933534/baa59816-44cf-4afa-9330-9183b6682177",
             "Ads Contributor",
-            "https://github.com/brahmkshatriya"
+            "https://t.me/uzmodder"
         ),
 
         )

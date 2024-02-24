@@ -50,7 +50,7 @@
                     app:iconifiedByDefault="false"
                     app:queryBackground="@color/transparent2"
 
-                    app:queryHint="Search Movie"
+                    app:queryHint="Film Qidirsh"
                     app:searchIcon="@drawable/search_icon"
                     tools:ignore="RtlSymmetry">
 

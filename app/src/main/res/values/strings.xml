@@ -5,10 +5,10 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="episode_text">%1$s</string>
-    <string name="title_trending">Trending</string>
-    <string name="title_latest">Latest</string>
-    <string name="title_favorite">Favorite</string>
-    <string name="title_search">Search</string>
+    <string name="title_trending">Trend</string>
+    <string name="title_latest">So`ngi</string>
+    <string name="title_favorite">Sevimli</string>
+    <string name="title_search">Qidirsh</string>
     <string-array name="tips">
         <item>You can Long Click an episode/chapter to Mark it as Read.</item>
         <item>Long Clicking Shows can directly open List Editor.</item>
@@ -26,7 +26,7 @@
     <string name="animations">Animations</string>
     <string name="seek_seconds_forward">+%d seconds</string>
     <string name="seek_seconds_backward">-%d seconds</string>
-    <string name="no_favorites_text">Your Favorites will show here</string>
+    <string name="no_favorites_text">Sevimlilaringiz shu yerda chiqadi</string>
     <string name="imageview_in_main">ImageView in Main</string>
 
     <string name="splash_c2_image">Splash C2 Image</string>
@@ -44,7 +44,7 @@
 
 
     <!-- Preference Titles -->
-    <string name="settings">Settings</string>
+    <string name="settings">Sozlamalar</string>
     <string name="mx_player_summary">Will only work if you have MX Player installed on your device</string>
     <string name="mx_player_title">Use MX player</string>
     <string name="external_player_off_summary">Using internal player</string>
@@ -62,12 +62,12 @@
     <string name="player_cat_title">Player</string>
 
     <string name="player">Player</string>
-    <string name="dark_mode_pref_title">Dark Mode</string>
+    <string name="dark_mode_pref_title">Tungi rejim</string>
     <string name="update_available">Update Available</string>
     <string name="update_not_available">No Update Available</string>
     <string name="downloading_update">Downloading Update</string>
     <string name="check_update_pref_summary">Donate For Developers</string>
-    <string name="check_update_pref">Developers</string>
+    <string name="check_update_pref">Dasturchilar</string>
     <string name="sort">Sort</string>
     <string name="video_cache_perf_title">Enable Video Cache</string>
     <string name="video_cache_perf_summray_disabled">Video cache disabled in player</string>

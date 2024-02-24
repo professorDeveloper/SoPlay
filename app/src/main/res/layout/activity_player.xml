@@ -200,7 +200,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-condensed-medium"
             android:padding="8dp"
-            android:text="Loading Episode"
+            android:text="Epizod yuklanmoqda"
             android:textAlignment="center"
             android:textColor="@color/white" />
 

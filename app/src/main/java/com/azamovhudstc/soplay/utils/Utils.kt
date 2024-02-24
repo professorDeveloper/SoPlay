@@ -3,6 +3,7 @@ package com.azamovhudstc.soplay.utils
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import okhttp3.FormBody
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
@@ -17,12 +18,44 @@ object Utils {
         .callTimeout(2, TimeUnit.MINUTES)
         .build()
 
-    fun get(url: String,
-            mapOfHeaders: Map<String, String>? = null
+    fun getAsilMedia(
+        host: String? = null,
+        pathSegment: ArrayList<String>? = null,
+        mapOfHeaders: Map<String, String>? = null,
+        params: Map<String, String>? = null,
+    ): String {
+        val urlBuilder = HttpUrl.Builder()
+            .scheme("http") // Replace with your scheme (http or https)
+            .host(host!!) // Replace with your actual host
+        pathSegment?.forEach {
+            urlBuilder.addPathSegment(it)
+        }
+
+
+        if (!params.isNullOrEmpty()) {
+            params.forEach {
+                urlBuilder.addQueryParameter(it.key, it.value)
+            }
+        }
+
+        val requestBuilder = Request.Builder().url(urlBuilder.build())
+        if (!mapOfHeaders.isNullOrEmpty()) {
+            mapOfHeaders.forEach {
+                requestBuilder.addHeader(it.key, it.value)
+            }
+        }
+
+        return httpClient.newCall(requestBuilder.build())
+            .execute().body.string()
+    }
+
+    fun get(
+        url: String,
+        mapOfHeaders: Map<String, String>? = null
     ): String {
         val requestBuilder = Request.Builder().url(url)
         if (!mapOfHeaders.isNullOrEmpty()) {
-            mapOfHeaders.forEach{
+            mapOfHeaders.forEach {
                 requestBuilder.addHeader(it.key, it.value)
             }
         }
@@ -30,7 +63,11 @@ object Utils {
             .execute().body!!.string()
     }
 
-    fun post(url: String, mapOfHeaders: Map<String, String>? = null, payload: Map<String, String>? = null): String {
+    fun post(
+        url: String,
+        mapOfHeaders: Map<String, String>? = null,
+        payload: Map<String, String>? = null
+    ): String {
         val requestBuilder = Request.Builder().url(url)
 
         if (!mapOfHeaders.isNullOrEmpty()) {
@@ -60,6 +97,22 @@ object Utils {
         mapOfHeaders: Map<String, String>? = null
     ): Document {
         return Jsoup.parse(get(url, mapOfHeaders))
+    }
+
+    fun getJsoupAsilMedia(
+        host: String,
+        pathSegment: ArrayList<String>? /* = java.util.ArrayList<kotlin.String>? */ = null,
+        params: Map<String, String>? = null,
+        mapOfHeaders: Map<String, String>? = null
+    ): Document {
+        return Jsoup.parse(
+            getAsilMedia(
+                host = host,
+                pathSegment = pathSegment,
+                params = params,
+                mapOfHeaders = mapOfHeaders
+            )
+        )
     }
 
     fun getJson(

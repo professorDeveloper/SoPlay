@@ -1,10 +1,11 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="Developers">
+    <PreferenceCategory >
         <Preference
             app:key="developers"
             app:summary="@string/check_update_pref_summary"
             app:title="@string/check_update_pref" />
     </PreferenceCategory>
+
 
 </PreferenceScreen>

@@ -163,6 +163,8 @@ class PlayerViewModel @Inject constructor(
                     "STREAM GET LINK"
                 )
 
+
+                println(animeUrl)
                 reGenerateMp4(parseUrl(animeUrl)!!).apply {
                     _animeStreamLink.postValue(this@apply)
                     withContext(Dispatchers.Main) {
@@ -180,8 +182,21 @@ class PlayerViewModel @Inject constructor(
     }
 
     private suspend fun reGenerateMp4(link: String) = withContext(Dispatchers.IO) {
+        println(link)
         val requests = Requests(baseClient = Utils.httpClient, responseParser = parser)
-        val response = requests.get(link)
+        val response = requests.get(
+            link, headers = mapOf(
+                "Accept" to "/*",
+                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.101.76 Safari/537.36",
+                "Host" to "asilmedia.org",
+                "Cache-Control" to "no-cache",
+                "Pragma" to "no-cache",
+
+                "Connection" to "keep-alive",
+                "Upgrade-Insecure-Requests" to "1",
+
+                )
+        )
         return@withContext response.url.toString()
 
     }

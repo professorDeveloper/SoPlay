@@ -176,7 +176,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/poppins_semi_bold"
-                        android:text="Year"
+                        android:text="Yil"
                         android:textSize="14sp" />
 
                 </LinearLayout>
@@ -203,7 +203,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/poppins_semi_bold"
-                        android:text="Duration"
+                        android:text="Vaqti"
                         android:textSize="14sp" />
                 </LinearLayout>
 
@@ -228,7 +228,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/poppins_semi_bold"
-                        android:text="Country"
+                        android:text="Davlati"
                         android:textSize="14sp" />
                 </LinearLayout>
 
@@ -284,7 +284,7 @@
                             android:id="@+id/favButtonText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Favorite"
+                            android:text="Sevimli"
                             android:textAlignment="center" />
 
                     </LinearLayout>
@@ -341,7 +341,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/poppins"
-                            android:text="Select Episode"
+                            android:text="Qismni Tanlang"
                             android:textAlignment="center"
                             android:textStyle="bold" />
 
@@ -401,7 +401,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:fontFamily="@font/poppins"
-                    android:text="Description"
+                    android:text="Tavsif"
                     android:textColor="@color/white"
                     android:textSize="18sp"
                     app:layout_constraintStart_toStartOf="parent"

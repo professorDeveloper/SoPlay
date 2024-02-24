@@ -13,18 +13,29 @@ import kotlinx.coroutines.flow.flowOn
 class DetailRepositoryImpl : DetailRepository {
     override fun parseMovieDetailByHref(movieInfo: MovieInfo) = flow<Result<FullMovieData>> {
         if (isOnline(App.instance)) {
-            val document = Utils.getJsoup(movieInfo.href)
+            val document = Utils.getJsoup(
+                movieInfo.href, mapOfHeaders = mapOf(
+                    "Accept" to "/*",
+                    "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.101.76 Safari/537.36",
+                    "Host" to "asilmedia.org",
+                    "Cache-Control" to "no-cache",
+                    "Pragma" to "no-cache",
+                    "Connection" to "keep-alive",
+                    "Upgrade-Insecure-Requests" to "1",
+
+                    )
+            )
             val year: String =
                 document.select("div.fullmeta-item span.fullmeta-label:contains(Год) + span.fullmeta-seclabel a")
                     .text()
-
             val country: String =
                 document.select("div.fullmeta-item span.fullmeta-label:contains(Страна) + span.fullmeta-seclabel a")
                     .text()
-
-            val duration: String =
+            val duration2: String =
                 document.select("div.fullmeta-item span.fullmeta-label:contains(Продолжительность) + span.fullmeta-seclabel a")
                     .text()
+            val timePattern = Regex("\\d{2,3}\\s*мин\\.|\\d{2}:\\d{2}")
+            val duration = timePattern.findAll(duration2).map { it.value }.toList().get(0)
 
             val posterImageSrc: String =
                 document.select("div.poster picture.poster-img img.lazyload").attr("data-src")
@@ -52,7 +63,7 @@ class DetailRepositoryImpl : DetailRepository {
                 val value = it.groupValues[1]
                 val text = it.groupValues[2]
                 Pair(text, value)
-            }.toMutableList()
+            }.toList()
 
             val imageUrls = document.select(".xfieldimagegallery img.lazyload[data-src]")
                 .map { it.attr("data-src") }
@@ -60,21 +71,16 @@ class DetailRepositoryImpl : DetailRepository {
             val descriptionElements = document.select("span[itemprop=description]")
             val nonRussianDescription = descriptionElements.text()
 
-            // Filter out paragraphs with Russian characters
 
-            println("Description: $nonRussianDescription")
-
-            // Extension function to check if a character is Russian
             val rating = document.select(".r-im.txt-bold500.pfrate-count").text()
 
 
-//        options.forEachIndexed { index, pair ->
-//            options[index] = Pair(pair.first, parseUrl(pair.second)!!)
-//
-//        }
             // Extract the video URL from the iframe inside the "cn-content" div
             val videoDiv = document.selectFirst("#cn-content")
             val iframeElement = videoDiv?.selectFirst("iframe")
+            val videoUrl = iframeElement?.attr("src")
+            val parsedUrl = parseUrl(videoUrl!!)
+
             val data = FullMovieData(
                 year = year,
                 country = country,
@@ -86,9 +92,10 @@ class DetailRepositoryImpl : DetailRepository {
                 options = options.distinct().filterNot { it.second.toIntOrNull() != null },
                 imageUrls = imageUrls,
                 description = nonRussianDescription!!,
-                videoUrl = "parsedUrl"!!,
+                videoUrl = parsedUrl!!,
                 IMDB_rating = rating
             )
+
             emit(Result.success(data))
         } else {
             emit(Result.failure(Exception("Check Your Network")))
