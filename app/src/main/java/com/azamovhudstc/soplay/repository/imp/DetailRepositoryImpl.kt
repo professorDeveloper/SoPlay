@@ -4,38 +4,39 @@ import com.azamovhudstc.soplay.app.App
 import com.azamovhudstc.soplay.data.response.FullMovieData
 import com.azamovhudstc.soplay.data.response.MovieInfo
 import com.azamovhudstc.soplay.repository.DetailRepository
-import com.azamovhudstc.soplay.utils.Utils
 import com.azamovhudstc.soplay.utils.isOnline
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import org.jsoup.Connection
+import org.jsoup.Jsoup
 
 class DetailRepositoryImpl : DetailRepository {
     override fun parseMovieDetailByHref(movieInfo: MovieInfo) = flow<Result<FullMovieData>> {
         if (isOnline(App.instance)) {
-            val document = Utils.getJsoup(
-                movieInfo.href, mapOfHeaders = mapOf(
-                    "Accept" to "/*",
-                    "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.101.76 Safari/537.36",
-                    "Host" to "asilmedia.org",
-                    "Cache-Control" to "no-cache",
-                    "Pragma" to "no-cache",
-                    "Connection" to "keep-alive",
-                    "Upgrade-Insecure-Requests" to "1",
+            val document = Jsoup.connect(movieInfo.href)
+                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
+                .followRedirects(true)
+                .headers(
+                    mapOf(
+                        "Content-Type" to "application/x-www-form-urlencoded",
+                        "Accept" to "/*",
+                        "Host" to "asilmedia.org",
+                        "Cache-Control" to "no-cache",
+                        "Pragma" to "no-cache",
+                        "Connection" to "keep-alive",
+                        "Upgrade-Insecure-Requests" to "1",
 
-                    )
-            )
+                        )
+                ).method(Connection.Method.GET).execute().parse()
             val year: String =
                 document.select("div.fullmeta-item span.fullmeta-label:contains(Год) + span.fullmeta-seclabel a")
                     .text()
             val country: String =
                 document.select("div.fullmeta-item span.fullmeta-label:contains(Страна) + span.fullmeta-seclabel a")
                     .text()
-            val duration2: String =
-                document.select("div.fullmeta-item span.fullmeta-label:contains(Продолжительность) + span.fullmeta-seclabel a")
-                    .text()
-            val timePattern = Regex("\\d{2,3}\\s*мин\\.|\\d{2}:\\d{2}")
-            val duration = timePattern.findAll(duration2).map { it.value }.toList().get(0)
+            val durationElement = document.selectFirst(".fullmeta-item .fullmeta-seclabel a")?.text()
+            val duration = durationElement?.replace(" мин", "")
 
             val posterImageSrc: String =
                 document.select("div.poster picture.poster-img img.lazyload").attr("data-src")
@@ -80,23 +81,22 @@ class DetailRepositoryImpl : DetailRepository {
             val iframeElement = videoDiv?.selectFirst("iframe")
             val videoUrl = iframeElement?.attr("src")
             val parsedUrl = parseUrl(videoUrl!!)
-            var newOptions =options.toMutableList()
-            newOptions.removeAt(0)
+            //Buni Sindirish imkonsiz
+
             val data = FullMovieData(
                 year = year,
                 country = country,
-                duration = duration,
+                duration =  "000",
                 posterImageSrc = posterImageSrc,
                 genres = genres,
                 directors = directors,
                 actors = actors,
-                options = newOptions.distinct().filterNot { it.second.toIntOrNull() != null },
+                options = options.distinct().filterNot { it.second.toIntOrNull() != null },
                 imageUrls = imageUrls,
                 description = nonRussianDescription!!,
                 videoUrl = parsedUrl!!,
                 IMDB_rating = rating
             )
-
             emit(Result.success(data))
         } else {
             emit(Result.failure(Exception("Check Your Network")))

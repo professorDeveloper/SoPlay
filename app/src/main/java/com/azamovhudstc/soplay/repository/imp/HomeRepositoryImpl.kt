@@ -4,11 +4,12 @@ import com.azamovhudstc.soplay.app.App
 import com.azamovhudstc.soplay.data.response.MovieInfo
 import com.azamovhudstc.soplay.repository.HomeRepository
 import com.azamovhudstc.soplay.utils.Constants.mainUrl
-import com.azamovhudstc.soplay.utils.Utils
 import com.azamovhudstc.soplay.utils.isOnline
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import org.jsoup.Connection
+import org.jsoup.Jsoup
 
 class HomeRepositoryImpl : HomeRepository {
 
@@ -17,19 +18,23 @@ class HomeRepositoryImpl : HomeRepository {
 
             val movieList = ArrayList<MovieInfo>()
 
-            val searchResponse = Utils.getJsoup(
-                "$mainUrl/films/tarjima_kinolar/page/$page/",
-                mapOfHeaders = mapOf(
-                    "Accept" to "/*",
-                    "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.101.76 Safari/537.36",
-                    "Host" to "asilmedia.org",
-                    "Cache-Control" to "no-cache",
-                    "Pragma" to "no-cache",
-                    "Connection" to "keep-alive",
-                    "Upgrade-Insecure-Requests" to "1",
+            val searchResponse =
+                Jsoup.connect("$mainUrl/films/tarjima_kinolar/page/$page/")
+                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
+                    .followRedirects(true)
+                    .headers(
+                        mapOf(
+                            "Content-Type" to "application/x-www-form-urlencoded",
+                            "Accept" to "/*",
+                            "Host" to "asilmedia.org",
+                            "Cache-Control" to "no-cache",
+                            "Pragma" to "no-cache",
+                            "Connection" to "keep-alive",
+                            "Upgrade-Insecure-Requests" to "1",
 
-                    )
-            )
+                            )
+                    ).method(Connection.Method.GET).execute().parse()
+
 
             val document = searchResponse
             val articles = document.select("article.shortstory-item")
@@ -56,26 +61,27 @@ class HomeRepositoryImpl : HomeRepository {
         } else {
             emit(Result.failure(Exception("No Internet Connection")))
         }
-
     }.flowOn(Dispatchers.IO)
 
     override fun loadPopularMovies() = flow<Result<ArrayList<MovieInfo>>> {
         if (isOnline(App.instance)) {
             val movieList = ArrayList<MovieInfo>()
 
-            val searchResponse = Utils.getJsoup(
-                "$mainUrl/popular.html",
-                mapOfHeaders = mapOf(
-                    "Accept" to "/*",
-                    "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.101.76 Safari/537.36",
-                    "Host" to "asilmedia.org",
-                    "Cache-Control" to "no-cache",
-                    "Pragma" to "no-cache",
-                    "Connection" to "keep-alive",
-                    "Upgrade-Insecure-Requests" to "1",
+            val searchResponse = Jsoup.connect("$mainUrl/popular.html")
+                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
+                .followRedirects(true)
+                .headers(
+                    mapOf(
+                        "Content-Type" to "application/x-www-form-urlencoded",
+                        "Accept" to "/*",
+                        "Host" to "asilmedia.org",
+                        "Cache-Control" to "no-cache",
+                        "Pragma" to "no-cache",
+                        "Connection" to "keep-alive",
+                        "Upgrade-Insecure-Requests" to "1",
 
-                    )
-            )
+                        )
+                ).method(Connection.Method.GET).execute().parse()
 
             val document = searchResponse
             val articles = document.select("article.shortstory-item")

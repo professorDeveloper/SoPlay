@@ -3,36 +3,40 @@ package com.azamovhudstc.soplay.repository.imp
 import com.azamovhudstc.soplay.app.App
 import com.azamovhudstc.soplay.data.response.MovieInfo
 import com.azamovhudstc.soplay.repository.SearchRepository
-import com.azamovhudstc.soplay.utils.Constants.host
-import com.azamovhudstc.soplay.utils.Utils
+import com.azamovhudstc.soplay.utils.Constants.mainUrl
 import com.azamovhudstc.soplay.utils.isOnline
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import org.jsoup.Connection
+import org.jsoup.Jsoup
 
 class SearchRepositoryImpl : SearchRepository {
     override fun searchMovies(query: String) = flow<Result<ArrayList<MovieInfo>>> {
         if (isOnline(App.instance)) {
             val movieList = ArrayList<MovieInfo>()
-
-            val searchResponse = Utils.getJsoupAsilMedia(
-                params = mapOf(
-                    "story" to query,
-                    "do" to "search",
-                    "subaction" to "search"
-                ), host = host, mapOfHeaders =
-                mapOf(
-                    "Accept" to "/*",
-                    "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.101.76 Safari/537.36",
-                    "Host" to "asilmedia.org",
-                    "Cache-Control" to "no-cache",
-                    "Pragma" to "no-cache",
-
-                    "Connection" to "keep-alive",
-                    "Upgrade-Insecure-Requests" to "1",
-
-                    )
+            val params = mapOf(
+                "story" to query,
+                "do" to "search",
+                "subaction" to "search"
             )
+            val headers = mapOf(
+                "Accept" to "/*",
+                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.101.76 Safari/537.36",
+                "Host" to "asilmedia.org",
+                "Cache-Control" to "no-cache",
+                "Pragma" to "no-cache",
+
+                "Connection" to "keep-alive",
+                "Upgrade-Insecure-Requests" to "1",
+
+                )
+            val searchResponse = Jsoup.connect(mainUrl)
+                .headers(headers)
+                .data(params)
+                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
+                .followRedirects(true)
+                .method(Connection.Method.GET).execute().parse()
 
             val document = searchResponse
             val articles = document.select("article.shortstory-item")
