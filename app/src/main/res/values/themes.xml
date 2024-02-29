@@ -62,7 +62,20 @@
         <item name="android:textColorHint">@color/white</item>
         <item name="closeIconTint">@color/white</item>
     </style>
+    <style name="BottomNavigationView" parent="@style/TextAppearance.AppCompat.Caption">
+        <item name="android:textFontWeight" tools:targetApi="p">500</item>
+        <item name="android:textSize">10sp</item>
+    </style>
 
+    <style name="BottomNavigationView.Active" parent="@style/TextAppearance.AppCompat.Caption">
+        <item name="android:textFontWeight" tools:targetApi="p">700</item>
+        <item name="android:textSize">10sp</item>
+
+    </style>
+
+    <style name="Theme.SoPlay.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator" tools:ignore="DuplicateDefinition">
+        <item name="android:color">?attr/colorSurface</item>
+    </style>
     <style name="DialogTheme" parent="Theme.SoPlay">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>

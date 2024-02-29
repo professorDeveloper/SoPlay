@@ -9,7 +9,7 @@ plugins {
 
 android {
     compileSdk 33
-
+1
     defaultConfig {
         applicationId "com.azamovhudstc.soplay"
         minSdk 23
@@ -158,6 +158,10 @@ dependencies {
     kapt "androidx.room:room-compiler:$roomVersion"
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
     implementation 'com.vmadalin:easypermissions-ktx:1.0.0'
+    // Shimmer Effect
+    implementation 'com.facebook.shimmer:shimmer:0.5.0'
+
 //
+
 
 }

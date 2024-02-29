@@ -9,11 +9,15 @@
     <item
         android:id="@+id/navigation_latest"
         android:icon="@drawable/select_latest"
-        android:title="@string/title_latest" />
+        android:title="Yangi" />
 
     <item
         android:id="@+id/navigation_trending"
         android:icon="@drawable/ic_trending_black_24"
         android:title="@string/title_trending" />
+    <item
+        android:id="@+id/navigation_tv"
+        android:icon="@drawable/ic_round_movie_filter_24"
+        android:title="TV" />
 
 </menu>

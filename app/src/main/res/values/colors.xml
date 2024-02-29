@@ -7,8 +7,18 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="inactive_input">#949494</color>
     <color name="whiteGray">#9b9dab</color>
+    <color name="place_holder">#C2C2C2</color>
+    <color name="stroke_color">#EFEFEF</color>
 
+    <color name="black_overlay">#66000000</color>
+    <color name="login_bg">#f2f2f2</color>
+    <color name="card_bg">#ffffff</color>
+    <color name="github_bg">#24292f</color>
+    <color name="second_btn_bg">#fee9eb</color>
+    <color name="second_btn_text">#E21221</color>
+    <color name="color_off_toggle">#EEEEEE</color>
 
     <color name="seed_9">#fac917</color>
     <color name="md_theme_light_9_primary">#FCEE0C</color>

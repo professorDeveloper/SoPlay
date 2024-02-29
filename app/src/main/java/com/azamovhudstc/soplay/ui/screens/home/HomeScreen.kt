@@ -44,8 +44,8 @@ class HomeScreen : Fragment() {
                 is Resource.Error -> {
                     if (isLoading) {
 
-                        binding.progress.hide()
-                        binding.searchRv.show()
+//                        binding.progress.hide()
+//                        binding.searchRv.show()
                         Snackbar.make(
                             binding.root,
                             it.throwable.message.toString(),
@@ -58,20 +58,20 @@ class HomeScreen : Fragment() {
                 }
                 Resource.Loading -> {
                     if (isLoading) {
-                        binding.progress.show()
-                        binding.searchRv.hide()
+//                        binding.progress.show()
+//                        binding.searchRv.hide()
                     }
                 }
                 is Resource.Success -> {
 
                     if (isLoading) {
-                        binding.progress.hide()
-                        binding.searchRv.show()
+//                        binding.progress.hide()
+//                        binding.searchRv.show()
                         isLoading = false
                     }
                     it.data?.let {
                         if (model.lastPage == 1) {
-                            binding.searchRv.adapter = adapter
+//                            binding.searchRv.adapter = adapter
                             model.pagingData.addAll(it)
                             adapter.list.clear()
                             adapter.list.addAll(it)
@@ -178,18 +178,18 @@ class HomeScreen : Fragment() {
     }
 
     private fun initPagination() {
-        binding.searchRv.addOnScrollListener(object :
-            RecyclerView.OnScrollListener() {
-            override fun onScrolled(v: RecyclerView, dx: Int, dy: Int) {
-                if (!v.canScrollVertically(1) && !model.isSearch) {
-                    println(model.pagingData.isNotEmpty())
-                    if (model.pagingData.isNotEmpty()) {
-                        model.loadNextPage(model.lastPage + 1)
-                    }
-                }
-                super.onScrolled(v, dx, dy)
-            }
-        })
+//        binding.searchRv.addOnScrollListener(object :
+//            RecyclerView.OnScrollListener() {
+//            override fun onScrolled(v: RecyclerView, dx: Int, dy: Int) {
+//                if (!v.canScrollVertically(1) && !model.isSearch) {
+//                    println(model.pagingData.isNotEmpty())
+//                    if (model.pagingData.isNotEmpty()) {
+//                        model.loadNextPage(model.lastPage + 1)
+//                    }
+//                }
+//                super.onScrolled(v, dx, dy)
+//            }
+//        })
     }
 
     override fun onResume() {

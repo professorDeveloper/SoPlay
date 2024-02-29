@@ -22,7 +22,6 @@ class SearchRepositoryImpl : SearchRepository {
             )
             val headers = mapOf(
                 "Accept" to "/*",
-                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.101.76 Safari/537.36",
                 "Host" to "asilmedia.org",
                 "Cache-Control" to "no-cache",
                 "Pragma" to "no-cache",
@@ -34,7 +33,6 @@ class SearchRepositoryImpl : SearchRepository {
             val searchResponse = Jsoup.connect(mainUrl)
                 .headers(headers)
                 .data(params)
-                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
                 .followRedirects(true)
                 .method(Connection.Method.GET).execute().parse()
 

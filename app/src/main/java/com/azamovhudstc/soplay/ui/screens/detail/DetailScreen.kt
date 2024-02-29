@@ -60,10 +60,8 @@ class DetailScreen : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        isToolbarDisabledGoListener.invoke(true)
         data = arguments?.getSerializable("data") as MovieInfo
         val window = requireActivity().window
-        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = resources.getColor(R.color.transparent)
         viewModel.movieDetailData.observe(this) {
             when (it) {
@@ -224,6 +222,11 @@ class DetailScreen : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.parseDetailByMovieInfo(data)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
     }
 
 

@@ -7,6 +7,13 @@
 
 
     <fragment
+        android:id="@+id/navigation_tv"
+        android:name="com.azamovhudstc.soplay.ui.screens.tv.TvScreen"
+        android:label="Telekanallar"
+        tools:layout="@layout/tv_screen">
+
+    </fragment>
+    <fragment
         android:id="@+id/navigation_favorite"
         android:name="com.azamovhudstc.soplay.ui.screens.favorite.FavoriteScreen"
         android:label="@string/title_favorite"
