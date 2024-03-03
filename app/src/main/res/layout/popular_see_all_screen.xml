@@ -21,6 +21,7 @@
         <ImageView
             android:id="@+id/backButton"
             android:layout_width="30dp"
+            android:visibility="gone"
             android:layout_height="match_parent"
             android:src="@drawable/ic_round_arrow_back_ios_new_24"
             app:layout_constraintEnd_toEndOf="parent"
