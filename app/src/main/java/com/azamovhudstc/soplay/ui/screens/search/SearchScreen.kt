@@ -31,7 +31,6 @@ class SearchScreen : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        changeToolbarColorListener.invoke(true)
         model.searchData.observe(viewLifecycleOwner) {
             when (it) {
                 is Resource.Error -> {
