@@ -97,4 +97,8 @@
         android:name="com.azamovhudstc.soplay.ui.screens.search.SearchScreen"
         android:label="Search"
         tools:layout="@layout/search_screen" />
+    <fragment
+        android:id="@+id/popularSeeAllScreen"
+        android:name="com.azamovhudstc.soplay.ui.screens.home.seeall.PopularSeeAllScreen"
+        android:label="PopularSeeAllScreen" />
 </navigation>

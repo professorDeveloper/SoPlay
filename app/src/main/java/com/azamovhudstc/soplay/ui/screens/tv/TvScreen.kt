@@ -1,60 +1,133 @@
 package com.azamovhudstc.soplay.ui.screens.tv
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.content.pm.ActivityInfo
+import android.net.Uri
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
 import com.azamovhudstc.soplay.R
+import com.azamovhudstc.soplay.databinding.TvScreenBinding
+import com.azamovhudstc.soplay.ui.screens.tv.adapter.TvAdapter
+import com.azamovhudstc.soplay.ui.screens.tv.player.PlayerActivityTv
+import com.azamovhudstc.soplay.utils.Resource
+import com.azamovhudstc.soplay.utils.hide
+import com.azamovhudstc.soplay.utils.show
+import com.azamovhudstc.soplay.utils.snackString
+import com.azamovhudstc.soplay.viewmodel.imp.TvViewModelImpl
+import kotlinx.coroutines.launch
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [TvScreen.newInstance] factory method to
- * create an instance of this fragment.
- */
 class TvScreen : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private var _binding: TvScreenBinding? = null
+    private val binding get() = _binding!!
+    private val tvAdapter by lazy { TvAdapter() }
+    private val model by viewModels<TvViewModelImpl>()
+    private var screenWidth: Float = 0f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+        model.tvList.observe(this) {
+            when (it) {
+                is Resource.Error -> {
+                    snackString(it.throwable.message)
+                    binding.progressBar.hide()
+                }
+                Resource.Loading -> {
+                    binding.progressBar.show()
+                    binding.tvRv.hide()
+
+                }
+                is Resource.Success -> {
+                    binding.progressBar.hide()
+                    binding.tvRv.show()
+                    binding.tvRv.layoutManager =
+                        GridLayoutManager(requireContext(), (screenWidth / 124f).toInt())
+                    binding.tvRv.adapter = tvAdapter
+                    tvAdapter.submitList(it.data)
+                    tvAdapter.setItemClickListener { movie ->
+                        lifecycleScope.launch {
+                            binding.progressBar.hide()
+                            binding.tvRv.show()
+                            val activity =PlayerActivityTv.newIntent(requireActivity(),movie)
+                            startActivity(activity)
+                        }
+                    }
+
+
+                }
+            }
+        }
+
+    }
+
+    private fun startExternalPlayer(
+        liveTvLink: String,
+        animeName: String,
+    ) {
+        val title = "$animeName"
+
+        val customIntent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(Uri.parse(liveTvLink), "video/*")
+            putExtra("title", title)
+        }
+        startMX(customIntent)
+
+    }
+
+    private fun startMX(
+        customIntent: Intent
+    ) {
+        try {
+            customIntent.apply {
+                setPackage("com.mxtech.videoplayer.pro")
+                startActivity(this)
+            }
+        } catch (e: ActivityNotFoundException) {
+            Log.i(
+                R.string.app_name.toString(),
+                "MX Player pro isn't installed, falling back to MX player Ads"
+            )
+            try {
+                Intent(Intent.ACTION_VIEW).apply {
+                    customIntent.apply {
+                        setPackage("com.mxtech.videoplayer.ad")
+                        startActivity(this)
+                    }
+                }
+            } catch (e: ActivityNotFoundException) {
+                Log.i(
+                    R.string.app_name.toString(),
+                    "No version of MX Player is installed, falling back to other external player"
+                )
+                startActivity(Intent.createChooser(customIntent, "Play using"))
+            }
         }
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.tv_screen, container, false)
+        _binding = TvScreenBinding.inflate(inflater, container, false)
+        requireActivity().requestedOrientation =
+            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment TvScreen.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            TvScreen().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        screenWidth = resources.displayMetrics.run { widthPixels / density }
+        model.loadTv()
     }
+
 }

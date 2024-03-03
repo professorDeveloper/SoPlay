@@ -2,10 +2,12 @@ package com.azamovhudstc.soplay.repository.imp
 
 import com.azamovhudstc.soplay.app.App
 import com.azamovhudstc.soplay.data.response.MovieInfo
+import com.azamovhudstc.soplay.parser.extractMovieList
 import com.azamovhudstc.soplay.repository.HomeRepository
 import com.azamovhudstc.soplay.utils.Constants.mainUrl
 import com.azamovhudstc.soplay.utils.isOnline
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import org.jsoup.Connection
@@ -107,4 +109,66 @@ class HomeRepositoryImpl : HomeRepository {
             emit(Result.failure(Exception("No Internet Connection")))
         }
     }.flowOn(Dispatchers.IO)
+
+    override fun getNeedWatch() = flow<Result<ArrayList<MovieInfo>>> {
+        val document =
+            Jsoup.connect("$mainUrl/whatchnow.html")
+                .followRedirects(true)
+                .headers(
+                    mapOf(
+                        "Content-Type" to "application/x-www-form-urlencoded",
+                        "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                        "Host" to "asilmedia.org",
+                        "Cache-Control" to "no-cache",
+                        "Pragma" to "no-cache",
+                        "Connection" to "keep-alive",
+                        "Upgrade-Insecure-Requests" to "1",
+                        "X-Requested-With" to "XMLHttpRequest"
+                    )
+                ).get()
+        emit(Result.success(extractMovieList(document)))
+
+    }.flowOn(Dispatchers.IO)
+
+    override fun getLastPagination(page: Int)=flow<Result<ArrayList<MovieInfo>>> {
+        val document =
+            Jsoup.connect("$mainUrl/lastnews/page/$page")
+                .followRedirects(true)
+                .headers(
+                    mapOf(
+                        "Content-Type" to "application/x-www-form-urlencoded",
+                        "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                        "Host" to "asilmedia.org",
+                        "Cache-Control" to "no-cache",
+                        "Pragma" to "no-cache",
+                        "Connection" to "keep-alive",
+                        "Upgrade-Insecure-Requests" to "1",
+                        "X-Requested-With" to "XMLHttpRequest"
+                    )
+                ).get()
+
+
+            emit(Result.success(extractMovieList(document)))
+        }.flowOn(Dispatchers.IO)
+
+    override fun getLastNews()=flow<Result<ArrayList<MovieInfo>>> {
+        val document =
+            Jsoup.connect(mainUrl + "/lastnews/")
+                .followRedirects(true)
+                .headers(
+                    mapOf(
+                        "Content-Type" to "application/x-www-form-urlencoded",
+                        "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                        "Host" to "asilmedia.org",
+                        "Cache-Control" to "no-cache",
+                        "Pragma" to "no-cache",
+                        "Connection" to "keep-alive",
+                        "Upgrade-Insecure-Requests" to "1",
+                        "X-Requested-With" to "XMLHttpRequest"
+                    )
+                ).get()
+        emit(Result.success(extractMovieList(document)))
+
+
+        }.flowOn(Dispatchers.IO)
 }

@@ -30,6 +30,18 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".ui.screens.tv.player.PlayerActivityTv"
+            android:autoRemoveFromRecents="true"
+            android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:noHistory="true"
+            android:resizeableActivity="true"
+            android:screenOrientation="sensorLandscape"
+            android:supportsPictureInPicture="true" />
+
+        <activity
             android:name=".ui.activity.PlayerActivity"
             android:autoRemoveFromRecents="true"
             android:configChanges="uiMode|orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
@@ -42,9 +54,8 @@
             android:supportsPictureInPicture="true" />
         <activity
             android:name=".ui.activity.MainActivity"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout"
-            android:supportsPictureInPicture="true"
-            android:exported="true">
+            android:exported="true"
+            android:supportsPictureInPicture="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -69,6 +80,7 @@
             tools:ignore="MissingClass">
             <intent-filter>
                 <action android:name="androidx.media3.exoplayer.downloadService.action.RESTART" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </service>

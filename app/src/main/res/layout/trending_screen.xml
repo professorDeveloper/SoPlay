@@ -40,6 +40,7 @@
             android:id="@+id/favoriteRv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginTop="14dp"
             android:clipToPadding="false"
             android:paddingBottom="28dp" />
 

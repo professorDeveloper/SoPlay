@@ -16,13 +16,17 @@ class SearchViewModelImpl : SearchViewModel, ViewModel() {
     private val repository = SearchRepositoryImpl()
     private val homeRepository = HomeRepositoryImpl()
     var lastPage: Int = 1
+    var lastPageLast: Int = 1
     var isSearch = false
     var pagingData: ArrayList<MovieInfo> = arrayListOf()
+    var pagingDataLast: ArrayList<MovieInfo> = arrayListOf()
     override val searchData: MutableLiveData<Resource<ArrayList<MovieInfo>>> = MutableLiveData()
     override var loadPagingData: MutableLiveData<Resource<ArrayList<MovieInfo>>> = MutableLiveData()
-
-init{
+    override var loadLastPagingData: MutableLiveData<Resource<ArrayList<MovieInfo>>> =
+        MutableLiveData()
+    init{
     loadNextPage(1)
+
 }
     override fun searchMovie(query: String) {
         searchData.postValue(Resource.Loading)
@@ -47,6 +51,21 @@ init{
             it.onFailure {
                 println(it.message)
                 loadPagingData.postValue(Resource.Error(it))
+            }
+        }.launchIn(viewModelScope)
+    }
+
+    override fun loadNextPageLast(page: Int) {
+        lastPageLast = page
+        loadLastPagingData.postValue(Resource.Loading)
+        homeRepository.getLastPagination(page).onEach {
+            it.onSuccess {
+                println(it.toString())
+                loadLastPagingData.postValue(Resource.Success(it))
+            }
+            it.onFailure {
+                println(it.message)
+                loadLastPagingData.postValue(Resource.Error(it))
             }
         }.launchIn(viewModelScope)
     }

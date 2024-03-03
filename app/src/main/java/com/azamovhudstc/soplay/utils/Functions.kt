@@ -14,12 +14,12 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.WindowCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.MutableLiveData
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.app.App
 import com.azamovhudstc.soplay.data.response.MovieInfo
-import com.azamovhudstc.soplay.repository.imp.HomeRepositoryImpl
 import com.azamovhudstc.soplay.ui.activity.MainActivity
 import com.azamovhudstc.soplay.utils.Download.defaultDownload
 import com.bumptech.glide.Glide
@@ -28,17 +28,13 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
 import com.lagradost.nicehttp.addGenericDns
-import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import java.io.*
 import kotlin.reflect.KFunction
 
 
-
-
-
 @SuppressLint("RestrictedApi")
- fun applyDynamicColors(
+fun applyDynamicColors(
     useMaterialYou: Boolean,
     context: Context,
     useOLED: Boolean,
@@ -83,6 +79,7 @@ fun initActivity(a: Activity) {
     AppCompatDelegate.setDefaultNightMode(
         AppCompatDelegate.MODE_NIGHT_NO
     )
+    WindowCompat.setDecorFitsSystemWindows(window, false)
 
 }
 
@@ -136,6 +133,16 @@ fun Activity.hideSystemBars() {
                     or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
             )
 }
+@Suppress("DEPRECATION")
+fun Fragment.hideSystemBars() {
+    requireActivity().window.decorView.systemUiVisibility = (
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            )
+}
 
 @Suppress("DEPRECATION")
 fun Activity.hideStatusBar() {
@@ -157,11 +164,12 @@ fun ImageView.loadImage(file: FileUrl?, size: Int = 0) {
         }
     }
 }
+
 var loaded: Boolean = false
 var loadedFav: Boolean = false
-fun openLinkInBrowser(link: String?,activity:FragmentActivity) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-        activity.startActivity(intent)
+fun openLinkInBrowser(link: String?, activity: FragmentActivity) {
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+    activity.startActivity(intent)
 }
 
 object Refresh {
@@ -170,6 +178,7 @@ object Refresh {
             activity[i.key]!!.postValue(true)
         }
     }
+
     fun all2() {
         for (i in activity2) {
             activity2[i.key]!!.postValue(true)
@@ -188,6 +197,7 @@ lateinit var isToolbarDisabledGoListener: (Boolean) -> Unit
 fun disableToolbar(listener: (Boolean) -> Unit) {
     isToolbarDisabledGoListener = listener
 }
+
 lateinit var changeToolbarColorListener: (Boolean) -> Unit
 
 fun changeToolbarColor(listener: (Boolean) -> Unit) {

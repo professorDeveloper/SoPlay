@@ -9,7 +9,7 @@ plugins {
 
 android {
     compileSdk 33
-1
+
     defaultConfig {
         applicationId "com.azamovhudstc.soplay"
         minSdk 23
@@ -162,6 +162,5 @@ dependencies {
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
 
 //
-
 
 }

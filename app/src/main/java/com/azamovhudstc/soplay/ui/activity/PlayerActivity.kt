@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.*
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -312,6 +313,7 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
 
 
 
+
         playerView.setActionUpListener {
             val currentSpeed = model.player.playbackParameters.speed
             if (currentSpeed == 2f && model.player.playWhenReady && isNormal) {
@@ -392,7 +394,7 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
                     }
                 }
             }
-            hideSystemBars()
+                hideSystemBars()
 
             val dialog = builder.create()
             dialog.show()

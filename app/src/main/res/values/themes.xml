@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.SoPlay" parent="Theme.Material3.Light.NoActionBar">
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorOnBackground</item>
+        <item name="android:statusBarColor" tools:targetApi="l">#45000000</item>
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/md_theme_dark_9_primary</item>
         <item name="android:textColor">@color/white</item>
@@ -48,7 +48,7 @@
         <item name="android:color">?attr/colorOnBackground</item>
     </style>
     <style name="MyBottomNavigationView.TextAppearance" parent="TextAppearance.MaterialComponents.Caption">
-        <item name="android:textSize">14dp</item>
+        <item name="android:textSize">12sp</item>
     </style>
 
     <style name="ThemeOverlay.SearchView" parent="">

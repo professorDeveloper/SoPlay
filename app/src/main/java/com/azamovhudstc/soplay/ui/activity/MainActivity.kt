@@ -1,27 +1,18 @@
 package com.azamovhudstc.soplay.ui.activity
 
-import android.app.UiModeManager
 import android.content.SharedPreferences
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceManager
-import android.transition.Slide
-import android.transition.TransitionManager
-import android.view.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.databinding.ActivityMainBinding
-import com.azamovhudstc.soplay.utils.*
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.navigationrail.NavigationRailView
+import com.azamovhudstc.soplay.utils.hideWithoutAnimation
+import com.azamovhudstc.soplay.utils.initActivity
+import com.azamovhudstc.soplay.utils.showWithAnimation
+import com.azamovhudstc.soplay.utils.snackString
 import com.vmadalin.easypermissions.EasyPermissions
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -75,6 +66,10 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         navHostFragment.navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.detailScreen -> {
+                    binding.bottomNavigation.hideWithoutAnimation(binding.fragmentContainerView)
+                }
+
+                R.id.popularSeeAllScreen -> {
                     binding.bottomNavigation.hideWithoutAnimation(binding.fragmentContainerView)
                 }
 
