@@ -30,7 +30,6 @@
 
         android:visibility="visible"
         android:elevation="10dp"
-        app:itemRippleColor="@color/status"
         app:itemTextAppearanceActive="@style/MyBottomNavigationView.TextAppearance"
         app:itemTextAppearanceInactive="@style/MyBottomNavigationView.TextAppearance"
         app:elevation="10dp"

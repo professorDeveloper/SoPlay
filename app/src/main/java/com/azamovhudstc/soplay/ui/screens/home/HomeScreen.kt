@@ -166,6 +166,14 @@ class HomeScreen : Fragment() {
             model.getLastNews()
             model.getNeedWatch()
 
+            binding.settingBtn.setOnClickListener {
+                findNavController().navigate(
+                    R.id.navigation_settings,
+                    null,
+                    com.azamovhudstc.soplay.utils.animationTransaction().build()
+                )
+            }
+
             viewpagerPopularMovies.setOnTouchListener { v, event ->
                 when (event?.action) {
                     MotionEvent.ACTION_DOWN -> onUserInteraction()
@@ -231,10 +239,10 @@ class HomeScreen : Fragment() {
         isBookmarked: Boolean,
         bookmark: MovieInfo
     ) {
-        if (isBookmarked){
+        if (isBookmarked) {
             model.removeFavMovie(bookmark.href)
 
-        }else{
+        } else {
             model.addFavMovie(bookmark)
         }
 //        with(viewModel) {

@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-        android:id="@+id/navigation_favorite"
-        android:icon="@drawable/select_fav"
-        android:title="@string/title_favorite" />
 
     <item
         android:id="@+id/navigation_latest"
@@ -19,5 +15,9 @@
         android:id="@+id/navigation_tv"
         android:icon="@drawable/ic_round_movie_filter_24"
         android:title="TV" />
+    <item
+        android:id="@+id/navigation_favorite"
+        android:icon="@drawable/select_fav"
+        android:title="@string/title_favorite" />
 
 </menu>

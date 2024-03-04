@@ -12,15 +12,12 @@ import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.data.Movie
-import com.azamovhudstc.soplay.data.response.FullMovieData
-import com.azamovhudstc.soplay.data.response.MovieInfo
 import com.azamovhudstc.soplay.databinding.ActivityPlayerTvBinding
 import com.azamovhudstc.soplay.ui.activity.PlayerActivity
-import com.azamovhudstc.soplay.utils.Refresh.activity
 import com.azamovhudstc.soplay.utils.hideSystemBars
 import com.azamovhudstc.soplay.viewmodel.imp.TvViewModelImpl
-import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
@@ -65,13 +62,12 @@ class PlayerActivityTv : AppCompatActivity() {
         model.hrefData.observe(this) {
             playerView = binding.player
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-            playerView!!.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT
             setUpPlayer()
             playerView?.setKeepScreenOn(true)
             addMediaItem(it)
         }
 
-      supportActionBar?.hide()
+        supportActionBar?.hide()
         parseExtra()
         model.loadHrefData(animePlayingDetails)
     }
@@ -89,15 +85,14 @@ class PlayerActivityTv : AppCompatActivity() {
         //set up audio attributes
 
         playerView?.player = player
+        playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
 
 
         //hiding all the ui StyledPlayerView comes with
         playerView?.setShowPreviousButton(false)
         playerView?.setShowNextButton(false)
-        playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT
-
-        //setting the scaling mode to scale to fit
-        player?.videoScalingMode = C.VIDEO_SCALING_MODE_DEFAULT
+        var exoProgress = findViewById<PlayerActivity.ExtendedTimeBar>(R.id.exo_progress)
+        exoProgress.setForceDisabled(true)
     }
 
 

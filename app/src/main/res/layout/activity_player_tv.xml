@@ -8,10 +8,26 @@
     <com.google.android.exoplayer2.ui.StyledPlayerView
         android:id="@+id/player"
         android:layout_width="match_parent"
-
         android:layout_height="match_parent"
+        app:hide_during_ads="true"
+
+        app:resize_mode="fill"
+        app:controller_layout_id="@layout/exo_player_control_view_tv"
         app:show_buffering="always"
-        app:use_controller="true" />
+        app:use_controller="true" >
+
+        <ImageView
+            android:id="@+id/exo_logo"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_gravity="top|start"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="10dp"
+            android:alpha="0.4"
+            android:src="@mipmap/ic_launcher_foreground" />
+
+
+    </com.google.android.exoplayer2.ui.StyledPlayerView>
 
 
 
