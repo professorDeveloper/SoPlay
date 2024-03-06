@@ -167,7 +167,7 @@ fun ImageView.loadImage(file: FileUrl?, size: Int = 0) {
 
 var loaded: Boolean = false
 var loadedFav: Boolean = false
-fun openLinkInBrowser(link: String?, activity: FragmentActivity) {
+fun openLinkInBrowser(link: String?, activity: Activity) {
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
     activity.startActivity(intent)
 }

@@ -4,15 +4,11 @@ import com.azamovhudstc.soplay.data.Movie
 import com.azamovhudstc.soplay.repository.TvRepository
 import com.azamovhudstc.soplay.utils.Color
 import com.azamovhudstc.soplay.utils.Utils.getJsoup
-import com.azamovhudstc.soplay.utils.Utils.httpClient
-import com.azamovhudstc.soplay.utils.parser
 import com.azamovhudstc.soplay.utils.printlnColored
 import com.azamovhudstc.soplay.utils.snackString
-import com.lagradost.nicehttp.Requests
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jsoup.select.Elements
 
@@ -53,11 +49,42 @@ class TvRepositoryImpl : TvRepository {
 
     }.flowOn(Dispatchers.IO)
 
+    override fun getNextTvPage(page: Int) = flow<Result<ArrayList<Movie>>> {
+        val tvList = ArrayList<Movie>()
+        val doc = getJsoup("$mainURL/page/$page/")
+        val movieElements: Elements = doc.select(".tcarusel-item.main-news")
+        if (movieElements != null) {
+            movieElements
+                .map {
+                    val href = it.select("a[href]").attr("href")
+                    val title = it.select("a[href]").text()
+                    val image = it.select("img.xfieldimage").attr("src")
+                    val rating = it.select(".current-rating").text().toInt()
+                    printlnColored("  Text: ${removeNumbers(title)}", Color.YELLOW)
+                    printlnColored("  Image: $image", Color.DARK_ORANGE)
+                    printlnColored("  Href: $href", Color.CYAN)
+                    printlnColored("  Rating: $rating", Color.GREEN)
+                    printlnColored("-----------------------------", Color.YELLOW)
+
+                }
+
+        }
+        movieElements.map {
+            val href = it.select("a[href]").attr("href")
+            val title = it.select("a[href]").text()
+            val image = it.select("img.xfieldimage").attr("src")
+            val rating = it.select(".current-rating").text().toInt()
+
+            tvList.add(Movie(href, removeNumbers(title), image, rating))
+        }
+        emit(Result.success(tvList))
+    }.flowOn(Dispatchers.IO)
+
     private fun removeNumbers(input: String): String {
         return input.replace(Regex("\\d+"), "").trim()
     }
 
-    override suspend fun getTvFullDataByHref(href: String)= withContext(Dispatchers.IO) {
+    override suspend fun getTvFullDataByHref(href: String) = withContext(Dispatchers.IO) {
 
         try {
             val doc = getJsoup(href)

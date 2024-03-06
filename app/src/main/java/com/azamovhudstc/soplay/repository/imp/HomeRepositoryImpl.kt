@@ -7,7 +7,6 @@ import com.azamovhudstc.soplay.repository.HomeRepository
 import com.azamovhudstc.soplay.utils.Constants.mainUrl
 import com.azamovhudstc.soplay.utils.isOnline
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import org.jsoup.Connection
@@ -125,12 +124,12 @@ class HomeRepositoryImpl : HomeRepository {
                         "Upgrade-Insecure-Requests" to "1",
                         "X-Requested-With" to "XMLHttpRequest"
                     )
-                ).get()
+                ).execute().parse()
         emit(Result.success(extractMovieList(document)))
 
     }.flowOn(Dispatchers.IO)
 
-    override fun getLastPagination(page: Int)=flow<Result<ArrayList<MovieInfo>>> {
+    override fun getLastPagination(page: Int) = flow<Result<ArrayList<MovieInfo>>> {
         val document =
             Jsoup.connect("$mainUrl/lastnews/page/$page")
                 .followRedirects(true)
@@ -145,13 +144,13 @@ class HomeRepositoryImpl : HomeRepository {
                         "Upgrade-Insecure-Requests" to "1",
                         "X-Requested-With" to "XMLHttpRequest"
                     )
-                ).get()
+                ).execute().parse()
 
 
-            emit(Result.success(extractMovieList(document)))
-        }.flowOn(Dispatchers.IO)
+        emit(Result.success(extractMovieList(document)))
+    }.flowOn(Dispatchers.IO)
 
-    override fun getLastNews()=flow<Result<ArrayList<MovieInfo>>> {
+    override fun getLastNews() = flow<Result<ArrayList<MovieInfo>>> {
         val document =
             Jsoup.connect(mainUrl + "/lastnews/")
                 .followRedirects(true)
@@ -166,9 +165,9 @@ class HomeRepositoryImpl : HomeRepository {
                         "Upgrade-Insecure-Requests" to "1",
                         "X-Requested-With" to "XMLHttpRequest"
                     )
-                ).get()
+                ).execute().parse()
         emit(Result.success(extractMovieList(document)))
 
 
-        }.flowOn(Dispatchers.IO)
+    }.flowOn(Dispatchers.IO)
 }

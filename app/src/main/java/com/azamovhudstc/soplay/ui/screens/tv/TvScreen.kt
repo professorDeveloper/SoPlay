@@ -12,8 +12,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.databinding.TvScreenBinding
 import com.azamovhudstc.soplay.ui.screens.tv.adapter.TvAdapter
@@ -31,32 +31,45 @@ class TvScreen : Fragment() {
     private val tvAdapter by lazy { TvAdapter() }
     private val model by viewModels<TvViewModelImpl>()
     private var screenWidth: Float = 0f
+    private var isLoading = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        model.tvList.observe(this) {
+        model.loadPagingData.observe(this) {
             when (it) {
                 is Resource.Error -> {
                     snackString(it.throwable.message)
                     binding.progressBar.hide()
                 }
                 Resource.Loading -> {
-                    binding.progressBar.show()
-                    binding.tvRv.hide()
-
+                    if (isLoading){
+                        binding.progressBar.show()
+                        binding.tvRv.hide()
+                    }
                 }
                 is Resource.Success -> {
-                    binding.progressBar.hide()
-                    binding.tvRv.show()
+                    if (isLoading){
+                        binding.progressBar.hide()
+                        binding.tvRv.show()
+                        isLoading=false
+                    }
                     binding.tvRv.layoutManager =
                         GridLayoutManager(requireContext(), (screenWidth / 124f).toInt())
                     binding.tvRv.adapter = tvAdapter
-                    tvAdapter.submitList(it.data)
+                    if (model.lastPage == 1) {
+                        binding.tvRv.adapter = tvAdapter
+                        model.pagingData.addAll(it.data)
+                        tvAdapter.submitList(it.data)
+                    } else {
+                        val prev = model.pagingData.size
+                        model.pagingData.addAll(it.data)
+                        tvAdapter.notifyItemRangeInserted(prev, it.data.size)
+                    }
                     tvAdapter.setItemClickListener { movie ->
                         lifecycleScope.launch {
                             binding.progressBar.hide()
                             binding.tvRv.show()
-                            val activity =PlayerActivityTv.newIntent(requireActivity(),movie)
+                            val activity = PlayerActivityTv.newIntent(requireActivity(), movie)
                             startActivity(activity)
                         }
                     }
@@ -127,7 +140,26 @@ class TvScreen : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         screenWidth = resources.displayMetrics.run { widthPixels / density }
-        model.loadTv()
+        if (isLoading) {
+            model.loadTvNextPage(1)
+        } else {
+            model.loadTvNextPage(1)
+        }
+//        initPagination()
+    }
+
+    private fun initPagination() {
+        binding.tvRv.addOnScrollListener(object :
+            RecyclerView.OnScrollListener() {
+            override fun onScrolled(v: RecyclerView, dx: Int, dy: Int) {
+                if (!v.canScrollVertically(1) && !model.isSearch) {
+                    if (model.pagingData.isNotEmpty() && model.lastPage != 4) {
+                        model.loadTvNextPage(model.lastPage + 1)
+                    }
+                }
+                super.onScrolled(v, dx, dy)
+            }
+        })
     }
 
 }

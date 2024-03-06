@@ -14,8 +14,8 @@ android {
         applicationId "com.azamovhudstc.soplay"
         minSdk 23
         targetSdk 33
-        versionCode 1
-        versionName "1.0"
+        versionCode ((System.currentTimeMillis() / 60000).toInteger())
+        versionName "2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -76,6 +76,7 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.7.10"
 
@@ -160,6 +161,7 @@ dependencies {
     implementation 'com.vmadalin:easypermissions-ktx:1.0.0'
     // Shimmer Effect
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
+    implementation 'com.github.javiersantos:AppUpdater:2.7'
 
 //
 

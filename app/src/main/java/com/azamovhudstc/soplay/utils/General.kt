@@ -41,8 +41,8 @@ import androidx.viewpager2.widget.ViewPager2
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.app.App
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.delay
 import java.lang.reflect.Field
-import java.text.DateFormatSymbols
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CancellationException
@@ -66,29 +66,21 @@ suspend fun <T> tryWithSuspend(
         null
     }
 }
+
 val defaultHeaders = mapOf(
     "User-Agent" to
             "Mozilla/5.0 (Linux; Android %s; %s) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36"
                 .format(Build.VERSION.RELEASE, Build.MODEL)
 )
 
-fun randomColor(): Int {
-    val color = listOf(
-        Color.parseColor("#24687B"),
-        Color.parseColor("#014037"),
-        Color.parseColor("#7E1416"),
-        Color.parseColor("#989D60"),
-        Color.parseColor("#BF5264"),
-        Color.parseColor("#542437"),
-        Color.parseColor("#329669"),
-        Color.parseColor("#3D3251"),
-        Color.parseColor("#D85C43"),
-        Color.parseColor("#C02944"),
-        Color.parseColor("#D3B042"),
-    )
-    return color.shuffled().first()
+suspend fun View.pop() {
+        ObjectAnimator.ofFloat(this@pop, "scaleX", 1f, 1.25f).setDuration(120).start()
+        ObjectAnimator.ofFloat(this@pop, "scaleY", 1f, 1.25f).setDuration(120).start()
+    delay(120)
+        ObjectAnimator.ofFloat(this@pop, "scaleX", 1.25f, 1f).setDuration(100).start()
+        ObjectAnimator.ofFloat(this@pop, "scaleY", 1.25f, 1f).setDuration(100).start()
+    delay(100)
 }
-
 
 fun View.hide() {
     visibility = View.GONE
@@ -200,7 +192,6 @@ fun TextView.setHtmlText(htmlString: String?) {
 }
 
 
-
 fun <T> randomSelectFromList(list: List<T>): T? {
     val filteredList = list.filter { it != "HENTAI" }
     if (filteredList.isEmpty()) {
@@ -209,7 +200,6 @@ fun <T> randomSelectFromList(list: List<T>): T? {
     return filteredList[Random().nextInt(filteredList.size)]
 
 }
-
 
 
 fun snackString(s: String?, activity: Activity? = null, clipboard: String? = null) {
@@ -399,7 +389,6 @@ fun animationTransaction(): NavOptions.Builder {
 }
 
 
-
 @SuppressLint("ClickableViewAccessibility")
 class SpinnerNoSwipe : androidx.appcompat.widget.AppCompatSpinner {
     private var mGestureDetector: GestureDetector? = null
@@ -412,16 +401,21 @@ class SpinnerNoSwipe : androidx.appcompat.widget.AppCompatSpinner {
         setup()
     }
 
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    ) {
         setup()
     }
 
     private fun setup() {
-        mGestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
-            override fun onSingleTapUp(e: MotionEvent): Boolean {
-                return performClick()
-            }
-        })
+        mGestureDetector =
+            GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+                override fun onSingleTapUp(e: MotionEvent): Boolean {
+                    return performClick()
+                }
+            })
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -471,6 +465,7 @@ fun View.slideStart(animTime: Long, startOffset: Long, hide: View? = null) {
     }
     startAnimation(slideUp)
 }
+
 fun View.circularReveal(ex: Int, ey: Int, subX: Boolean, time: Long) {
     ViewAnimationUtils.createCircularReveal(
         this,
@@ -481,7 +476,8 @@ fun View.circularReveal(ex: Int, ey: Int, subX: Boolean, time: Long) {
     ).setDuration(time).start()
 }
 
-open class NoPaddingArrayAdapter<T>(context: Context, layoutId: Int, items: List<T>) : ArrayAdapter<T>(context, layoutId, items) {
+open class NoPaddingArrayAdapter<T>(context: Context, layoutId: Int, items: List<T>) :
+    ArrayAdapter<T>(context, layoutId, items) {
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val view = super.getView(position, convertView, parent)
         view.setPadding(0, view.paddingTop, view.paddingRight, view.paddingBottom)

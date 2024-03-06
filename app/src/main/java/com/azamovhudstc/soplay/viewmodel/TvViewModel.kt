@@ -9,6 +9,7 @@ interface TvViewModel {
     val tvList: MutableLiveData<Resource<ArrayList<Movie>>>
     val hrefData :MutableLiveData<String>
     fun loadTv()
+    fun loadTvNextPage(page:Int)
     fun loadHrefData(movie:Movie)
 
 

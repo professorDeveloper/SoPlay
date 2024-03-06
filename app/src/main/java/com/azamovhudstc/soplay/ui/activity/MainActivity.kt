@@ -4,17 +4,17 @@ import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.databinding.ActivityMainBinding
-import com.azamovhudstc.soplay.utils.hideWithoutAnimation
-import com.azamovhudstc.soplay.utils.initActivity
-import com.azamovhudstc.soplay.utils.showWithAnimation
-import com.azamovhudstc.soplay.utils.snackString
+import com.azamovhudstc.soplay.utils.*
 import com.vmadalin.easypermissions.EasyPermissions
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
@@ -30,6 +30,16 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         initActivity(this)
         hasPermission()
         setupBottomNavigationView()
+        checkUpdate()
+    }
+
+
+    private fun checkUpdate() {
+        lifecycleScope.launch(Dispatchers.IO){
+            if (loadData<Boolean>("check_update") != false) AppUpdater.check(this@MainActivity)
+
+        }
+
     }
 
     private fun hasPermission() {
@@ -70,6 +80,9 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
                 }
 
                 R.id.popularSeeAllScreen -> {
+                    binding.bottomNavigation.hideWithoutAnimation(binding.fragmentContainerView)
+                }
+                R.id.navigation_settings->{
                     binding.bottomNavigation.hideWithoutAnimation(binding.fragmentContainerView)
                 }
 

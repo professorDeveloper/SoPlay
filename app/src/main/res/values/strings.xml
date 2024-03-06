@@ -7,6 +7,10 @@
     <string name="episode_text">%1$s</string>
     <string name="title_trending">Trend</string>
     <string name="title_latest">So`ngi</string>
+    <string name="no_connection_title">Internet Mavjud Emas</string>
+    <string name="no_connection_des">Tarmoqqa ulanish yo`q, tarmoq sozlamalarini tekshiring yoki qaytadan urinib ko`ring !</string>
+    <string name="try_again">Qayta Urinish</string>
+
     <string name="title_favorite">Sevimli</string>
     <string name="title_search">Qidirsh</string>
     <string-array name="tips">
@@ -60,6 +64,8 @@
     <string name="pip_title">Enable PiP</string>
     <string name="theme_cat_title">Theme</string>
     <string name="player_cat_title">Player</string>
+    <string name="version_current">Version %1$s</string>
+    <string name="donate_goal">(Let\'s reach to $200!)</string>
 
     <string name="player">Player</string>
     <string name="dark_mode_pref_title">Tungi rejim</string>
@@ -75,5 +81,8 @@
     <string name="auto_play_summary">Autoplay next episode when the current episode ends</string>
     <string name="auto_play_title">Autoplay next episode</string>
     <string name="press_back_again_in_player">Press Back Again to Exit Player</string>
+    <string name="repo">professorDeveloper/SoPlay</string>
+    <string name="telegram">https://t.me/soplayapp</string>
+    <string name="github">https://github.com/professorDeveloper/SoPlay</string>
 
 </resources>

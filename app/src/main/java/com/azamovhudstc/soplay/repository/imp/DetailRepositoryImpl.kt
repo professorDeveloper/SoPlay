@@ -34,7 +34,8 @@ class DetailRepositoryImpl : DetailRepository {
             val country: String =
                 document.select("div.fullmeta-item span.fullmeta-label:contains(Страна) + span.fullmeta-seclabel a")
                     .text()
-            val durationElement = document.selectFirst(".fullmeta-item .fullmeta-seclabel a")?.text()
+            val durationElement =
+                document.selectFirst(".fullmeta-item .fullmeta-seclabel a")?.text()
             val duration = durationElement?.replace(" мин", "")
 
             val posterImageSrc: String =
@@ -59,10 +60,14 @@ class DetailRepositoryImpl : DetailRepository {
             val matches = pattern.findAll(document.html())
 
             // Process the matches
-            val options = matches.map {
+            val options = matches.mapNotNull {
                 val value = it.groupValues[1]
                 val text = it.groupValues[2]
-                Pair(text, value)
+                if (value != "http://yangi-kinolar.ru/vast/player.html?file=[xfvalue_kino_url]") {
+                    Pair(text, value)
+                } else {
+                    null
+                }
             }.toList()
 
             val imageUrls = document.select(".xfieldimagegallery img.lazyload[data-src]")
@@ -85,7 +90,7 @@ class DetailRepositoryImpl : DetailRepository {
             val data = FullMovieData(
                 year = year,
                 country = country,
-                duration =  "000",
+                duration = "000",
                 posterImageSrc = posterImageSrc,
                 genres = genres,
                 directors = directors,
