@@ -1,8 +1,8 @@
 # 📱 SoPlay
 
-## 🚀 Sevimli filmlaringizni avtobusda, poezdda, ko'chada yoki uyda tomosha qiling - SoPlay har doim tomosha qilishga tayyor!
+## 🚀 New Release
 
-<img width="3010" alt="Kitsune (3)" src="https://github.com/professorDeveloper/SoPlay/assets/108933534/09d00682-04e0-4cbd-998b-b1b10f14d3d4">
+https://github.com/professorDeveloper/SoPlay/assets/108933534/d474ff5d-c67a-43fb-8f0a-1399c86bd092
 
 ### 📌 Cheksiz kinolar listi
 ### 📌 Reklamalarsiz qulay player
