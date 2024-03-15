@@ -12,6 +12,7 @@ import android.os.Environment
 import android.widget.TextView
 import androidx.core.content.FileProvider
 import androidx.core.content.getSystemService
+import androidx.fragment.app.FragmentActivity
 import com.azamovhudstc.soplay.BuildConfig
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.ui.activity.MainActivity
@@ -26,33 +27,34 @@ import kotlinx.serialization.Serializable
 import java.io.File
 
 object AppUpdater {
-    suspend fun check(activity: MainActivity, post: Boolean = false) {
-        if (post) snackString("Checking for Update")
+    suspend fun check(activity: FragmentActivity, post:Boolean=false) {
+        if(post) snackString("Checking for Update")
         val repo = activity.getString(R.string.repo)
         tryWithSuspend {
             val md =
                 client.get("https://raw.githubusercontent.com/$repo/master/stable.md").text
 
             val version = md.substringAfter("# ").substringBefore("\n")
-            logMessage("""Version: $version""")
-            val dontShow = loadData("dont_ask_for_update_$version") ?: true
-            if (compareVersion(version) && !dontShow && !activity.isDestroyed) activity.runOnUiThread {
+            logMessage("Git Version : $version")
+            val dontShow = loadData("dont_ask_for_update_$version")?:false
+            println(compareVersion(version))
+            println(dontShow)
+            if (compareVersion(version) && dontShow  && !activity.isDestroyed) activity.runOnUiThread {
                 CustomBottomDialog.newInstance().apply {
-                    setTitleText("Update Available")
+                    setTitleText("${if (!BuildConfig.DEBUG) "" else "Beta "}Update Available")
                     addView(
                         TextView(activity).apply {
-                            val markWon = Markwon.builder(activity)
-                                .usePlugin(SoftBreakAddsNewLinePlugin.create()).build()
+                            val markWon = Markwon.builder(activity).usePlugin(SoftBreakAddsNewLinePlugin.create()).build()
                             markWon.setMarkdown(this, md)
                         }
                     )
 
-                    setCheck("Boshqa Ko`rsatilmasin $version", false) { isChecked ->
-                        if (isChecked) {
-                            saveData("dont_ask_for_update_$version", isChecked)
+                    setCheck("Don't show again for version $version", false) { isChecked ->
+                        if (!isChecked) {
+                            saveData("dont_ask_for_update_$version", !isChecked)
                         }
                     }
-                    setPositiveButton("O`rnatish") {
+                    setPositiveButton("Let's Go") {
                         MainScope().launch(Dispatchers.IO) {
                             try {
                                 client.get("https://api.github.com/repos/$repo/releases/tags/v$version")
@@ -60,10 +62,7 @@ object AppUpdater {
                                         it.browserDownloadURL.endsWith("apk")
                                     }?.browserDownloadURL.apply {
                                         if (this != null) activity.downloadUpdate(version, this)
-                                        else openLinkInBrowser(
-                                            "https://github.com/repos/$repo/releases/tag/v$version",
-                                            activity
-                                        )
+                                        else openLinkInBrowser("https://github.com/repos/$repo/releases/tag/v$version", activity)
                                     }
                             } catch (e: Exception) {
                                 logError(e)
@@ -71,14 +70,14 @@ object AppUpdater {
                         }
                         dismiss()
                     }
-                    setNegativeButton("Bekor qilish") {
+                    setNegativeButton("Cope") {
                         dismiss()
                     }
                     show(activity.supportFragmentManager, "dialog")
                 }
             }
-            else {
-                if (post) snackString("No Update Found")
+            else{
+                if(post) snackString("No Update Found")
             }
         }
     }

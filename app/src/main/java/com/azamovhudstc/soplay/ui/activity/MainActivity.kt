@@ -11,6 +11,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.databinding.ActivityMainBinding
 import com.azamovhudstc.soplay.utils.*
+import com.azamovhudstc.soplay.utils.AppUpdater.check
 import com.vmadalin.easypermissions.EasyPermissions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -36,8 +37,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
     private fun checkUpdate() {
         lifecycleScope.launch(Dispatchers.IO){
-            if (loadData<Boolean>("check_update") != false) AppUpdater.check(this@MainActivity)
-
+            check(this@MainActivity)
         }
 
     }

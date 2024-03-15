@@ -9,10 +9,14 @@ import android.graphics.PorterDuffColorFilter
 import android.util.TypedValue
 import android.view.View
 import android.widget.EditText
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.azamovhudstc.soplay.R
+import com.azamovhudstc.soplay.app.App
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.ParseException
@@ -32,6 +36,15 @@ fun BottomNavigationView.hideWithAnimation(fragmentContainerView: View) {
     this.animateTranslationY(66f, 0f, 700)
     fragmentContainerView.animateMarginBottom(0f, 700)
 }
+fun toast(string: String?) {
+    if (string != null) {
+        println(string)
+        MainScope().launch {
+            Toast.makeText(App.Companion.instance ?: return@launch, string, Toast.LENGTH_SHORT).show()
+        }
+    }
+}
+
 
 fun BottomNavigationView.hideWithoutAnimation(fragmentContainerView: View) {
     if (this.visibility == View.GONE) return

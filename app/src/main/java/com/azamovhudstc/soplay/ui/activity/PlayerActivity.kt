@@ -8,6 +8,7 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.Color
+import android.graphics.drawable.Animatable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -20,8 +21,10 @@ import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.*
 import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.data.response.FullMovieData
 import com.azamovhudstc.soplay.data.response.MovieInfo
@@ -39,15 +42,18 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.net.CookieHandler
 import java.net.CookieManager
 import java.net.CookiePolicy
+import java.util.concurrent.TimeUnit
 import kotlin.math.min
 
 @AndroidEntryPoint
 class PlayerActivity : AppCompatActivity(), Player.Listener {
     private var notchHeight: Int = 1
-
+    private var epChanging = false
     private val model by viewModels<PlayerViewModel>()
     private var quality: String = "Auto"
     private lateinit var animePlayingDetails: FullMovieData
+    private var episodeLength: Float = 0f
+    private var playbackPosition: Long = 0
     private lateinit var binding: ActivityPlayerBinding
     private var mBackstackLost = true
     private lateinit var exoTopControllers: LinearLayout
@@ -56,9 +62,15 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
     private val handler = Handler(Looper.getMainLooper())
     private var isFullscreen: Int = 0
     private var orientationListener: OrientationEventListener? = null
+    private var isPlayerPlaying = true
 
     private var isNormal = true
 
+    private val resumeWindow = "resumeWindow"
+    private val resumePosition = "resumePosition"
+    private val playerFullscreen = "playerFullscreen"
+    private val playerOnPlay = "playerOnPlay"
+    private var currentWindow = 0
 
     // Top buttons
     private lateinit var loadingLayout: LinearLayout
@@ -217,28 +229,81 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
         model.isLoading.observe(this) { isLoading ->
             loadingLayout.isVisible = isLoading
             playerView.isVisible = !isLoading
+
         }
+
+        playbackPosition = loadData("${movieInfo?.title}_${currentEpIndex}", this) ?: 0
+
+        println("Position$playbackPosition")
         model.keepScreenOn.observe(this) { keepScreenOn ->
             playerView.keepScreenOn = keepScreenOn
         }
         model.playNextEp.observe(this) { playNextEp ->
             if (playNextEp) setNewEpisode()
+
+
         }
         model.isError.observe(this) { isError ->
             if (isError) {
+
                 finishAndRemoveTask()
             }
         }
+
         if (!isInit) {
             model.setAnimeLink(
                 epList[currentEpIndex] as String
             )
+            playbackPosition = loadData("${movieInfo?.title}_${currentEpIndex}", this) ?: 0
             prevEpBtn.setImageViewEnabled(PlayerActivity.currentEpIndex.toInt() >= 2)
             nextEpBtn.setImageViewEnabled(currentEpIndex.toInt() != epCount.toInt())
         }
         isInit = true
 
+        model.showSubsBtn.observe(this){
+            if (!it){
+                if (playbackPosition != 0L ) {
+                    val time = String.format(
+                        "%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(playbackPosition),
+                        TimeUnit.MILLISECONDS.toMinutes(playbackPosition) - TimeUnit.HOURS.toMinutes(
+                            TimeUnit.MILLISECONDS.toHours(
+                                playbackPosition
+                            )
+                        ),
+                        TimeUnit.MILLISECONDS.toSeconds(playbackPosition) - TimeUnit.MINUTES.toSeconds(
+                            TimeUnit.MILLISECONDS.toMinutes(
+                                playbackPosition
+                            )
+                        )
+                    )
+                    AlertDialog.Builder(this, R.style.DialogTheme).setTitle("Continue from ${time}?").apply {
+                        setCancelable(false)
+                        setPositiveButton("Yes") { d, _ ->
+                            buildExoplayer()
+                            d.dismiss()
+                        }
+                        setNegativeButton("No") { d, _ ->
+                            playbackPosition = 0L
+                            buildExoplayer()
+                            d.dismiss()
+                        }
+                    }.show()
+                } else {
+
+                }
+            }
+        }
     }
+
+    private fun buildExoplayer() {
+        model.player.playWhenReady = true
+        model.player
+            .apply {
+                seekTo(playbackPosition)
+                play()
+            }
+    }
+
 
 
     private fun setNewEpisode(increment: Int = 1) {
@@ -250,6 +315,7 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
                 epList.get(currentEpIndex),
                 true
             )
+            epChanging = true
             prevEpBtn.setImageViewEnabled(currentEpIndex.toInt() >= 2)
             nextEpBtn.setImageViewEnabled(currentEpIndex.toInt() != epCount.toInt())
             model.player.stop()
@@ -278,6 +344,15 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        if (isInit) {
+            outState.putInt(resumeWindow, model.player.currentMediaItemIndex)
+            outState.putLong(resumePosition, model.player.currentPosition)
+        }
+        outState.putInt(playerFullscreen, isFullscreen)
+        outState.putBoolean(playerOnPlay, isPlayerPlaying)
+        super.onSaveInstanceState(outState)
+    }
 
     @SuppressLint("WrongConstant")
     private fun prepareButtons() {
@@ -394,7 +469,7 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
                     }
                 }
             }
-                hideSystemBars()
+            hideSystemBars()
 
             val dialog = builder.create()
             dialog.show()
@@ -533,7 +608,14 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
 
     override fun onUserLeaveHint() {
         // Handle leaving PiP mode using the home button
-        finishAndRemoveTask()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            this.enterPictureInPictureMode(
+                PictureInPictureParams.Builder().build()
+            )
+            playerView.useController = false
+            pipStatus = false
+            model.player.pause()
+        }
     }
 
     private fun updateEpisodeName() {
@@ -566,7 +648,7 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
         }
         if (isInit) {
             saveData(
-                "${animePlayingDetails.imageUrls}_${currentEpIndex}",
+                "${movieInfo?.title}_${currentEpIndex}",
                 model.player.currentPosition,
                 this
             )
@@ -640,6 +722,8 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
             controller.systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
+        hideSystemBars()
+
         playerView.useController = true
         model.player.prepare()
     }
@@ -647,6 +731,15 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
     public override fun onPause() {
         super.onPause()
         if (pipStatus) pauseVideo()
+        if (isInit) {
+            playerView.player?.pause()
+            saveData(
+                "${movieInfo?.title}_${currentEpIndex}",
+                model.player.currentPosition,
+                this
+            )
+        }
+
     }
 
     override fun finish() {
@@ -666,6 +759,7 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
         finishAndRemoveTask()
     }
 
+
     private val keyMap: MutableMap<Int, (() -> Unit)?> = mutableMapOf(
         KeyEvent.KEYCODE_DPAD_RIGHT to null,
         KeyEvent.KEYCODE_DPAD_LEFT to null,
@@ -673,6 +767,47 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
         KeyEvent.KEYCODE_N to { nextEpBtn.performClick() },
         KeyEvent.KEYCODE_B to { prevEpBtn.performClick() }
     )
+    private var wasPlaying = false
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        if (!epChanging) {
+            if (isInit && !hasFocus) wasPlaying = model.player.isPlaying
+            if (hasFocus) {
+                if (isInit && wasPlaying) model.player.play()
+            } else {
+                if (isInit) model.player.pause()
+            }
+        }
+        super.onWindowFocusChanged(hasFocus)
+    }
+
+    private var isBuffering = true
+    override fun onPlaybackStateChanged(playbackState: Int) {
+        if (playbackState == ExoPlayer.STATE_READY) {
+            model.player.play()
+            if (episodeLength == 0f) {
+                episodeLength = model.player.duration.toFloat()
+            }
+        }
+        isBuffering = playbackState == Player.STATE_BUFFERING
+
+        super.onPlaybackStateChanged(playbackState)
+    }
+
+    override fun onIsPlayingChanged(isPlaying: Boolean) {
+        if (!isBuffering) {
+            isPlayerPlaying = isPlaying
+            playerView.keepScreenOn = isPlaying
+            (exoPlay.drawable as Animatable?)?.start()
+            if (!this.isDestroyed)
+                exoPlay.setImageViewEnabled(!isPlaying)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        finishAndRemoveTask()
+        startActivity(intent)
+    }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         return if (keyMap.containsKey(event.keyCode)) {

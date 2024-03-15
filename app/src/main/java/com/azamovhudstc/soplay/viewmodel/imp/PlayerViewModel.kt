@@ -14,17 +14,14 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.lifecycle.*
-import com.azamovhudstc.soplay.utils.Utils
-import com.azamovhudstc.soplay.utils.logError
-import com.azamovhudstc.soplay.utils.logMessage
-import com.azamovhudstc.soplay.utils.parser
+import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
+import com.azamovhudstc.soplay.utils.*
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.analytics.AnalyticsListener
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.source.*
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
 import com.google.android.exoplayer2.upstream.cache.CacheDataSource
-import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor
 import com.google.android.exoplayer2.upstream.cache.SimpleCache
 import com.lagradost.nicehttp.Requests
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,7 +48,7 @@ class PlayerViewModel @Inject constructor(
 
     val isLoading = MutableLiveData(true)
     val keepScreenOn = MutableLiveData(false)
-    val showSubsBtn = MutableLiveData(false)
+    val showSubsBtn = MutableLiveData(true)
     val playNextEp = MutableLiveData(false)
     val isError = MutableLiveData(false)
 
@@ -95,12 +92,12 @@ class PlayerViewModel @Inject constructor(
 
         // Cache
         simpleCache?.release()
-        simpleCache = SimpleCache(
+        simpleCache = com.google.android.exoplayer2.upstream.cache.SimpleCache(
             File(
                 app.cacheDir,
                 "exoplayerSourceCache"
             ).also { it.deleteOnExit() }, // Ensures always fresh file
-            LeastRecentlyUsedCacheEvictor(300L * 1024L * 1024L),
+            com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor(300L * 1024L * 1024L),
             databaseProvider
         )
     }
@@ -118,7 +115,14 @@ class PlayerViewModel @Inject constructor(
 
             override fun onPlayerError(error: PlaybackException) {
                 super.onPlayerError(error)
-                isError.postValue(true)
+                when (error.errorCode) {
+                    androidx.media3.common.PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS, androidx.media3.common.PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
+                    -> {
+                        snackString("Source Exception : ${error.message}")
+                    }
+                    else
+                    -> toast("Player Error ${error.errorCode} (${error.errorCodeName}) : ${error.message}")
+                }
                 Toast.makeText(app, error.localizedMessage, Toast.LENGTH_SHORT).show()
             }
 
@@ -165,7 +169,7 @@ class PlayerViewModel @Inject constructor(
 
 
                 println(animeUrl)
-                reGenerateMp4(parseUrl(animeUrl)!!).apply {
+                parseUrl(animeUrl)!!.apply {
                     _animeStreamLink.postValue(this@apply)
                     withContext(Dispatchers.Main) {
                         if (!savedDone.value || getNextEp) {
@@ -233,6 +237,7 @@ class PlayerViewModel @Inject constructor(
         qualityMapUnsorted = mutableMapOf()
         qualityTrackGroup = null
         player.setMediaSource(mediaSource)
+        showSubsBtn.postValue(false)
     }
 
     override fun onCleared() {
@@ -249,10 +254,8 @@ class PlayerViewModel @Inject constructor(
     private fun prepareMediaSource() {
         if (animeStreamLink.value == null) return
         val dataSourceFactory = DefaultHttpDataSource.Factory()
-            .setUserAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36")
             .setReadTimeoutMs(20000)
             .setAllowCrossProtocolRedirects(true)
-
             .setDefaultRequestProperties(headerMap)
             .setConnectTimeoutMs(20000)
         val mediaItem: MediaItem = MediaItem.fromUri(animeStreamLink.value!!.toUri())
@@ -270,7 +273,6 @@ class PlayerViewModel @Inject constructor(
         }
 
 
-        showSubsBtn.postValue(false)
         setMediaSource(mediaSource)
     }
 
