@@ -1,4 +1,4 @@
-# 4.0
+# 3.0
 
 - **Muhim:**
   - Barcha Muammolar tuzatildi
