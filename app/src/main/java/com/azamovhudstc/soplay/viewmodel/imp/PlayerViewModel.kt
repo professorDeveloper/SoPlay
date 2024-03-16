@@ -236,8 +236,8 @@ class PlayerViewModel @Inject constructor(
         qualityMapSorted = mutableMapOf()
         qualityMapUnsorted = mutableMapOf()
         qualityTrackGroup = null
-        player.setMediaSource(mediaSource)
         showSubsBtn.postValue(false)
+        player.setMediaSource(mediaSource)
     }
 
     override fun onCleared() {
