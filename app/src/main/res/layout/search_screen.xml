@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/md_theme_light_9_onBackground"
 
     tools:context=".ui.screens.home.HomeScreen">
 
@@ -13,10 +12,8 @@
 
         android:layout_height="wrap_content"
         android:layout_marginTop="25dp"
-        android:background="@color/md_theme_light_9_onBackground"
         android:orientation="vertical"
-        app:elevation="0dp"
-        app:liftOnScrollColor="@color/md_theme_light_9_onBackground">
+        app:elevation="0dp">
 
 
         <FrameLayout

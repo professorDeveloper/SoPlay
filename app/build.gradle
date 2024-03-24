@@ -9,12 +9,12 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk 32
 
     defaultConfig {
         applicationId "com.azamovhudstc.soplay"
         minSdk 23
-        targetSdk 33
+        targetSdk 32
         versionCode ((System.currentTimeMillis() / 60000).toInteger())
         versionName "2.0"
 

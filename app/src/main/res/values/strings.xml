@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">SoPlay</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="get_recommendations">Watch/Read some Anime or Manga to get Recommendations</string>
@@ -10,6 +10,8 @@
     <string name="no_connection_title">Internet Mavjud Emas</string>
     <string name="no_connection_des">Tarmoqqa ulanish yo`q, tarmoq sozlamalarini tekshiring yoki qaytadan urinib ko`ring !</string>
     <string name="try_again">Qayta Urinish</string>
+    <string name="requires_android_12">Requires Android 12+</string>
+    <string name="use_unique_theme_for_each_item">Theme as Anime/Manga </string>
 
     <string name="title_favorite">Sevimli</string>
     <string name="title_search">Qidirsh</string>
@@ -78,11 +80,19 @@
     <string name="video_cache_perf_title">Enable Video Cache</string>
     <string name="video_cache_perf_summray_disabled">Video cache disabled in player</string>
     <string name="video_cache_perf_summray_enabled">Video cache enabled in player</string>
+    <string name="oled_theme_variant">OLED theme variant</string>
     <string name="auto_play_summary">Autoplay next episode when the current episode ends</string>
     <string name="auto_play_title">Autoplay next episode</string>
     <string name="press_back_again_in_player">Press Back Again to Exit Player</string>
     <string name="repo">professorDeveloper/SoPlay</string>
     <string name="telegram">https://t.me/soplayapp</string>
     <string name="github">https://github.com/professorDeveloper/SoPlay</string>
+    <string name="theme" tools:ignore="ExtraTranslation">Theme</string>
+    <string name="ui_settings" tools:ignore="ExtraTranslation">UI Settings</string>
+    <string name="watch">Watch</string>
+    <string name="use_material_you">Material You</string>
+    <string name="custom_theme">Custom Theme:</string>
+    <string name="use_custom_theme">Custom Theme</string>
+    <string name="color_picker">Color Picker</string>
 
 </resources>

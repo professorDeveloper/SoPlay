@@ -4,8 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    app:cardElevation="2dp"
     android:layout_margin="8dp"
-    app:cardBackgroundColor="@color/md_theme_light_9_inverseSurface"
+    app:cardBackgroundColor="?attr/colorOnSurfaceInverse"
     app:cardCornerRadius="16dp"
     app:contentPadding="16dp">
 

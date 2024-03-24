@@ -59,18 +59,15 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
     private lateinit var exoTopControllers: LinearLayout
     private lateinit var exoMiddleControllers: LinearLayout
     private lateinit var exoBottomControllers: LinearLayout
-    private val handler = Handler(Looper.getMainLooper())
     private var isFullscreen: Int = 0
     private var orientationListener: OrientationEventListener? = null
     private var isPlayerPlaying = true
 
     private var isNormal = true
-
     private val resumeWindow = "resumeWindow"
     private val resumePosition = "resumePosition"
     private val playerFullscreen = "playerFullscreen"
     private val playerOnPlay = "playerOnPlay"
-    private var currentWindow = 0
 
     // Top buttons
     private lateinit var loadingLayout: LinearLayout
@@ -79,11 +76,8 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
     private lateinit var exoPlay: ImageView
     private lateinit var scaleBtn: ImageButton
     private lateinit var exoRotate: ImageButton
-    private lateinit var qualityBtn: ImageButton
     private lateinit var downloadBtn: ImageButton
     private lateinit var prevEpBtn: ImageButton
-    private var doubleBackToExitPressedOnce: Boolean = false
-    private lateinit var backPressSnackBar: Snackbar
     private lateinit var nextEpBtn: ImageButton
     private lateinit var videoEpTextView: TextView
     private lateinit var exoPip: ImageButton
@@ -91,7 +85,6 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
     private lateinit var exoProgress: ExtendedTimeBar
     private lateinit var exoLock: ImageButton
     private var isInit: Boolean = false
-    private var isTV: Boolean = false
     private val mCookieManager = CookieManager()
     private lateinit var exoBrightness: Slider
     private lateinit var exoVolume: Slider

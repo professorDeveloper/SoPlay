@@ -29,7 +29,6 @@
         android:includeFontPadding="false"
         android:maxLines="1"
         android:text="The Jungle Waiting"
-        android:textColor="@color/white"
         android:textFontWeight="700"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -45,7 +44,8 @@
 
         android:src="@drawable/ic_date"
         app:layout_constraintStart_toStartOf="@+id/textView"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:tint="?attr/colorPrimary" />
 
     <TextView
         android:id="@+id/yearTxt"
@@ -55,7 +55,6 @@
         android:fontFamily="@font/poppins_semi_bold"
         android:includeFontPadding="false"
         android:text="2022"
-        android:textColor="@color/white"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="@+id/imageView"
         app:layout_constraintStart_toEndOf="@+id/imageView"
@@ -68,8 +67,9 @@
         android:layout_marginTop="8dp"
         android:src="@drawable/ic_round_star_24"
         app:layout_constraintStart_toStartOf="@+id/imageView"
+        app:tint="?attr/colorPrimary"
         app:layout_constraintTop_toBottomOf="@+id/imageView"
-        app:tint="?attr/colorAccent" />
+       />
 
     <TextView
         android:id="@+id/ratingTxt"
@@ -79,7 +79,6 @@
         android:fontFamily="@font/poppins_semi_bold"
         android:includeFontPadding="false"
         android:text="95"
-        android:textColor="@color/white"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="@+id/imageView4"
         app:layout_constraintStart_toEndOf="@+id/imageView4"
@@ -89,11 +88,12 @@
         android:id="@+id/imageView5"
         android:layout_width="20dp"
         android:layout_height="20dp"
+        app:tint="?attr/colorPrimary"
         android:layout_marginTop="8dp"
         android:src="@drawable/ic_film"
         app:layout_constraintStart_toStartOf="@+id/imageView4"
         app:layout_constraintTop_toBottomOf="@+id/imageView4"
-        app:tint="?attr/colorAccent" />
+     />
 
 
     <TextView
@@ -104,7 +104,6 @@
         android:fontFamily="@font/poppins_semi_bold"
         android:includeFontPadding="false"
         android:text="Serial"
-        android:textColor="@color/white"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="@+id/imageView5"
         app:layout_constraintStart_toEndOf="@+id/imageView5"

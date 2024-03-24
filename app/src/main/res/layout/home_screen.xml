@@ -80,7 +80,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/settingBtn"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/white" />
+                app:tint="?attr/colorControlNormal" />
 
             <ImageView
                 android:id="@+id/settingBtn"
@@ -90,7 +90,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/white" />
+                app:tint="?attr/colorControlNormal" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -123,7 +123,6 @@
                     android:layout_weight="1"
                     android:fontFamily="@font/inter_bold"
                     android:text="Premyeralar"
-                    android:textColor="@color/white"
                     android:textFontWeight="700"
                     android:textSize="18sp" />
 
@@ -189,7 +188,6 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Tomosha qilish kerak"
-                    android:textColor="@color/white"
                     android:textFontWeight="700"
                     android:textSize="20sp" />
 
