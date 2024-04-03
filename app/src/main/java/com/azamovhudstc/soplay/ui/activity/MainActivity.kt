@@ -10,6 +10,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.databinding.ActivityMainBinding
+import com.azamovhudstc.soplay.theme.ThemeManager
 import com.azamovhudstc.soplay.utils.*
 import com.azamovhudstc.soplay.utils.AppUpdater.check
 import com.vmadalin.easypermissions.EasyPermissions
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        ThemeManager(this).applyTheme()
         initActivity(this)
         hasPermission()
         setupBottomNavigationView()
@@ -45,7 +47,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     private fun hasPermission() {
         EasyPermissions.hasPermissions(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
         if (Build.VERSION.SDK_INT >= 33) {
-            EasyPermissions.hasPermissions(this, android.Manifest.permission.POST_NOTIFICATIONS)
+//            EasyPermissions.hasPermissions(this, android.Manifest.permission.POST_NOTIFICATIONS)
         }
         requestFilePermission()
     }
@@ -58,12 +60,12 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
             android.Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
         if (Build.VERSION.SDK_INT >= 33) {
-            EasyPermissions.requestPermissions(
-                this,
-                "This Permission For Download Movies",
-                PERMISSION_REQUEST_CODE,
-                android.Manifest.permission.POST_NOTIFICATIONS
-            )
+//            EasyPermissions.requestPermissions(
+//                this,
+//                "This Permission For Download Movies",
+//                PERMISSION_REQUEST_CODE,
+//                android.Manifest.permission.POST_NOTIFICATIONS
+//            )
         }
     }
 
