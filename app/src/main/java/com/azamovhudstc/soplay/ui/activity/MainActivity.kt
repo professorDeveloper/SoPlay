@@ -1,9 +1,12 @@
 package com.azamovhudstc.soplay.ui.activity
 
 import android.content.SharedPreferences
+import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
+import android.util.TypedValue
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -33,12 +36,13 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         initActivity(this)
         hasPermission()
         setupBottomNavigationView()
+        ThemeManager(this).applyTheme()
         checkUpdate()
     }
 
 
     private fun checkUpdate() {
-        lifecycleScope.launch(Dispatchers.IO){
+        lifecycleScope.launch(Dispatchers.IO) {
             check(this@MainActivity)
         }
 
@@ -74,6 +78,25 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
             supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
         binding.bottomNavigation.setupWithNavController(navHostFragment.navController)
 
+        val context = this
+        val typedValue = TypedValue()
+        val theme = context.theme
+        theme.resolveAttribute(android.R.attr.colorPrimary, typedValue, true)
+        val colorPrimary = typedValue.data
+        val colorControlNormal = ContextCompat.getColor(context, R.color.uncheckedColor)
+        val states = arrayOf(
+            intArrayOf(android.R.attr.state_checked),
+            intArrayOf(-android.R.attr.state_checked)
+        )
+        val colors = intArrayOf(
+            colorPrimary,
+            colorControlNormal
+        )
+        val colorStateList = ColorStateList(states, colors)
+        binding.bottomNavigation.itemIconTintList = colorStateList
+        binding.bottomNavigation.itemTextColor = colorStateList
+
+
 
         navHostFragment.navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
@@ -84,13 +107,15 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
                 R.id.popularSeeAllScreen -> {
                     binding.bottomNavigation.hideWithoutAnimation(binding.fragmentContainerView)
                 }
-                R.id.navigation_settings->{
+
+                R.id.navigation_settings -> {
                     binding.bottomNavigation.hideWithoutAnimation(binding.fragmentContainerView)
                 }
 
                 R.id.searchScreen -> {
                     binding.bottomNavigation.hideWithoutAnimation(binding.fragmentContainerView)
                 }
+
                 else -> {
                     binding.bottomNavigation.showWithAnimation(binding.fragmentContainerView)
                 }

@@ -9,12 +9,12 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.azamovhudstc.soplay"
         minSdk 23
-        targetSdk 32
+        targetSdk 33
         versionCode ((System.currentTimeMillis() / 60000).toInteger())
         versionName "2.0"
 
@@ -163,6 +163,7 @@ dependencies {
     // Shimmer Effect
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
     implementation 'com.github.javiersantos:AppUpdater:2.7'
+    implementation 'com.github.eltos:simpledialogfragments:v3.7'
 
 //
     //

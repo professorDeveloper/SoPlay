@@ -14,7 +14,6 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.lifecycle.*
-import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import com.azamovhudstc.soplay.utils.*
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.analytics.AnalyticsListener
@@ -170,7 +169,7 @@ class PlayerViewModel @Inject constructor(
 
                 println(animeUrl)
                 parseUrl(animeUrl)!!.apply {
-                    _animeStreamLink.postValue(this@apply)
+                    _animeStreamLink.postValue(convertUrl(this@apply))
                     withContext(Dispatchers.Main) {
                         if (!savedDone.value || getNextEp) {
                             println("prepare Media Source")
@@ -184,6 +183,17 @@ class PlayerViewModel @Inject constructor(
         }
 
     }
+
+    fun convertUrl(originalUrl: String): String {
+        val parts = originalUrl.split("/")
+        val subdomain = parts[2] // Fayllar1.ru
+        val newSubdomain = parts[3] // 34
+        val newPathStart = "/${parts[3]}/${parts[4]}" // /34/Seriallar
+        val newPath = parts.subList(5, parts.size).joinToString("/") // Baxt/Baxt%201-qism%20480p%20O'zbek%20tilida%20(asilmedia.net).mp4
+        return "https://$newSubdomain.$subdomain$newPathStart/$newPath"
+    }
+
+
 
     private suspend fun reGenerateMp4(link: String) = withContext(Dispatchers.IO) {
         println(link)

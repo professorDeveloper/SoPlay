@@ -12,6 +12,8 @@
     <string name="try_again">Qayta Urinish</string>
     <string name="requires_android_12">Requires Android 12+</string>
     <string name="use_unique_theme_for_each_item">Theme as Anime/Manga </string>
+    <string name="restart_app">Restart App?</string>
+    <string name="do_it">Do It!</string>
 
     <string name="title_favorite">Sevimli</string>
     <string name="title_search">Qidirsh</string>

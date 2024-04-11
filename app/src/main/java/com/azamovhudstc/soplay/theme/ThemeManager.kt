@@ -15,15 +15,15 @@ import com.google.android.material.color.DynamicColorsOptions
 
 class ThemeManager(private val context: Activity) {
     fun applyTheme(fromImage: Bitmap? = null) {
-        val useOLED = context.getSharedPreferences("Sozo", Context.MODE_PRIVATE)
+        val useOLED = context.getSharedPreferences("Soplay", Context.MODE_PRIVATE)
             .getBoolean("use_oled", false) && isDarkThemeActive(context)
-        val useCustomTheme = context.getSharedPreferences("Sozo", Context.MODE_PRIVATE)
+        val useCustomTheme = context.getSharedPreferences("Soplay", Context.MODE_PRIVATE)
             .getBoolean("use_custom_theme", false)
-        val customTheme = context.getSharedPreferences("Sozo", Context.MODE_PRIVATE)
+        val customTheme = context.getSharedPreferences("Soplay", Context.MODE_PRIVATE)
             .getInt("custom_theme_int", 16712221)
-        val useSource = context.getSharedPreferences("Sozo", Context.MODE_PRIVATE)
+        val useSource = context.getSharedPreferences("Soplay", Context.MODE_PRIVATE)
             .getBoolean("use_source_theme", false)
-        val useMaterial = context.getSharedPreferences("Sozo", Context.MODE_PRIVATE)
+        val useMaterial = context.getSharedPreferences("Soplay", Context.MODE_PRIVATE)
             .getBoolean("use_material_you", false)
         if (useSource) {
             val returnedEarly = applyDynamicColors(
@@ -42,10 +42,11 @@ class ThemeManager(private val context: Activity) {
             val returnedEarly = applyDynamicColors(useMaterial, context, useOLED, useCustom = null)
             if (!returnedEarly) return
         }
-        val theme = context.getSharedPreferences("Sozo", Context.MODE_PRIVATE)
-            .getString("theme", "RED")!!
+        val theme = context.getSharedPreferences("Soplay", Context.MODE_PRIVATE)
+            .getString("theme", "YELLOW")!!
 
         val themeToApply = when (theme) {
+            "YELLOW" -> if (useOLED) R.style.Theme_SoPlay_Yellow else R.style.Theme_SoPlay_Yellow
             "BLUE" -> if (useOLED) R.style.Theme_SoPlay_BlueOLED else R.style.Theme_SoPlay_Blue
             "GREEN" -> if (useOLED) R.style.Theme_SoPlay_GreenOLED else R.style.Theme_SoPlay_Green
             "PURPLE" -> if (useOLED) R.style.Theme_SoPlay_PurpleOLED else R.style.Theme_SoPlay_Purple
@@ -92,7 +93,9 @@ class ThemeManager(private val context: Activity) {
             builder.setContentBasedSource(bitmap)
             needMaterial = false
         } else if (useCustom != null) {
-            builder.setContentBasedSource(bitmap!!)
+            val contentSourceBitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+            contentSourceBitmap.eraseColor(useCustom)
+            builder.setContentBasedSource(contentSourceBitmap!!)
             needMaterial = false
         }
 
@@ -130,6 +133,7 @@ class ThemeManager(private val context: Activity) {
 
     companion object {
         enum class Theme(val theme: String) {
+            YELLOW("YELLOW"),
             BLUE("BLUE"),
             GREEN("GREEN"),
             PURPLE("PURPLE"),

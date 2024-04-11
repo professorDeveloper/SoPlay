@@ -4,6 +4,8 @@
     <color name="fg">#A8EEEEEE</color>
     <color name="bg_opp">@color/bg_white</color>
     <color name="nav_bg">#1C1C1C</color>
+    <color name="colorPrimary">?attr/colorPrimary</color>
+    <color name="primary">?attr/colorPrimary</color>
     <color name="nav_bg_inv">#001C1C1C</color>
     <color name="nav_tab">#40ffffff</color>
     <color name="gradiant_bg_end">#AA1C1C1C</color>

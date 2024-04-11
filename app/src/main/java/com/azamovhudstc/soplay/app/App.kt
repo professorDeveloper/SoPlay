@@ -1,6 +1,7 @@
 package com.azamovhudstc.soplay.app
 
 import android.app.Application
+import com.azamovhudstc.soplay.theme.ThemeManager
 import com.azamovhudstc.soplay.utils.initializeNetwork
 import dagger.hilt.android.HiltAndroidApp
 

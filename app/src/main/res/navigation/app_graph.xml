@@ -74,7 +74,7 @@
 
     <fragment
         android:id="@+id/navigation_settings"
-        android:name="com.azamovhudstc.soplay.ui.screens.settings.SettingsFragment"
+        android:name="com.azamovhudstc.soplay.ui.screens.settings.SettingsScreen"
         android:label="Sozlamalar">
     </fragment>
 

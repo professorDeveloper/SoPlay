@@ -7,6 +7,5 @@
     android:layout_marginVertical="4dp"
     android:background="@color/colorPrimary"
     app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium"
-    app:srcCompat="@drawable/play"
-    app:tint="?attr/colorOnPrimary"/>
+    app:srcCompat="@drawable/play"/>
 

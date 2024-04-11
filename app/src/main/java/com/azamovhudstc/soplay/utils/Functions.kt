@@ -77,7 +77,7 @@ fun applyDynamicColors(
 fun initActivity(a: Activity) {
     val window = a.window
     AppCompatDelegate.setDefaultNightMode(
-        AppCompatDelegate.MODE_NIGHT_NO
+        AppCompatDelegate.MODE_NIGHT_YES
     )
     WindowCompat.setDecorFitsSystemWindows(window, false)
 

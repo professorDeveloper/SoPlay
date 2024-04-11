@@ -5,9 +5,9 @@
     android:layout_width="170dp"
     android:layout_height="300dp"
 
+
     android:layout_marginHorizontal="16dp"
-    android:layout_marginVertical="8dp"
-    android:background="?attr/colorControlNormal">
+    android:layout_marginVertical="8dp">
 
 
     <androidx.cardview.widget.CardView
