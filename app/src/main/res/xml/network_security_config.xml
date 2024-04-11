@@ -10,6 +10,8 @@
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">gogoanime.gr</domain>
+        <domain includeSubdomains="true">tv.musical.uz</domain>
+        <domain includeSubdomains="true">st1.musical.uz</domain>
         <domain includeSubdomains="true">uzmovi.com</domain>
         <domain includeSubdomains="true">asilmedia.org</domain>
         <domain includeSubdomains="true">asilmedia.net</domain>

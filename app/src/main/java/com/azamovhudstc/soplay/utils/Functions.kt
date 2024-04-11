@@ -30,6 +30,7 @@ import com.google.android.material.color.DynamicColorsOptions
 import com.lagradost.nicehttp.addGenericDns
 import okhttp3.OkHttpClient
 import java.io.*
+import kotlin.collections.ArrayList
 import kotlin.reflect.KFunction
 
 
@@ -342,4 +343,17 @@ fun setSlideUp() = AnimationSet(false).apply {
     animation.duration = (750 * 1f).toLong()
     animation.interpolator = OvershootInterpolator(1.1f)
     addAnimation(animation)
+}
+
+fun loadTvFilters() :ArrayList<Pair<String,Int>>{
+    val filterlist=ArrayList<Pair<String,Int>>()
+    filterlist.add(Pair("Barcha",1))
+    filterlist.add(Pair("Uzbek",25))
+    filterlist.add(Pair("Bolalar",20))
+    filterlist.add(Pair("O`yin-Kulgi",21))
+    filterlist.add(Pair("Yangiliklar",22))
+    filterlist.add(Pair("Kino",23))
+    filterlist.add(Pair("Sport",24))
+    filterlist.add(Pair("Hayvonot",26))
+    return filterlist;
 }

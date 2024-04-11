@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.azamovhudstc.soplay.data.Movie
 import com.azamovhudstc.soplay.data.response.MovieInfo
 import com.azamovhudstc.soplay.repository.imp.TvRepositoryImpl
+import com.azamovhudstc.soplay.tv.stv.parser.RandomTvData
+import com.azamovhudstc.soplay.tv.stv.response.RandomTvResponse
 import com.azamovhudstc.soplay.utils.Resource
 import com.azamovhudstc.soplay.viewmodel.TvViewModel
 import kotlinx.coroutines.flow.launchIn
@@ -14,6 +16,7 @@ import kotlinx.coroutines.launch
 
 class TvViewModelImpl : ViewModel(), TvViewModel {
     private val repository = TvRepositoryImpl()
+    private val tvData =RandomTvData()
     private val isAutoPlayEnabled = true
     private val isVideoCacheEnabled = true
     var lastPage: Int = 1
@@ -24,6 +27,8 @@ class TvViewModelImpl : ViewModel(), TvViewModel {
 
     override val tvList: MutableLiveData<Resource<ArrayList<Movie>>> = MutableLiveData()
     override val hrefData: MutableLiveData<String> = MutableLiveData()
+    override val tvRandomList: MutableLiveData<Resource<RandomTvResponse>> =
+        MutableLiveData()
 
     override fun loadTv() {
         tvList.postValue(Resource.Loading)
@@ -53,9 +58,29 @@ class TvViewModelImpl : ViewModel(), TvViewModel {
         }.launchIn(viewModelScope)
     }
 
-    override fun loadHrefData(movie: Movie) {
+    override fun loadRandomTvById(id: Int) {
+        tvRandomList.postValue(Resource.Loading)
         viewModelScope.launch {
-            hrefData.postValue(repository.getTvFullDataByHref(movie.href))
+            if (id!=1){
+                tvRandomList.postValue(Resource.Success(tvData.getDataByCategory(id)))
+
+            }else{
+                tvRandomList.postValue(Resource.Success(tvData.getRandomTvChannels()))
+            }
+        }
+    }
+
+
+    override fun loadHrefData(movie: Movie) {
+        println(movie.href)
+        viewModelScope.launch {
+            if (movie.href.toString().startsWith("http://st1")){
+                hrefData.postValue(movie.href)
+
+            }else{
+                hrefData.postValue(repository.getTvFullDataByHref(movie.href))
+
+            }
         }
 
     }

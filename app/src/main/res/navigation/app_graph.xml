@@ -8,9 +8,9 @@
 
     <fragment
         android:id="@+id/navigation_tv"
-        android:name="com.azamovhudstc.soplay.ui.screens.tv.TvScreen"
+        android:name="com.azamovhudstc.soplay.ui.screens.tv.randomtv.RandomTvScreen"
         android:label="Telekanallar"
-        tools:layout="@layout/tv_screen">
+        tools:layout="@layout/random_tv_screen">
 
     </fragment>
     <fragment
@@ -101,4 +101,9 @@
         android:id="@+id/popularSeeAllScreen"
         android:name="com.azamovhudstc.soplay.ui.screens.home.seeall.PopularSeeAllScreen"
         android:label="PopularSeeAllScreen" />
+    <fragment
+        android:id="@+id/randomTvScreen"
+        android:name="com.azamovhudstc.soplay.ui.screens.tv.randomtv.RandomTvScreen"
+        android:label="random_tv_screen"
+        tools:layout="@layout/random_tv_screen" />
 </navigation>

@@ -90,12 +90,6 @@ fun View.show() {
     visibility = View.VISIBLE
 }
 
-fun localLoadTabTxt(): ArrayList<String> {
-    val list = ArrayList<String>()
-    list.add("More Details")
-    list.add("Anime")
-    return list
-}
 
 class ZoomOutPageTransformer() : ViewPager2.PageTransformer {
     override fun transformPage(view: View, position: Float) {

@@ -60,6 +60,7 @@ class PlayerActivityTv : AppCompatActivity() {
         }
 
         model.hrefData.observe(this) {
+            println("LINK ::: $it")
             playerView = binding.player
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
             setUpPlayer()
@@ -91,7 +92,7 @@ class PlayerActivityTv : AppCompatActivity() {
         //hiding all the ui StyledPlayerView comes with
         playerView?.setShowPreviousButton(false)
         playerView?.setShowNextButton(false)
-        var exoProgress = findViewById<PlayerActivity.ExtendedTimeBar>(R.id.exo_progress)
+        val exoProgress = findViewById<PlayerActivity.ExtendedTimeBar>(R.id.exo_progress)
         exoProgress.setForceDisabled(true)
     }
 
