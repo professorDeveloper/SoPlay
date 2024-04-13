@@ -52,17 +52,12 @@ class RandomTvItemScreen : Fragment() {
                     binding.progressBar.hide()
                 }
                 Resource.Loading -> {
-                    if (isLoading) {
-                        binding.progressBar.show()
-                        binding.tvRv.hide()
-                    }
+                    binding.progressBar.show()
+                    binding.tvRv.hide()
                 }
                 is Resource.Success -> {
-                    if (isLoading) {
-                        binding.progressBar.hide()
-                        binding.tvRv.show()
-                        isLoading = false
-                    }
+                    binding.progressBar.hide()
+                    binding.tvRv.show()
                     binding.tvRv.layoutManager =
                         GridLayoutManager(requireContext(), (screenWidth / 124f).toInt())
                     binding.tvRv.adapter = adapter
@@ -96,6 +91,7 @@ class RandomTvItemScreen : Fragment() {
 
     override fun onResume() {
         super.onResume()
+
         val categoryId = arguments?.getInt("categoryId") ?: 20
         viewModel.loadRandomTvById(categoryId)
     }

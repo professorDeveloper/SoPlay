@@ -5,7 +5,7 @@
     android:layout_height="114dp"
     android:layout_marginHorizontal="8dp"
     android:layout_marginVertical="4dp"
-    android:background="?attr/colorSurfaceVariant"
+    android:background="@color/white"
     android:scaleType="centerCrop"
 
     app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium"

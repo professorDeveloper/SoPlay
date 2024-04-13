@@ -588,6 +588,7 @@ class PlayerActivity : AppCompatActivity(), Player.Listener {
                 "Available Qualities",
                 model.player,
                 C.TRACK_TYPE_VIDEO
+
             )
         trackSelectionDialogBuilder.setTheme(R.style.DialogTheme)
         trackSelectionDialogBuilder.setTrackNameProvider {
