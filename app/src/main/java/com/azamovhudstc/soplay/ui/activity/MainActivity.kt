@@ -95,6 +95,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         val colorStateList = ColorStateList(states, colors)
         binding.bottomNavigation.itemIconTintList = colorStateList
         binding.bottomNavigation.itemTextColor = colorStateList
+        // Code
+
 
 
 

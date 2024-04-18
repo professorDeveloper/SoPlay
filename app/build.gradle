@@ -5,6 +5,7 @@ plugins {
     id 'kotlin-parcelize'
     id 'com.google.dagger.hilt.android'
     id 'kotlinx-serialization'
+    id 'com.google.gms.google-services'
     //
 }
 
@@ -164,8 +165,9 @@ dependencies {
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
     implementation 'com.github.javiersantos:AppUpdater:2.7'
     implementation 'com.github.eltos:simpledialogfragments:v3.7'
+    //Firebase
+    implementation 'com.google.firebase:firebase-database-ktx:20.3.0'
+    implementation 'com.google.firebase:firebase-firestore-ktx:24.10.3'
 
-//
-    //
 
 }

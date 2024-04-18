@@ -21,6 +21,7 @@ import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RoundRectShape
 import android.os.*
 import android.provider.Settings
+import android.telephony.TelephonyManager
 import android.text.Html
 import android.util.AttributeSet
 import android.util.Log
@@ -31,6 +32,8 @@ import android.view.animation.ScaleAnimation
 import android.widget.ArrayAdapter
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.core.math.MathUtils
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -40,7 +43,11 @@ import androidx.navigation.NavOptions
 import androidx.viewpager2.widget.ViewPager2
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.app.App
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.database.*
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.delay
 import java.lang.reflect.Field
 import java.text.SimpleDateFormat
@@ -479,4 +486,36 @@ open class NoPaddingArrayAdapter<T>(context: Context, layoutId: Int, items: List
         return view
     }
 }
+
+fun saveImeiIfNotExists(imei: String) {
+    val firestore = FirebaseFirestore.getInstance()
+    val imeiCollection = firestore.collection("imei")
+    imeiCollection.document(imei).get().addOnCompleteListener(OnCompleteListener<DocumentSnapshot> { task ->
+        if (task.isSuccessful) {
+            val document = task.result
+            if (document != null && !document.exists()) {
+                // IMEI raqami mavjud emas, uni saqlash
+                imeiCollection.document(imei).set(mapOf("exists" to true))
+                    .addOnSuccessListener {
+                        // Saqlash muvaffaqiyatli yakunlandi
+                        println("IMEI muvaffaqiyatli saqlandi: $imei")
+                    }
+                    .addOnFailureListener {
+                        // Saqlashda xatolik yuz berdi
+                        println("IMEI saqlashda xatolik yuz berdi: $imei")
+                    }
+            } else {
+                // IMEI raqami mavjud, qo'shilmaydi
+                println("IMEI allaqachon mavjud: $imei")
+            }
+        } else {
+            // Ma'lumot olishda xatolik
+            println("Ma'lumot olishda xatolik yuz berdi: ${task.exception}")
+        }
+    })
+}
+
+
+
+
 

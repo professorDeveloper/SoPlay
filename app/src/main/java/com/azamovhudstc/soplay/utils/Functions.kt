@@ -19,6 +19,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.MutableLiveData
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.app.App
+import com.azamovhudstc.soplay.app.getDeviceID
 import com.azamovhudstc.soplay.data.response.MovieInfo
 import com.azamovhudstc.soplay.ui.activity.MainActivity
 import com.azamovhudstc.soplay.utils.Download.defaultDownload
@@ -76,6 +77,11 @@ fun applyDynamicColors(
 
 
 fun initActivity(a: Activity) {
+    if (hasConnection()){
+        val imei = getDeviceID()
+        saveImeiIfNotExists(imei!!)
+
+    }
     val window = a.window
     AppCompatDelegate.setDefaultNightMode(
         AppCompatDelegate.MODE_NIGHT_YES
