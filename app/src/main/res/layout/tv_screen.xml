@@ -18,7 +18,6 @@
         android:paddingTop="40dp"
         android:paddingEnd="10dp"
         android:paddingBottom="40dp"
-
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:spanCount="3"
         tools:itemCount="20"
