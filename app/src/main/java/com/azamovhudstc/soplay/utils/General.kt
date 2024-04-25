@@ -43,6 +43,7 @@ import androidx.navigation.NavOptions
 import androidx.viewpager2.widget.ViewPager2
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.app.App
+import com.azamovhudstc.soplay.data.PhoneData
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.database.*
@@ -487,26 +488,26 @@ open class NoPaddingArrayAdapter<T>(context: Context, layoutId: Int, items: List
     }
 }
 
-fun saveImeiIfNotExists(imei: String) {
+fun savePhoneDataIfNotExists(phoneData: PhoneData) {
     val firestore = FirebaseFirestore.getInstance()
     val imeiCollection = firestore.collection("imei")
-    imeiCollection.document(imei).get().addOnCompleteListener(OnCompleteListener<DocumentSnapshot> { task ->
+    imeiCollection.document(phoneData.imei).get().addOnCompleteListener(OnCompleteListener<DocumentSnapshot> { task ->
         if (task.isSuccessful) {
             val document = task.result
             if (document != null && !document.exists()) {
                 // IMEI raqami mavjud emas, uni saqlash
-                imeiCollection.document(imei).set(mapOf("exists" to true))
+                imeiCollection.document(phoneData.imei).set(phoneData)
                     .addOnSuccessListener {
                         // Saqlash muvaffaqiyatli yakunlandi
-                        println("IMEI muvaffaqiyatli saqlandi: $imei")
+                        println("Phone data muvaffaqiyatli saqlandi: $phoneData")
                     }
                     .addOnFailureListener {
                         // Saqlashda xatolik yuz berdi
-                        println("IMEI saqlashda xatolik yuz berdi: $imei")
+                        println("Phone data saqlashda xatolik yuz berdi: $phoneData")
                     }
             } else {
                 // IMEI raqami mavjud, qo'shilmaydi
-                println("IMEI allaqachon mavjud: $imei")
+                println("IMEI allaqachon mavjud: ${phoneData.imei}")
             }
         } else {
             // Ma'lumot olishda xatolik
@@ -514,7 +515,6 @@ fun saveImeiIfNotExists(imei: String) {
         }
     })
 }
-
 
 
 

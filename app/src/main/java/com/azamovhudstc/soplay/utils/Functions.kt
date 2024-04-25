@@ -6,12 +6,14 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.*
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
@@ -19,6 +21,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.MutableLiveData
 import com.azamovhudstc.soplay.R
 import com.azamovhudstc.soplay.app.App
+import com.azamovhudstc.soplay.app.getDeviceData
 import com.azamovhudstc.soplay.app.getDeviceID
 import com.azamovhudstc.soplay.data.response.MovieInfo
 import com.azamovhudstc.soplay.ui.activity.MainActivity
@@ -76,12 +79,10 @@ fun applyDynamicColors(
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 fun initActivity(a: Activity) {
-    if (hasConnection()){
-        val imei = getDeviceID()
-        saveImeiIfNotExists(imei!!)
-
-    }
+        val phoneData = getDeviceData(a.applicationContext)
+        savePhoneDataIfNotExists(phoneData!!)
     val window = a.window
     AppCompatDelegate.setDefaultNightMode(
         AppCompatDelegate.MODE_NIGHT_YES

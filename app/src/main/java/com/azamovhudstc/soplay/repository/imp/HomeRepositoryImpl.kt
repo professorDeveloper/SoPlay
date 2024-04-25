@@ -111,7 +111,7 @@ class HomeRepositoryImpl : HomeRepository {
 
     override fun getNeedWatch() = flow<Result<ArrayList<MovieInfo>>> {
         val document =
-            Jsoup.connect("$mainUrl/whatchnow.html")
+            Jsoup.connect("$mainUrl/popular.html")
                 .followRedirects(true)
                 .headers(
                     mapOf(
