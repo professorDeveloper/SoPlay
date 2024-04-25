@@ -37,8 +37,7 @@ fun getDeviceID(): String {
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun getDeviceData(context: Context): PhoneData {
-    val telephonyManager =
-        context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+    val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
     val imei = getDeviceID()!!
 

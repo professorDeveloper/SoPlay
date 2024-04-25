@@ -20,3 +20,6 @@ dependencyResolutionManagement {
 }
 rootProject.name = "SoPlay"
 include ':app'
+include ':data'
+include ':domain'
+include ':tv'

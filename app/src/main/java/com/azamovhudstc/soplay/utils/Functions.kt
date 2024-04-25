@@ -34,6 +34,7 @@ import com.google.android.material.color.DynamicColorsOptions
 import com.lagradost.nicehttp.addGenericDns
 import okhttp3.OkHttpClient
 import java.io.*
+import java.util.UUID
 import kotlin.collections.ArrayList
 import kotlin.reflect.KFunction
 
@@ -364,3 +365,6 @@ fun loadTvFilters() :ArrayList<Pair<String,Int>>{
     filterlist.add(Pair("Hayvonot",26))
     return filterlist;
 }
+
+//This is android ID
+fun getUniqueID()= UUID.randomUUID().toString()
