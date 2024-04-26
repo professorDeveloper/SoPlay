@@ -298,16 +298,16 @@ abstract class GesturesListener : GestureDetector.SimpleOnGestureListener() {
         return super.onDoubleTap(e)
     }
 
-    override fun onScroll(
-        e1: MotionEvent,
-        e2: MotionEvent,
-        distanceX: Float,
-        distanceY: Float
-    ): Boolean {
-        onScrollYClick(distanceY)
-        onScrollXClick(distanceX)
-        return super.onScroll(e1, e2, distanceX, distanceY)
-    }
+//    override fun onScroll(
+//        e1: MotionEvent,
+//        e2: MotionEvent,
+//        distanceX: Float,
+//        distanceY: Float
+//    ): Boolean {
+//        onScrollYClick(distanceY)
+//        onScrollXClick(distanceX)
+//        return super.onScroll(e1, e2, distanceX, distanceY)
+//    }
 
     private fun processSingleClickEvent(e: MotionEvent) {
         val handler = Handler(Looper.getMainLooper())

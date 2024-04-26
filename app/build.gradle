@@ -2,20 +2,20 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
-    id 'kotlin-parcelize'
     id 'com.google.dagger.hilt.android'
+    id 'kotlin-parcelize'
     id 'kotlinx-serialization'
     id 'com.google.gms.google-services'
     //
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.azamovhudstc.soplay"
-        minSdk 23
-        targetSdk 33
+        minSdk 24
+        targetSdk 34
         versionCode ((System.currentTimeMillis() / 60000).toInteger())
         versionName "2.0"
 
@@ -84,6 +84,10 @@ dependencies {
 
     implementation 'com.airbnb.android:lottie:5.2.0'
     implementation "androidx.core:core-splashscreen:1.0.0"
+
+    implementation project(path: ':data')
+    implementation project(path: ':domain')
+    implementation project(path: ':tv')
 
     /**
      * Navigation Fragment

@@ -39,45 +39,45 @@ import kotlin.collections.ArrayList
 import kotlin.reflect.KFunction
 
 
-@SuppressLint("RestrictedApi")
-fun applyDynamicColors(
-    useMaterialYou: Boolean,
-    context: Context,
-    useOLED: Boolean,
-    bitmap: Bitmap? = null,
-    useCustom: Int? = null
-): Boolean {
-    val builder = DynamicColorsOptions.Builder()
-    var needMaterial = true
-
-    // Set content-based source if a bitmap is provided
-    if (bitmap != null) {
-        builder.setContentBasedSource(bitmap)
-        needMaterial = false
-    } else if (useCustom != null) {
-        builder.setContentBasedSource(bitmap!!)
-        needMaterial = false
-    }
-
-    if (useOLED) {
-    }
-    if (needMaterial && !useMaterialYou) return true
-
-    // Build the options
-    val options = builder.build()
-
-    // Apply the dynamic colors to the activity
-    val activity = context as Activity
-    DynamicColors.applyToActivityIfAvailable(activity, options)
-
-    if (useOLED) {
-        val options2 = DynamicColorsOptions.Builder()
-            .build()
-        DynamicColors.applyToActivityIfAvailable(activity, options2)
-    }
-
-    return false
-}
+//@SuppressLint("RestrictedApi")
+//fun applyDynamicColors(
+//    useMaterialYou: Boolean,
+//    context: Context,
+//    useOLED: Boolean,
+//    bitmap: Bitmap? = null,
+//    useCustom: Int? = null
+//): Boolean {
+//    val builder = DynamicColorsOptions.Builder()
+//    var needMaterial = true
+//
+//    // Set content-based source if a bitmap is provided
+//    if (bitmap != null) {
+//        builder.setContentBasedSource(bitmap)
+//        needMaterial = false
+//    } else if (useCustom != null) {
+//        builder.setContentBasedSource(bitmap!!)
+//        needMaterial = false
+//    }
+//
+//    if (useOLED) {
+//    }
+//    if (needMaterial && !useMaterialYou) return true
+//
+//    // Build the options
+//    val options = builder.build()
+//
+//    // Apply the dynamic colors to the activity
+//    val activity = context as Activity
+//    DynamicColors.applyToActivityIfAvailable(activity, options)
+//
+//    if (useOLED) {
+//        val options2 = DynamicColorsOptions.Builder()
+//            .build()
+//        DynamicColors.applyToActivityIfAvailable(activity, options2)
+//    }
+//
+//    return false
+//}
 
 
 @RequiresApi(Build.VERSION_CODES.O)
