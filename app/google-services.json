@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "495953409406",
+    "firebase_url": "https://soplay-bd7c8-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "soplay-bd7c8",
     "storage_bucket": "soplay-bd7c8.appspot.com"
   },
@@ -9,7 +10,26 @@
       "client_info": {
         "mobilesdk_app_id": "1:495953409406:android:3e4ea1383be0f8edfcef2f",
         "android_client_info": {
-          "package_name": "com.azamovhudstc.soplay"
+          "package_name": "com.azamovme.soplay"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCpnr-bbKv78VhC3jhDihcjI3MzcwVObY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:495953409406:android:1393ac376dd9f5adfcef2f",
+        "android_client_info": {
+          "package_name": "com.azamovme.soplay"
         }
       },
       "oauth_client": [],

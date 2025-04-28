@@ -399,7 +399,7 @@
 
             <view
                 android:id="@+id/exo_progress"
-                class="com.azamovhudstc.soplay.ui.activity.PlayerActivity$ExtendedTimeBar"
+                class="com.azamovme.soplay.ui.activity.PlayerActivity$ExtendedTimeBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"

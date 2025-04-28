@@ -26,7 +26,6 @@
         android:layout_height="match_parent">
 
 
-
         <View
             android:id="@+id/exo_forward_area"
             android:layout_width="300dp"
@@ -209,28 +208,27 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1" />
-
-                <ToggleButton
-                    android:id="@+id/subs_toggle_btn"
-                    android:layout_width="28dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text=""
-                    android:textOff=""
-                    android:textOn=""
-                    android:textSize="0sp"
-                    android:visibility="gone"
-                    tools:ignore="TouchTargetSizeCheck" />
-
-                <ImageView
-                    android:id="@+id/rotate"
+                <ImageButton
+                    android:id="@+id/exo_rotate"
                     android:layout_width="26dp"
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_gravity="center"
                     android:background="@drawable/background_selector"
                     android:src="@drawable/ic_round_screen_rotation_alt_24"
-                    android:visibility="gone" />
+                    android:visibility="visible" />
+                <ImageButton
+                    android:id="@+id/exo_screen"
+                    android:layout_width="26dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_gravity="center"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="@drawable/background_selector"
+                    android:src="@drawable/ic_round_fullscreen_24"
+                    android:visibility="visible" />
+
+
 
 
             </LinearLayout>
@@ -238,7 +236,7 @@
 
             <view
                 android:id="@+id/exo_progress"
-                class="com.azamovhudstc.soplay.ui.activity.PlayerActivity$ExtendedTimeBar"
+                class="com.azamovme.soplay.ui.activity.PlayerActivity$ExtendedTimeBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"

@@ -22,7 +22,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
 
-            <com.azamovhudstc.soplay.utils.CustomViewPagerScroll
+            <com.azamovme.soplay.utils.CustomViewPagerScroll
                 android:id="@+id/viewpagerPopularMovies"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

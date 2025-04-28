@@ -35,7 +35,7 @@
         <!--        <item name="fgl_elevation">3dp</item>-->
 
 
-        <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="s">1000</item>
+        <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="s">4000</item>
         <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="s">
             @drawable/anim_splash
         </item>

@@ -8,14 +8,14 @@
 
     <fragment
         android:id="@+id/navigation_tv"
-        android:name="com.azamovhudstc.soplay.ui.screens.tv.randomtv.RandomTvScreen"
+        android:name="com.azamovme.soplay.ui.screens.tv.randomtv.RandomTvScreen"
         android:label="Telekanallar"
         tools:layout="@layout/random_tv_screen">
 
     </fragment>
     <fragment
         android:id="@+id/navigation_favorite"
-        android:name="com.azamovhudstc.soplay.ui.screens.favorite.FavoriteScreen"
+        android:name="com.azamovme.soplay.ui.screens.favorite.FavoriteScreen"
         android:label="@string/title_favorite"
         tools:layout="@layout/favorite_screen">
         <action
@@ -30,7 +30,7 @@
 
     <fragment
         android:id="@+id/navigation_latest"
-        android:name="com.azamovhudstc.soplay.ui.screens.home.HomeScreen"
+        android:name="com.azamovme.soplay.ui.screens.home.HomeScreen"
         android:label="@string/title_latest"
         tools:layout="@layout/home_screen">
         <action
@@ -45,7 +45,7 @@
 
     <fragment
         android:id="@+id/navigation_trending"
-        android:name="com.azamovhudstc.soplay.ui.screens.trending.TrendingScreen"
+        android:name="com.azamovme.soplay.ui.screens.trending.TrendingScreen"
         android:label="@string/title_trending"
         tools:layout="@layout/trending_screen">
         <action
@@ -59,7 +59,7 @@
     </fragment>
     <fragment
         android:id="@+id/navigation_search"
-        android:name="com.azamovhudstc.soplay.ui.screens.search.SearchScreen"
+        android:name="com.azamovme.soplay.ui.screens.search.SearchScreen"
         android:label="@string/title_search"
         tools:layout="@layout/search_screen">
         <action
@@ -74,13 +74,13 @@
 
     <fragment
         android:id="@+id/navigation_settings"
-        android:name="com.azamovhudstc.soplay.ui.screens.settings.SettingsScreen"
+        android:name="com.azamovme.soplay.ui.screens.settings.SettingsScreen"
         android:label="Sozlamalar">
     </fragment>
 
     <fragment
         android:id="@+id/homeScreen"
-        android:name="com.azamovhudstc.soplay.ui.screens.home.HomeScreen"
+        android:name="com.azamovme.soplay.ui.screens.home.HomeScreen"
         android:label="SoPlay"
         tools:layout="@layout/home_screen">
         <action
@@ -89,21 +89,21 @@
     </fragment>
     <fragment
         android:id="@+id/detailScreen"
-        android:name="com.azamovhudstc.soplay.ui.screens.detail.DetailScreen"
+        android:name="com.azamovme.soplay.ui.screens.detail.DetailScreen"
         android:label="DetailScreen" />
 
     <fragment
         android:id="@+id/searchScreen"
-        android:name="com.azamovhudstc.soplay.ui.screens.search.SearchScreen"
+        android:name="com.azamovme.soplay.ui.screens.search.SearchScreen"
         android:label="Search"
         tools:layout="@layout/search_screen" />
     <fragment
         android:id="@+id/popularSeeAllScreen"
-        android:name="com.azamovhudstc.soplay.ui.screens.home.seeall.PopularSeeAllScreen"
+        android:name="com.azamovme.soplay.ui.screens.home.seeall.PopularSeeAllScreen"
         android:label="PopularSeeAllScreen" />
     <fragment
         android:id="@+id/randomTvScreen"
-        android:name="com.azamovhudstc.soplay.ui.screens.tv.randomtv.RandomTvScreen"
+        android:name="com.azamovme.soplay.ui.screens.tv.randomtv.RandomTvScreen"
         android:label="random_tv_screen"
         tools:layout="@layout/random_tv_screen" />
 </navigation>

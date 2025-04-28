@@ -139,7 +139,7 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <com.azamovhudstc.soplay.utils.DoubleTapPlayerView
+    <com.azamovme.soplay.utils.DoubleTapPlayerView
         android:id="@+id/exoPlayerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -154,7 +154,7 @@
         app:show_timeout="5000"
         app:use_controller="true" />
 
-    <com.azamovhudstc.soplay.utils.DoubleTapOverlay
+    <com.azamovme.soplay.utils.DoubleTapOverlay
         android:id="@+id/double_tap_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

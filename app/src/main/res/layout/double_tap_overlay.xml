@@ -14,7 +14,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.azamovhudstc.soplay.utils.CircleClipTapView
+    <com.azamovme.soplay.utils.CircleClipTapView
         android:id="@+id/circle_clip_tap_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

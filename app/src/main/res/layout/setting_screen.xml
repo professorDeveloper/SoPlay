@@ -82,7 +82,7 @@
             android:paddingEnd="32dp">
 
 
-            <com.azamovhudstc.soplay.utils.Xpandable
+            <com.azamovme.soplay.utils.Xpandable
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -241,10 +241,10 @@
                     android:layout_marginEnd="-16dp"
                     android:layout_marginBottom="8dp"
                     android:background="?android:attr/listDivider" />
-            </com.azamovhudstc.soplay.utils.Xpandable>
+            </com.azamovme.soplay.utils.Xpandable>
 
 
-            <com.azamovhudstc.soplay.utils.Xpandable
+            <com.azamovme.soplay.utils.Xpandable
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -373,7 +373,7 @@
                     app:showText="false"
                     app:thumbTint="@color/button_switch_track" />
 
-            </com.azamovhudstc.soplay.utils.Xpandable>
+            </com.azamovme.soplay.utils.Xpandable>
 
 
             <Button
