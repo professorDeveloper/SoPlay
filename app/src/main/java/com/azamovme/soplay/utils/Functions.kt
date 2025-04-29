@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
+import com.azamovme.soplay.R
 import com.azamovme.soplay.app.App
 import com.azamovme.soplay.data.response.MovieInfo
 import com.azamovme.soplay.ui.activity.MainActivity

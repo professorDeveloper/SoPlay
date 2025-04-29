@@ -84,7 +84,7 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layout_constraintEnd_toEndOf="parent"
 
-        app:spanCount="2"
+        app:spanCount="3"
         tools:listitem="@layout/anime_item" />
 
 

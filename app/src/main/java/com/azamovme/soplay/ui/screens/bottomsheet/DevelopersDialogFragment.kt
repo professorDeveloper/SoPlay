@@ -14,13 +14,13 @@ class DevelopersDialogFragment : BottomSheetDialogFragment() {
     private var _binding: BottomSheetDevelopersBinding? = null
     private val binding get() = _binding!!
 
-    private val developers = arrayListOf(
-        Developer(
-            "Azamov X ㋡",
-            "https://github.com/professorDeveloper/Scraping-Tutorial/assets/108933534/b7c85044-3c9c-4d2f-8146-529e380ca3e9",
-            "Owner",
-            "https://t.me/stc_android"
-        ),
+//    private val developers = arrayListOf(
+//        Developer(
+//            "Azamov X ㋡",
+//            "https://github.com/professorDeveloper/Scraping-Tutorial/assets/108933534/b7c85044-3c9c-4d2f-8146-529e380ca3e9",
+//            "Owner",
+//            "https://t.me/stc_android"
+//        ),
 ////        Developer(
 ////            "KBOT09",
 ////            "https://avatars.githubusercontent.com/u/88382789?v=4",
@@ -34,7 +34,7 @@ class DevelopersDialogFragment : BottomSheetDialogFragment() {
 ////            "https://t.me/uzmodder"
 ////        ),
 //
-        )
+//        )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,7 +47,7 @@ class DevelopersDialogFragment : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.devsRecyclerView.adapter = DevelopersAdapter(developers,this)
+        binding.devsRecyclerView.adapter = DevelopersAdapter(arrayListOf(),this)
         binding.devsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
     }
 

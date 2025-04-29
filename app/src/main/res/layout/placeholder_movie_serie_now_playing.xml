@@ -3,19 +3,26 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:weightSum="2">
+    android:weightSum="3">
 
     <View
         android:layout_width="0dp"
-        android:layout_height="260dp"
+        android:layout_height="200dp"
         android:layout_margin="5dp"
         android:background="@drawable/place_holder_bg"
         android:layout_weight="1" />
 
     <View
         android:layout_width="0dp"
-        android:layout_height="260dp"
+        android:layout_height="200dp"
         android:layout_margin="5dp"
         android:background="@drawable/place_holder_bg"
         android:layout_weight="1" />
+    <View
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/place_holder_bg"
+        android:layout_weight="1" />
+
 </LinearLayout>

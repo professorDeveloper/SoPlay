@@ -18,7 +18,7 @@ interface LinkDao {
     fun isItFav(link: String, sourceName: String): Boolean
 
     @Query("SELECT * FROM fav_table where favId = :link AND favSource = :sourceName")
-    fun getFav(link: String, sourceName: String): FavRoomModel
+    fun getFav(link: String?, sourceName: String): FavRoomModel
 
 
 }

@@ -106,6 +106,12 @@ class PlayerActivityTv : AppCompatActivity() {
 
             else -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         }
+        if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE) {
+            binding.player.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_HEIGHT
+        } else {
+            binding.player.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH
+        }
+
     }
 
     private fun parseExtra() {

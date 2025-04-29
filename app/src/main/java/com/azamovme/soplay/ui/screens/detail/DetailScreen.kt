@@ -35,7 +35,7 @@ class DetailScreen : Fragment() {
 
     private lateinit var bottomSheet: com.google.android.material.bottomsheet.BottomSheetDialog
     private lateinit var epList: MutableList<Pair<String, String>>
-    private lateinit var epIndex: String
+    private  var epIndex: String = ""
     private var epIndexForEp: Int = 0
     private fun inFav() {
         println("In Fav")
@@ -77,10 +77,12 @@ class DetailScreen : Fragment() {
                     }
 
                 }
+
                 Resource.Loading -> {
                     binding.progress.show()
                     binding.container.hide()
                 }
+
                 is Resource.Success -> {
                     // Check Favorite
                     data.href.let { viewModel.isFavMovie(it) }
@@ -144,16 +146,20 @@ class DetailScreen : Fragment() {
                     }
 
 
-                    binding.epTextView.text = response.options.get(0).first
+                    if (response.options.isNotEmpty()) {
+                        binding.epTextView.text =
+                            if (response.options.size == 1) "1 Episode" else "${response.options.size} Episodes"
+                        epList = response.options.toMutableList()
+                        epIndex = epList.first().first
+                    }
                     binding.tvDescriptionValue.text = response.description
                     binding.durationValue.text = response.duration
 
                     binding.yearValue.text = response.year
                     binding.countryValue.text = response.country
-                    epList = response.options.toMutableList()
-                    epIndex = epList.first().first
-                    setUpEpisodeSheet(it.data)
-
+                    if (epList.size != 0) {
+                        setUpEpisodeSheet(it.data)
+                    }
                     binding.epCard.setOnClickListener {
                         bottomSheet.show()
                     }
@@ -163,58 +169,59 @@ class DetailScreen : Fragment() {
     }
 
     private fun setUpEpisodeSheet(response: FullMovieData) {
-
-        bottomSheet =
-            com.google.android.material.bottomsheet.BottomSheetDialog(
-                requireContext()
-            )
-        bottomSheet.setContentView(R.layout.select_season_bottom_sheet_layout)
-        bottomSheet.behavior.peekHeight = bottomSheet.behavior.maxHeight
-        bottomSheet.behavior.state = BottomSheetBehavior.STATE_EXPANDED
-        bottomSheet.behavior.isDraggable = false
-        val list =
-            bottomSheet.findViewById<android.widget.ListView>(R.id.listView)
-        val editText =
-            bottomSheet.findViewById<android.widget.EditText>(R.id.text_input_edit_text)
-
-        binding.epTextView.text =
-            resources.getString(R.string.episode_text, epIndex)
-
-        // Episodes aye
-        epList = response.options.toMutableList()
-        epIndex = epList.first().first
-
-
-        // Setup the views that uses the above
-        // 1. Ep text
-        binding.epTextView.text =
-            resources.getString(R.string.episode_text, epIndex)
-
-
-        val adapterForEpList = android.widget.ArrayAdapter(
-            requireContext(), android.R.layout.simple_spinner_dropdown_item,
-            epList.map { it.first }
-        ).apply {
-            list?.adapter = this
-        }
-
-        // Search
-        editText?.addTextChangedListener {
-            val searchedText = it.toString()
-            adapterForEpList.filter.filter(searchedText)
-        }
-
-
-        val pos = adapterForEpList.getPosition(epIndex)
-        list?.setSelection(pos)
-        list?.setOnItemClickListener { _, view, position, _ ->
-            val episodeString = (view as android.widget.TextView).text.toString()
-            epIndex = episodeString
-            epIndexForEp = position
+        if (response.options.isNotEmpty() && epList.size != 0) {
+            bottomSheet =
+                com.google.android.material.bottomsheet.BottomSheetDialog(
+                    requireContext()
+                )
+            bottomSheet.setContentView(R.layout.select_season_bottom_sheet_layout)
+            bottomSheet.behavior.peekHeight = bottomSheet.behavior.maxHeight
+            bottomSheet.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheet.behavior.isDraggable = false
+            val list =
+                bottomSheet.findViewById<android.widget.ListView>(R.id.listView)
+            val editText =
+                bottomSheet.findViewById<android.widget.EditText>(R.id.text_input_edit_text)
 
             binding.epTextView.text =
                 resources.getString(R.string.episode_text, epIndex)
-            bottomSheet.dismiss()
+
+            // Episodes aye
+            epList = response.options.toMutableList()
+            epIndex = epList.first().first
+
+
+            // Setup the views that uses the above
+            // 1. Ep text
+            binding.epTextView.text =
+                resources.getString(R.string.episode_text, epIndex)
+
+
+            val adapterForEpList = android.widget.ArrayAdapter(
+                requireContext(), android.R.layout.simple_spinner_dropdown_item,
+                epList.map { it.first }
+            ).apply {
+                list?.adapter = this
+            }
+
+            // Search
+            editText?.addTextChangedListener {
+                val searchedText = it.toString()
+                adapterForEpList.filter.filter(searchedText)
+            }
+
+
+            val pos = adapterForEpList.getPosition(epIndex)
+            list?.setSelection(pos)
+            list?.setOnItemClickListener { _, view, position, _ ->
+                val episodeString = (view as android.widget.TextView).text.toString()
+                epIndex = episodeString
+                epIndexForEp = position
+
+                binding.epTextView.text =
+                    resources.getString(R.string.episode_text, epIndex)
+                bottomSheet.dismiss()
+            }
         }
 
     }

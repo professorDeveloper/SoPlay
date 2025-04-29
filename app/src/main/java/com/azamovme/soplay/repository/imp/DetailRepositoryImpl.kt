@@ -1,5 +1,6 @@
 package com.azamovme.soplay.repository.imp
 
+import android.util.Log
 import com.azamovme.soplay.app.App
 import com.azamovme.soplay.data.response.FullMovieData
 import com.azamovme.soplay.data.response.MovieInfo
@@ -84,8 +85,8 @@ class DetailRepositoryImpl : DetailRepository {
             val videoDiv = document.selectFirst("#cn-content")
             val iframeElement = videoDiv?.selectFirst("iframe")
             val videoUrl = iframeElement?.attr("src")
-            val parsedUrl = parseUrl(videoUrl!!)
-            //Buni Sindirish imkonsiz
+            Log.d("GGG", "parseMovieDetailByHref:${videoUrl} ")
+            val parsedUrl = parseUrl(videoUrl?: "")
 
             val data = FullMovieData(
                 year = year,

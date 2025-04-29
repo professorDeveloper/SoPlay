@@ -27,14 +27,19 @@ class FavoriteRepositoryImpl @Inject constructor(private val dao: LinkDao) : Fav
         }
     }
 
-    override suspend fun checkFavoriteFromRoom(animeLink: String, sourceName: String): Boolean {
-        return dao.isItFav(animeLink, sourceName)
+    override suspend fun checkFavoriteFromRoom(animeLink: String?, sourceName: String): Boolean {
+        return dao.isItFav(animeLink?:"hh", sourceName)
     }
 
-    override suspend fun removeFavFromRoom(animeLink: String, sourceName: String) {
-        val foundFav = dao.getFav(animeLink, sourceName)
-        dao.deleteOne(foundFav)
-    }
+    override suspend fun removeFavFromRoom(animeLink: String?, sourceName: String) {
+// if animeLink is null, bail out immediately
+        animeLink ?: return
+
+        // getFav should return a nullable FavRoomModel?
+        val foundFav: FavRoomModel? = dao.getFav(animeLink, sourceName)
+        if (foundFav != null) {
+            dao.deleteOne(foundFav)
+        }    }
 
     override suspend fun addFavToRoom(favRoomModel: FavRoomModel) {
         dao.insert(favRoomModel)
