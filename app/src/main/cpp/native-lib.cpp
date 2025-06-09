@@ -63,7 +63,7 @@ Java_com_azamovme_soplay_utils_NativeHelper_getDialogMessage(JNIEnv* env, jclass
 }
 
 // "Exit"
-JNIEXPORT jstring JNICALL
+[[maybe_unused]] JNIEXPORT jstring JNICALL
 Java_com_azamovme_soplay_utils_NativeHelper_getButtonTextExit(JNIEnv* env, jclass) {
     return makeSimple(env, "Exit");
 }

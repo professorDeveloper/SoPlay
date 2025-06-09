@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.azamovme.soplay.databinding.BottomSheetDevelopersBinding
 import com.azamovme.soplay.ui.screens.bottomsheet.adapter.DevelopersAdapter
-import com.azamovme.soplay.utils.Developer
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class DevelopersDialogFragment : BottomSheetDialogFragment() {

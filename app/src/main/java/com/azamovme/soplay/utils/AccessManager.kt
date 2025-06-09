@@ -37,17 +37,19 @@ object AccessManager {
         return try {
             val snap = ref.get().await()
             if (!snap.exists()) {
-                ref.setValue(mapOf(
-                    "uuid"     to uuid,
-                    "isDostup" to true
-                )).await()
+                ref.setValue(
+                    mapOf(
+                        "uuid" to uuid,
+                        "isDostup" to true
+                    )
+                ).await()
                 true
             } else {
                 snap.child("isDostup")
                     .getValue(Boolean::class.java) == true
             }
         } catch (e: CancellationException) {
-            throw e
+            return false
         } catch (e: Exception) {
             Log.e("AccessManager", "initAndCheckDostup failed", e)
             false

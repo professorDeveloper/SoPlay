@@ -194,25 +194,6 @@ class PlayerViewModel @Inject constructor(
     }
 
 
-
-    private suspend fun reGenerateMp4(link: String) = withContext(Dispatchers.IO) {
-        println(link)
-        val requests = Requests(baseClient = Utils.httpClient, responseParser = parser)
-        val response = requests.get(
-            link, headers = mapOf(
-                "Accept" to "/*",
-                "Host" to "asilmedia.org",
-                "Cache-Control" to "no-cache",
-                "Pragma" to "no-cache",
-                "Connection" to "keep-alive",
-                "Upgrade-Insecure-Requests" to "1",
-
-                )
-        )
-        return@withContext response.url.toString()
-
-    }
-
     private fun parseUrl(url: String): String? {
         // Split the URL using "?" as the delimiter
         val parts = url.split("?")

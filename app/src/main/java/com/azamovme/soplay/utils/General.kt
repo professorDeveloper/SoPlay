@@ -9,11 +9,13 @@
 
 package com.azamovme.soplay.utils
 
+import android.Manifest
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Paint
@@ -32,6 +34,7 @@ import android.view.animation.ScaleAnimation
 import android.widget.ArrayAdapter
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.core.app.ActivityCompat
 import androidx.core.math.MathUtils
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -484,11 +487,29 @@ open class NoPaddingArrayAdapter<T>(context: Context, layoutId: Int, items: List
         return view
     }
 }
-@SuppressLint("MissingPermission", "ServiceCast")
-fun getDevicePhoneNumber(context: Context): String? {
-    val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-    return tm.line1Number
+@SuppressLint("MissingPermission")
+fun getDevicePhoneNumber(context: Context): String {
+    val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+
+    // Avval permission tekshiriladi
+    if (ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.READ_PHONE_NUMBERS
+        ) != PackageManager.PERMISSION_GRANTED &&
+        ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.READ_PHONE_STATE
+        ) != PackageManager.PERMISSION_GRANTED
+    ) {
+        return "Permission not granted"
+    }
+
+    // Raqamni olishga urinamiz
+    val number = telephonyManager.line1Number
+
+    return if (!number.isNullOrEmpty()) number else "Number not available"
 }
+
 fun savePhoneDataIfNotExists(phoneData: PhoneData) {
     val firestore = FirebaseFirestore.getInstance()
     val imeiCollection = firestore.collection("imei")
