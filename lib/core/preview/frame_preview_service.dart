@@ -172,7 +172,10 @@ class FramePreviewService {
       headers: headers,
       durationMs: durationMs,
       count: gridCount(durationMs, metered: metered),
-      pace: Duration(milliseconds: metered ? 900 : 250),
+      // One frame a second on Wi-Fi: each is a second hardware decoder and a
+      // segment download while the real stream plays, and back-to-back
+      // extraction competed with it on high-bitrate files.
+      pace: Duration(milliseconds: metered ? 900 : 1000),
       cacheKey: cacheKey,
       positionMs: positionMs,
     )..start();

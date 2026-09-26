@@ -276,14 +276,14 @@ extension _PlayerGestures on _PlayerPageState {
       final delta = -(d.delta.dy) / (constraints.maxHeight * 0.7);
       if (_dragSwipeType == _SwipeType.brightness) {
         _brightness = (_brightness + delta).clamp(0.0, 1.0).toDouble();
-        unawaited(_setSystemBrightness(_brightness));
+        _pushSystemLevels(brightness: true);
         _swipeIndicator.value = _SwipeIndicator(
           _SwipeType.brightness,
           _brightness,
         );
       } else {
         _volume = (_volume + delta).clamp(0.0, 1.0).toDouble();
-        unawaited(_setSystemVolume(_volume));
+        _pushSystemLevels(volume: true);
         _swipeIndicator.value = _SwipeIndicator(_SwipeType.volume, _volume);
       }
     }

@@ -13,7 +13,9 @@ extension _PlayerHistory on _PlayerPageState {
   void _scheduleHistorySave() {
     _historyTimer?.cancel();
     _historyTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      _saveHistory();
+      // Quiet: this tick is for surviving a kill, not for the screens under
+      // the player, which catch up from the save on pause and on exit.
+      _saveHistory(notify: false);
       _jellyfinProgress();
       // Deliberately not inside _saveHistory: that returns early for a
       // finished episode, a title with no url and a session under ten seconds,
@@ -81,7 +83,7 @@ extension _PlayerHistory on _PlayerPageState {
     return label.isEmpty ? 'Episode ${ep.episode}' : label;
   }
 
-  void _saveHistory() {
+  void _saveHistory({bool notify = true}) {
     if (!WatchProgress.countsAsAViewing(_playbackWatch.elapsed)) return;
 
     // Time watched since the last save, banked before anything can return
@@ -113,26 +115,29 @@ extension _PlayerHistory on _PlayerPageState {
     // PlayerArgs.offlineEpisodeNumber.
     final offlineEp = widget.args.offlineEpisodeNumber;
 
-    _history.save(
-      HistoryItem(
-        contentUrl: contentUrl,
-        provider: widget.args.provider,
-        title: widget.args.title,
-        thumbnail: widget.args.thumbnail,
-        isSerial: widget.args.isSerial || offlineEp != null,
-        episodeIndex: widget.args.isSerial ? _episodeIndex : null,
-        episodeNumber: ep?.episode ?? offlineEp,
-        episodeLabel: ep?.label ?? widget.args.offlineEpisodeLabel,
-        positionMs: posMs,
-        durationMs: durMs,
-        watchedAt: DateTime.now().millisecondsSinceEpoch,
-        // The last episode on offer: finishing it finishes the series.
-        isFinale:
-            widget.args.isSerial &&
-            _episodes.length > 1 &&
-            _episodeIndex == _episodes.length - 1,
-      ),
+    final item = HistoryItem(
+      contentUrl: contentUrl,
+      provider: widget.args.provider,
+      title: widget.args.title,
+      thumbnail: widget.args.thumbnail,
+      isSerial: widget.args.isSerial || offlineEp != null,
+      episodeIndex: widget.args.isSerial ? _episodeIndex : null,
+      episodeNumber: ep?.episode ?? offlineEp,
+      episodeLabel: ep?.label ?? widget.args.offlineEpisodeLabel,
+      positionMs: posMs,
+      durationMs: durMs,
+      watchedAt: DateTime.now().millisecondsSinceEpoch,
+      // The last episode on offer: finishing it finishes the series.
+      isFinale:
+          widget.args.isSerial &&
+          _episodes.length > 1 &&
+          _episodeIndex == _episodes.length - 1,
     );
+    if (notify) {
+      _history.save(item);
+    } else {
+      _history.saveQuietly(item);
+    }
   }
 
   /// Adds the stretch since the last tick to the running totals.
@@ -252,7 +257,9 @@ extension _PlayerHistory on _PlayerPageState {
 
   /// Trakt is for films and series: not live channels, not trailers.
   bool get _traktApplies =>
-      !_isLive && widget.args.provider != 'trailer' && widget.args.contentUrl != null;
+      !_isLive &&
+      widget.args.provider != 'trailer' &&
+      widget.args.contentUrl != null;
 
   double get _playbackPercent {
     final v = _controller?.value;

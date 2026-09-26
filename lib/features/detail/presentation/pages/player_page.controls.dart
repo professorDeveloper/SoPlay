@@ -564,12 +564,18 @@ extension _PlayerControls on _PlayerPageState {
       child: ColoredBox(
         color: Colors.black,
         // Clipped, so a zoomed frame stays inside the video box and never
-        // paints under the controls or the subtitles. At 1.0 Transform.scale is
-        // an identity and costs nothing, so there is no branch for it.
+        // paints under the controls or the subtitles.
         child: ClipRect(
           child: Transform.scale(
             scale: _videoZoom,
-            filterQuality: FilterQuality.medium,
+            // Only while zoomed. With ANY filterQuality, RenderTransform paints
+            // through an ImageFilterLayer even at scale 1.0 (its identity
+            // shortcut is taken only when filterQuality is null), so the whole
+            // video texture went through an offscreen pass and a resample on
+            // every frame the screen drew.
+            filterQuality: _videoZoom == _kMinZoom
+                ? null
+                : FilterQuality.medium,
             child: _FittedVideo(controller: c, fit: _fit),
           ),
         ),
@@ -1189,30 +1195,37 @@ extension _PlayerControls on _PlayerPageState {
         ? ExcludeFocus(excluding: !_controlsVisible, child: overlay)
         : overlay;
 
-    if (!isBuffering) return gated;
     // A stall while the controls are hidden used to show nothing at all — the
     // spinner lived inside the overlay and faded out with it. This one sits
     // outside the fade and cross-fades against it, so exactly one buffering
     // indicator is on screen: this, or the ring on the play button.
-    Widget spinner = const IgnorePointer(
-      child: Center(
-        child: SizedBox(
-          width: 44,
-          height: 44,
-          child: CircularProgressIndicator(
-            color: Colors.white,
-            strokeWidth: 2.8,
+    Widget? spinner;
+    if (isBuffering) {
+      spinner = const IgnorePointer(
+        child: Center(
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2.8,
+            ),
           ),
         ),
-      ),
-    );
-    if (!isDesktopPlatform) {
-      spinner = FadeTransition(
-        opacity: ReverseAnimation(_controlsAnimation),
-        child: spinner,
       );
+      if (!isDesktopPlatform) {
+        spinner = FadeTransition(
+          opacity: ReverseAnimation(_controlsAnimation),
+          child: spinner,
+        );
+      }
     }
-    return Stack(fit: StackFit.expand, children: [gated, spinner]);
+    // One shape whether buffering or not. Returning `gated` bare in one state
+    // and inside a Stack in the other changed the widget type at this slot, so
+    // every buffering flip unmounted and re-inflated the whole overlay —
+    // slider, buttons, focus and all. media_kit reports buffering around every
+    // seek, so each ±10 s tap rebuilt the controls from scratch twice.
+    return Stack(fit: StackFit.expand, children: [gated, ?spinner]);
   }
 
   /// One control of the cluster around play, or null when it does not apply.

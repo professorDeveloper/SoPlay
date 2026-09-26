@@ -78,7 +78,7 @@ void main() {
     });
 
     test('the floor is the shared rule, not a number spelled out here', () {
-      final body = bodyOf(history, 'void _saveHistory()');
+      final body = bodyOf(history, 'void _saveHistory({bool notify = true})');
       expect(body, contains('WatchProgress.countsAsAViewing'));
       expect(
         body,
