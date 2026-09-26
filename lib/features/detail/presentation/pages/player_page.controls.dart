@@ -201,6 +201,9 @@ extension _PlayerControls on _PlayerPageState {
     }
 
     _controller?.addListener(listener);
+    // Checked once now as well: media_kit shows the seek target at once, so
+    // the position may already be there and no later change would say so.
+    listener();
     Future.delayed(const Duration(seconds: 1), () {
       // The user can pop the player within this second — _sliderDragValue is
       // disposed by then, so touching it would throw.
@@ -2116,67 +2119,73 @@ extension _PlayerControls on _PlayerPageState {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ValueListenableBuilder<double?>(
-                valueListenable: _sliderDragValue,
-                builder: (_, dragVal, _) {
-                  return ValueListenableBuilder<VideoPlayerValue>(
-                    valueListenable: c,
-                    builder: (_, value, _) {
-                      if (_isLive) return _buildLiveBar();
-                      final duration = value.duration.inMilliseconds == 0
-                          ? Duration.zero
-                          : value.duration;
-                      final maxMs = duration.inMilliseconds.toDouble().clamp(
-                        1.0,
-                        double.infinity,
-                      );
-                      final sliderVal =
-                          dragVal ??
-                          (duration.inMilliseconds == 0
-                              ? 0.0
-                              : value.position.inMilliseconds
-                                    .clamp(0, duration.inMilliseconds)
-                                    .toDouble());
-                      final displayPos = dragVal != null
-                          ? Duration(milliseconds: dragVal.toInt())
-                          : value.position;
+              // Its own layer: the thumb moves on every playhead tick and on
+              // every drag event (120 Hz on a Samsung S22), and without a
+              // boundary each of those repainted the whole controls overlay —
+              // scrim, title, every icon and its text shadow — not the bar.
+              RepaintBoundary(
+                child: ValueListenableBuilder<double?>(
+                  valueListenable: _sliderDragValue,
+                  builder: (_, dragVal, _) {
+                    return ValueListenableBuilder<VideoPlayerValue>(
+                      valueListenable: c,
+                      builder: (_, value, _) {
+                        if (_isLive) return _buildLiveBar();
+                        final duration = value.duration.inMilliseconds == 0
+                            ? Duration.zero
+                            : value.duration;
+                        final maxMs = duration.inMilliseconds.toDouble().clamp(
+                          1.0,
+                          double.infinity,
+                        );
+                        final sliderVal =
+                            dragVal ??
+                            (duration.inMilliseconds == 0
+                                ? 0.0
+                                : value.position.inMilliseconds
+                                      .clamp(0, duration.inMilliseconds)
+                                      .toDouble());
+                        final displayPos = dragVal != null
+                            ? Duration(milliseconds: dragVal.toInt())
+                            : value.position;
 
-                      return Row(
-                        children: [
-                          IgnorePointer(
-                            child: Text(
-                              _positionLabel(displayPos, duration),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                shadows: _kControlShadow,
+                        return Row(
+                          children: [
+                            IgnorePointer(
+                              child: Text(
+                                _positionLabel(displayPos, duration),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  shadows: _kControlShadow,
+                                ),
                               ),
                             ),
-                          ),
-                          Expanded(
-                            child: _buildSeekBar(
-                              value: value,
-                              sliderVal: sliderVal.clamp(0.0, maxMs),
-                              maxMs: maxMs,
-                              scrubbing: dragVal != null,
-                              previewPosition: displayPos,
-                            ),
-                          ),
-                          IgnorePointer(
-                            child: Text(
-                              _formatDuration(duration),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                shadows: _kControlShadow,
+                            Expanded(
+                              child: _buildSeekBar(
+                                value: value,
+                                sliderVal: sliderVal.clamp(0.0, maxMs),
+                                maxMs: maxMs,
+                                scrubbing: dragVal != null,
+                                previewPosition: displayPos,
                               ),
                             ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
+                            IgnorePointer(
+                              child: Text(
+                                _formatDuration(duration),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  shadows: _kControlShadow,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
               const SizedBox(height: 4),
               if (isDesktopPlatform)

@@ -579,7 +579,18 @@ class _MediaKitController extends PlayerController {
     // first, so by here it is a cheap already-done flag — kept because a
     // controller built any other way still has to initialise before Player().
     _mediaKitUsable();
-    _player = mk.Player();
+    _player = mk.Player(
+      configuration: mk.PlayerConfiguration(
+        // demuxer-max-bytes and demuxer-max-back-bytes: media_kit sets both
+        // from this. A seek inside the demuxer cache is answered from memory
+        // (demuxer-seekable-cache is on whenever the cache is, and media_kit
+        // turns the cache on); one outside it waits for a whole HLS segment
+        // to download before a frame can be decoded. media_kit's 32 MiB held
+        // only ~35–45 s of a 1080p stream either side of the playhead, so
+        // most swipes missed it. Not on TV boxes, the devices short on RAM.
+        bufferSize: isTvPlatform ? 32 * 1024 * 1024 : 64 * 1024 * 1024,
+      ),
+    );
     // No androidAttachSurfaceAfterVideoParameters here, deliberately.
     //
     // Setting it to false does fix the black first frame — the picture was
@@ -623,6 +634,61 @@ class _MediaKitController extends PlayerController {
   final _closed = Completer<void>();
   String? _error;
 
+  /// How often mpv's playhead reaches listeners.
+  ///
+  /// mpv reports `time-pos` on every displayed frame, 24 to 60 times a
+  /// second, and each report rebuilt the seek row, the scrub preview, the
+  /// subtitle layer and the page listener. video_player polls ExoPlayer every
+  /// 100 ms, so this is parity with the platform engine, not a loss: at 100 ms
+  /// the thumb of an episode moves well under a pixel per tick, and
+  /// downloaded subtitles are timed exactly as they are on ExoPlayer.
+  static const Duration _positionInterval = Duration(milliseconds: 100);
+
+  /// How long after a seek a far-off `time-pos` is treated as one that was
+  /// already on its way when the seek was issued, and how far off counts.
+  static const Duration _seekLandingWindow = Duration(seconds: 2);
+  static const Duration _seekLandingSlack = Duration(milliseconds: 1500);
+
+  final Stopwatch _sincePosition = Stopwatch();
+  final Stopwatch _sinceSeek = Stopwatch();
+  Duration? _heldPosition;
+  Duration? _seekTarget;
+  Timer? _positionFlush;
+
+  void _onPosition(Duration p) {
+    final target = _seekTarget;
+    if (target != null) {
+      // Showing a pre-seek tick would snap the thumb back to where the
+      // finger left it, then forward again.
+      final stale = (p - target).abs() > _seekLandingSlack;
+      if (stale && _sinceSeek.elapsed < _seekLandingWindow) return;
+      _seekTarget = null;
+    }
+    if (_sincePosition.isRunning &&
+        _sincePosition.elapsed < _positionInterval) {
+      _heldPosition = p;
+      // Trailing edge, so the last position before a pause or the end of
+      // the file still lands.
+      _positionFlush ??= Timer(_positionInterval - _sincePosition.elapsed, () {
+        _positionFlush = null;
+        final held = _heldPosition;
+        if (held != null) _flushPosition(held);
+      });
+      return;
+    }
+    _flushPosition(p);
+  }
+
+  void _flushPosition(Duration p) {
+    _positionFlush?.cancel();
+    _positionFlush = null;
+    _heldPosition = null;
+    _sincePosition
+      ..reset()
+      ..start();
+    _emit(value.copyWith(position: p));
+  }
+
   @override
   Future<void> initialize() async {
     _wire();
@@ -638,6 +704,21 @@ class _MediaKitController extends PlayerController {
         );
       } catch (e) {
         debugPrint('[player] hls-bitrate not applied: $e');
+      }
+      // media_kit creates every Player with hr-seek=yes and
+      // hr-seek-framedrop=no. hr-seek stays: every seek here is an absolute
+      // one, and a keyframe seek on a stream with 6–10 s GOPs can land a
+      // +10 s skip back where it started. framedrop goes back to mpv's own
+      // default: the frames between the keyframe and the target are thrown
+      // away anyway, and with it off the decoder had to decode every one of
+      // them first — the freeze after each swipe and seek-bar release. Safe
+      // here because nothing sets a --vf filter (colour profiles and shaders
+      // act in the VO), the one case mpv's manual says framedrop can skip
+      // the target frame.
+      try {
+        await platform.setProperty('hr-seek-framedrop', 'yes');
+      } catch (e) {
+        debugPrint('[player] hr-seek-framedrop not applied: $e');
       }
     }
     await _player.open(
@@ -736,11 +817,7 @@ class _MediaKitController extends PlayerController {
 
   void _wire() {
     _subs
-      ..add(
-        _player.stream.position.listen(
-          (p) => _emit(value.copyWith(position: p)),
-        ),
-      )
+      ..add(_player.stream.position.listen(_onPosition))
       ..add(
         _player.stream.duration.listen(
           (d) => _emit(value.copyWith(duration: d)),
@@ -953,8 +1030,25 @@ class _MediaKitController extends PlayerController {
   Future<void> pause() => _fallback?.pause() ?? _player.pause();
 
   @override
-  Future<void> seekTo(Duration position) =>
-      _fallback?.seekTo(position) ?? _player.seek(position);
+  Future<void> seekTo(Duration position) {
+    final fallback = _fallback;
+    if (fallback != null) return fallback.seekTo(position);
+    // Shown now rather than when mpv's next time-pos arrives, as video_player
+    // does for ExoPlayer: the seek bar lets go of the thumb on release, and
+    // a second double-tap adds its step to the new position, not the old one.
+    final duration = value.duration;
+    final shown = position < Duration.zero
+        ? Duration.zero
+        : duration > Duration.zero && position > duration
+        ? duration
+        : position;
+    _seekTarget = shown;
+    _sinceSeek
+      ..reset()
+      ..start();
+    _flushPosition(shown);
+    return _player.seek(position);
+  }
 
   @override
   Future<void> setPlaybackSpeed(double speed) =>
@@ -1168,6 +1262,10 @@ class _MediaKitController extends PlayerController {
   Future<void> _teardownMpv() => _mpvDisposal ??= _releaseMpv();
 
   Future<void> _releaseMpv() async {
+    // A held tick must not land in `value` after the swap has handed it to
+    // the fallback.
+    _positionFlush?.cancel();
+    _positionFlush = null;
     for (final s in _subs) {
       await s.cancel();
     }
