@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:soplay/core/theme/app_colors.dart';
 import 'package:soplay/features/onboarding/data/onboarding_posters.dart';
@@ -10,11 +11,12 @@ import 'package:soplay/features/onboarding/data/onboarding_posters.dart';
 /// pairing are the two things people never guess the app can do, and neither
 /// of them looks like a poster.
 class TvShowcase extends StatefulWidget {
-  const TvShowcase({super.key, this.active = true});
+  const TvShowcase({super.key, this.running});
 
-  /// The entrance waits for this, so a showcase mounted ahead of time does
-  /// not spend it off screen.
-  final bool active;
+  /// Starts and stops the scene from outside. The entrance waits for it too,
+  /// so a showcase mounted ahead of time does not spend it off screen.
+  /// Null: it runs whenever animations are on.
+  final ValueListenable<bool>? running;
 
   @override
   State<TvShowcase> createState() => _TvShowcaseState();
@@ -24,70 +26,91 @@ class _TvShowcaseState extends State<TvShowcase> with TickerProviderStateMixin {
   late final AnimationController _loop = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 9),
-  )..repeat();
+  );
 
   // The line-up gets its own clock. On the screen's 9-second loop a strip of
   // forty marks flies past far too fast to read a single one.
   late final AnimationController _strips = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 78),
-  )..repeat();
+  );
 
   late final AnimationController _entrance = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1300),
   );
 
+  // Made once. A CurvedAnimation hangs a status listener on its parent that
+  // only dispose() takes off, and these were made on every build — five more
+  // on each frame of a swipe.
+  late final List<CurvedAnimation> _steps = [
+    for (final start in const [0.0, 0.1, 0.24, 0.34, 0.44])
+      CurvedAnimation(
+        parent: _entrance,
+        curve: Interval(
+          start,
+          (start + 0.5).clamp(0.0, 1.0),
+          curve: Curves.easeOutCubic,
+        ),
+      ),
+  ];
+
+  bool _reduced = false;
+
   @override
   void initState() {
     super.initState();
-    if (widget.active) _entrance.forward();
+    widget.running?.addListener(_sync);
   }
 
   @override
   void didUpdateWidget(TvShowcase old) {
     super.didUpdateWidget(old);
-    if (widget.active && _entrance.value == 0 && !_entrance.isAnimating) {
-      _entrance.forward();
-    }
+    if (old.running == widget.running) return;
+    old.running?.removeListener(_sync);
+    widget.running?.addListener(_sync);
+    _sync();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final reduced = MediaQuery.disableAnimationsOf(context);
-    if (reduced) {
-      _loop.stop();
-    } else if (!_loop.isAnimating) {
-      _loop.repeat();
+    _reduced = MediaQuery.disableAnimationsOf(context);
+    _sync();
+  }
+
+  // Stopped, not muted: a muted ticker's clock keeps counting, so the scene
+  // jumped ahead by however long it had been held once it was let go.
+  void _sync() {
+    final run = !_reduced && (widget.running?.value ?? true);
+    for (final c in [_loop, _strips]) {
+      if (!run) {
+        c.stop();
+      } else if (!c.isAnimating) {
+        c.repeat();
+      }
     }
-    if (reduced) {
-      _strips.stop();
-    } else if (!_strips.isAnimating) {
-      _strips.repeat();
-    }
-    if (reduced) {
+    if (_reduced) {
       _entrance.stop();
       _entrance.value = 1;
+    } else if (!run) {
+      _entrance.stop();
+    } else if (_entrance.value < 1 && !_entrance.isAnimating) {
+      _entrance.forward();
     }
   }
 
   @override
   void dispose() {
+    widget.running?.removeListener(_sync);
+    for (final s in _steps) {
+      s.dispose();
+    }
     _loop.dispose();
     _strips.dispose();
     _entrance.dispose();
     super.dispose();
   }
-
-  Animation<double> _step(double start) => CurvedAnimation(
-    parent: _entrance,
-    curve: Interval(
-      start,
-      (start + 0.5).clamp(0.0, 1.0),
-      curve: Curves.easeOutCubic,
-    ),
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -100,14 +123,14 @@ class _TvShowcaseState extends State<TvShowcase> with TickerProviderStateMixin {
               // The set assembles itself: screen, then the line-up it carries,
               // then the phone that drives it — the order the sentence reads in.
               _Rise(
-                animation: _step(0),
+                animation: _steps[0],
                 from: 26,
                 child: _Television(controller: _loop),
               ),
-              _Rise(animation: _step(0.1), from: 20, child: const _Stand()),
+              _Rise(animation: _steps[1], from: 20, child: const _Stand()),
               const SizedBox(height: 30),
               _Rise(
-                animation: _step(0.24),
+                animation: _steps[2],
                 from: 22,
                 child: _ChannelStrip(
                   controller: _strips,
@@ -117,7 +140,7 @@ class _TvShowcaseState extends State<TvShowcase> with TickerProviderStateMixin {
               ),
               const SizedBox(height: 9),
               _Rise(
-                animation: _step(0.34),
+                animation: _steps[3],
                 from: 22,
                 child: _ChannelStrip(
                   controller: _strips,
@@ -128,7 +151,7 @@ class _TvShowcaseState extends State<TvShowcase> with TickerProviderStateMixin {
               ),
               const SizedBox(height: 9),
               _Rise(
-                animation: _step(0.44),
+                animation: _steps[4],
                 from: 22,
                 child: _ChannelStrip(
                   controller: _strips,
@@ -392,19 +415,25 @@ class _ChannelStrip extends StatelessWidget {
 
     return SizedBox(
       height: _tileHeight,
-      child: ShaderMask(
-        blendMode: BlendMode.dstIn,
-        shaderCallback: (rect) => const LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            Colors.transparent,
-            Colors.white,
-            Colors.white,
-            Colors.transparent,
-          ],
-          stops: [0, 0.12, 0.88, 1],
-        ).createShader(rect),
+      // The edges fade by painting the page's colour over them, not by
+      // masking: a ShaderMask is an offscreen pass per strip on every frame,
+      // and it kept the whole scene from taking the crossfade's opacity
+      // directly, making the fade one more full-screen layer.
+      child: DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              AppColors.background,
+              AppColors.background.withValues(alpha: 0),
+              AppColors.background.withValues(alpha: 0),
+              AppColors.background,
+            ],
+            stops: const [0, 0.12, 0.88, 1],
+          ),
+        ),
         child: ClipRect(
           child: OverflowBox(
             maxWidth: double.infinity,

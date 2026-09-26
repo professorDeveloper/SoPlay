@@ -28,9 +28,14 @@ class OnboardingBadgesPage extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
         child: Column(
           children: [
-            const SizedBox(height: 250, child: _MedalStage()),
+            const SizedBox(
+              height: 250,
+              // Its own layer: the stage redraws every frame, and without one
+              // the heading, the week and the button were re-recorded with it.
+              child: RepaintBoundary(child: _MedalStage()),
+            ),
             const SizedBox(height: 18),
-            const _WeekToBadge(),
+            const RepaintBoundary(child: _WeekToBadge()),
             const SizedBox(height: 26),
             OnboardingHeading(
               center: true,
@@ -128,25 +133,32 @@ class _MedalStageState extends State<_MedalStage>
                   ),
                 ),
               ),
-              for (final (i, (id, tier, at, size)) in _around.indexed)
-                Align(
-                  alignment: at,
-                  child: Transform.translate(
-                    offset: Offset(0, math.sin(t + i * 1.7) * 5),
-                    child: Transform.scale(
-                      scale: struck(i + 1),
-                      child: Opacity(
-                        opacity: 0.92,
-                        child: AchievementBadge(
-                          id: id,
-                          tier: tier,
-                          size: size,
-                          light: light,
+              // One layer for the four rather than one each: they never
+              // overlap, so fading them together looks the same and costs one
+              // offscreen pass a frame instead of four.
+              Opacity(
+                opacity: 0.92,
+                child: Stack(
+                  children: [
+                    for (final (i, (id, tier, at, size)) in _around.indexed)
+                      Align(
+                        alignment: at,
+                        child: Transform.translate(
+                          offset: Offset(0, math.sin(t + i * 1.7) * 5),
+                          child: Transform.scale(
+                            scale: struck(i + 1),
+                            child: AchievementBadge(
+                              id: id,
+                              tier: tier,
+                              size: size,
+                              light: light,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
+                  ],
                 ),
+              ),
               Transform.translate(
                 offset: Offset(0, math.sin(t) * 3),
                 child: Transform.scale(

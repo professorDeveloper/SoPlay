@@ -37,7 +37,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
   static const _autoAdvance = Duration(seconds: 6);
 
   final _pageController = PageController();
-  int _page = 0;
+  // Read by the dots and the key handler only. A setState here rebuilt the
+  // whole intro — header, pager, both visible slides, buttons — on the frame
+  // a swipe crossed halfway, and laid the pager out again mid-drag.
+  final _page = ValueNotifier<int>(0);
   bool _leaving = false;
   Timer? _timer;
 
@@ -56,12 +59,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
   void dispose() {
     _timer?.cancel();
     _pageController.dispose();
+    _page.dispose();
     super.dispose();
   }
 
   void _turn(int by, {bool wrap = false}) {
     if (!_pageController.hasClients) return;
-    var to = _page + by;
+    var to = _page.value + by;
     if (wrap) to %= _slides;
     if (to < 0 || to >= _slides) return;
     _pageController.animateToPage(
@@ -110,7 +114,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              _Backdrops(controller: _pageController, page: _page),
+              _Backdrops(controller: _pageController, page: _page.value),
               DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -145,13 +149,17 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             child: PageView.builder(
                               controller: _pageController,
                               itemCount: _slides,
-                              onPageChanged: (i) => setState(() => _page = i),
+                              onPageChanged: (i) => _page.value = i,
                               itemBuilder: (context, i) =>
                                   _Slide(index: i, controller: _pageController),
                             ),
                           ),
                           const SizedBox(height: 16),
-                          _Dots(count: _slides, active: _page),
+                          ValueListenableBuilder<int>(
+                            valueListenable: _page,
+                            builder: (context, active, _) =>
+                                _Dots(count: _slides, active: active),
+                          ),
                           const SizedBox(height: 26),
                           Center(
                             child: ConstrainedBox(
@@ -267,14 +275,47 @@ class _SkipChip extends StatelessWidget {
 
 /// Cross-fades the three backdrops against the swipe itself, so the artwork
 /// changes with the finger rather than snapping when the page settles.
-class _Backdrops extends StatelessWidget {
+class _Backdrops extends StatefulWidget {
   const _Backdrops({required this.controller, required this.page});
 
   final PageController controller;
   final int page;
 
   @override
+  State<_Backdrops> createState() => _BackdropsState();
+}
+
+class _BackdropsState extends State<_Backdrops> {
+  // Each wall starts and stops its own clock from these. A TickerMode did it
+  // before, but every Image under one depends on it, so each flip re-resolved
+  // a hundred-odd posters on the first and last frame of a swipe; and a muted
+  // ticker's clock keeps counting, so a wall jumped ahead when it settled.
+  final _running = [for (var i = 0; i < 3; i++) ValueNotifier(false)];
+
+  // Built once: a swipe frame rebuilds the fade and the scale around them,
+  // never the walls themselves.
+  late final List<Widget> _walls = [
+    // The page's scrim already fades them into the background.
+    PosterWall(
+      posters: kMoviePosters,
+      fadeBottom: false,
+      running: _running[0],
+    ),
+    AnimeRibbons(fadeBottom: false, running: _running[1]),
+    TvShowcase(running: _running[2]),
+  ];
+
+  @override
+  void dispose() {
+    for (final r in _running) {
+      r.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final controller = widget.controller;
     return AnimatedBuilder(
       animation: controller,
       builder: (context, _) {
@@ -282,28 +323,30 @@ class _Backdrops extends StatelessWidget {
         // truth available then.
         final position =
             controller.hasClients && controller.position.haveDimensions
-            ? controller.page ?? page.toDouble()
-            : page.toDouble();
+            ? controller.page ?? widget.page.toDouble()
+            : widget.page.toDouble();
 
         final opacities = backdropOpacities(position);
         // Mid-swipe the walls hold still: the frame then only has the
         // crossfade to draw, not two moving walls under it as well.
         final settled = (position - position.roundToDouble()).abs() < 0.001;
+        for (var i = 0; i < 3; i++) {
+          // Only starts or stops controllers; nothing listening rebuilds.
+          _running[i].value = settled && opacities[i] > 0.001;
+        }
 
         return Stack(
           fit: StackFit.expand,
           children: [
+            // All three stay mounted, unpainted at zero opacity: mounting one
+            // on the first frame of a drag built a whole wall inside it.
             for (var i = 0; i < 3; i++)
-              // Neighbours are mounted ahead, paused and unpainted, so their
-              // posters are decoded before the finger reaches them.
-              if ((position - i).abs() < 1.99)
-                _Backdrop(
-                  key: ValueKey(i),
-                  index: i,
-                  moving: settled,
-                  opacity: opacities[i],
-                  distance: (position - i).abs().clamp(0.0, 1.0),
-                ),
+              _Backdrop(
+                key: ValueKey(i),
+                opacity: opacities[i],
+                distance: (position - i).abs().clamp(0.0, 1.0),
+                child: _walls[i],
+              ),
           ],
         );
       },
@@ -327,36 +370,22 @@ List<double> backdropOpacities(double position) {
 class _Backdrop extends StatelessWidget {
   const _Backdrop({
     super.key,
-    required this.index,
-    required this.moving,
     required this.opacity,
     required this.distance,
+    required this.child,
   });
 
-  final int index;
-  final bool moving;
   final double opacity;
   final double distance;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final shown = opacity > 0.001;
-    return TickerMode(
-      enabled: shown && moving,
-      child: Opacity(
-        opacity: opacity,
-        child: RepaintBoundary(
-          // Eases forward as it takes focus.
-          child: Transform.scale(
-            scale: 1 + distance * 0.06,
-            child: switch (index) {
-              // The page's scrim already fades them into the background.
-              0 => const PosterWall(posters: kMoviePosters, fadeBottom: false),
-              1 => const AnimeRibbons(fadeBottom: false),
-              _ => TvShowcase(active: shown),
-            },
-          ),
-        ),
+    return Opacity(
+      opacity: opacity,
+      child: RepaintBoundary(
+        // Eases forward as it takes focus.
+        child: Transform.scale(scale: 1 + distance * 0.06, child: child),
       ),
     );
   }

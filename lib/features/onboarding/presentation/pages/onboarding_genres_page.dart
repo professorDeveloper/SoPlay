@@ -32,6 +32,10 @@ class OnboardingGenresPage extends StatefulWidget {
 
 class _OnboardingGenresPageState extends State<OnboardingGenresPage> {
   final OnboardingController _c = getIt<OnboardingController>();
+
+  // Built once: the kinds cannot change on this step, and the same instance
+  // lets a chip tap's setState skip the backdrop entirely.
+  late final Widget _backdrop = _BlurredPosters(posters: postersFor(_c.kinds));
   late final GenreCatalog _catalog = widget.catalog ?? getIt<GenreCatalog>();
   List<TasteGenre>? _genres;
   bool _offline = false;
@@ -82,7 +86,7 @@ class _OnboardingGenresPageState extends State<OnboardingGenresPage> {
     return OnboardingScaffold(
       step: OnboardingStep.genres,
       glow: accent,
-      background: _BlurredPosters(posters: postersFor(kinds)),
+      background: _backdrop,
       onSkip: () => onboardingNext(context),
       body: CustomScrollView(
         slivers: [
@@ -452,50 +456,88 @@ class _ChipsLoading extends StatelessWidget {
 }
 
 /// The picked kinds' posters, tilted, blurred and darkened into a backdrop.
-class _BlurredPosters extends StatelessWidget {
+class _BlurredPosters extends StatefulWidget {
   const _BlurredPosters({required this.posters});
 
   final List<String> posters;
 
   @override
+  State<_BlurredPosters> createState() => _BlurredPostersState();
+}
+
+class _BlurredPostersState extends State<_BlurredPosters> {
+  // Impeller keeps no raster cache, so a live 26-sigma blur over more than
+  // the whole screen was worked out again on every frame anything on the page
+  // moved — the route fade, the chips' entrance, the shimmer. The picture
+  // never changes, so it is blurred once and kept as an image.
+  final _snapshot = SnapshotController();
+  bool _requested = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_requested) return;
+    _requested = true;
+    // Taken once every poster has decoded and been drawn: a snapshot is not
+    // retaken when its child repaints, so an early one would keep the gaps.
+    Future.wait([
+      for (final p in widget.posters)
+        precacheImage(ResizeImage(AssetImage(p), width: 200), context),
+    ]).then((_) => WidgetsBinding.instance.endOfFrame).then((_) {
+      if (mounted) _snapshot.allowSnapshotting = true;
+    });
+  }
+
+  @override
+  void dispose() {
+    _snapshot.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final posters = widget.posters;
     return RepaintBoundary(
       child: Stack(
         fit: StackFit.expand,
         children: [
-          ImageFiltered(
-            imageFilter: ui.ImageFilter.blur(sigmaX: 26, sigmaY: 26),
-            child: OverflowBox(
-              maxWidth: double.infinity,
-              maxHeight: double.infinity,
-              child: Transform.rotate(
-                angle: -0.12,
-                child: Transform.scale(
-                  scale: 1.3,
-                  child: LayoutBuilder(
-                    builder: (context, _) {
-                      final size = MediaQuery.sizeOf(context);
-                      final tileW = size.width / 3.2;
-                      return SizedBox(
-                        width: size.width * 1.2,
-                        height: size.height * 1.2,
-                        child: Wrap(
-                          children: [
-                            for (final p in posters)
-                              SizedBox(
-                                width: tileW,
-                                height: tileW * 1.45,
-                                child: Image.asset(
-                                  p,
-                                  fit: BoxFit.cover,
-                                  cacheWidth: 200,
-                                  excludeFromSemantics: true,
+          SnapshotWidget(
+            controller: _snapshot,
+            autoresize: true,
+            child: ImageFiltered(
+              imageFilter: ui.ImageFilter.blur(sigmaX: 26, sigmaY: 26),
+              child: OverflowBox(
+                maxWidth: double.infinity,
+                maxHeight: double.infinity,
+                child: Transform.rotate(
+                  angle: -0.12,
+                  child: Transform.scale(
+                    scale: 1.3,
+                    child: LayoutBuilder(
+                      builder: (context, _) {
+                        final size = MediaQuery.sizeOf(context);
+                        final tileW = size.width / 3.2;
+                        return SizedBox(
+                          width: size.width * 1.2,
+                          height: size.height * 1.2,
+                          child: Wrap(
+                            children: [
+                              for (final p in posters)
+                                SizedBox(
+                                  width: tileW,
+                                  height: tileW * 1.45,
+                                  child: Image.asset(
+                                    p,
+                                    fit: BoxFit.cover,
+                                    cacheWidth: 200,
+                                    excludeFromSemantics: true,
+                                  ),
                                 ),
-                              ),
-                          ],
-                        ),
-                      );
-                    },
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
