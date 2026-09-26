@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:soplay/features/extensions/presentation/pages/source_catalog_page.dart';
 import 'package:soplay/core/content/content_mode.dart';
 import 'package:soplay/core/di/injection.dart';
 import 'package:soplay/core/matching/title_match.dart';
@@ -887,6 +888,22 @@ class _AlternateSourceSheetState extends State<AlternateSourceSheet> {
           // help, and a dead end is the wrong thing to leave them with.
           if (!_searching) ...[
             const SizedBox(height: 14),
+            // The message just said "add one that does"; this is where.
+            if (_outcome?.asked == 0)
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  SourceCatalogPage.open(
+                    context,
+                    initialItemType: SourceCatalogPage.itemTypeFor(
+                      widget.provider.contentMode,
+                    ),
+                  );
+                },
+                style: TextButton.styleFrom(foregroundColor: Colors.white70),
+                icon: const Icon(Icons.add_rounded, size: 18),
+                label: Text('ext.add_source'.tr()),
+              ),
             TextButton.icon(
               onPressed: () {
                 Navigator.of(context).pop();

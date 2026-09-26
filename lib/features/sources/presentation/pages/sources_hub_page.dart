@@ -26,7 +26,6 @@ import 'package:soplay/features/profile/presentation/bloc/provider_bloc.dart';
 import 'package:soplay/features/profile/presentation/bloc/provider_event.dart';
 import 'package:soplay/features/profile/presentation/bloc/provider_state.dart';
 import 'package:soplay/features/extensions/presentation/pages/source_catalog_page.dart';
-import 'package:soplay/features/extensions/domain/entities/catalog_source_entity.dart';
 import 'package:soplay/features/jellyfin/presentation/pages/jellyfin_servers_page.dart';
 import 'package:soplay/features/profile/presentation/pages/sources_page.dart';
 import 'package:soplay/features/sources/data/source_browse_repository.dart';
@@ -303,6 +302,26 @@ class _SourcesHubPageState extends State<SourcesHubPage>
     context,
   ).push(MaterialPageRoute<void>(builder: (_) => const SourcesPage()));
 
+  /// Straight to the installable catalogue, opened on this tab's kind of
+  /// source.
+  ///
+  /// v3.2.0 removed this and left only "Manage", so adding a source meant
+  /// Manage, then a settings row called "Sources by language", from the page
+  /// people open in order to add one.
+  Future<void> _openInstaller() async {
+    await SourceCatalogPage.open(
+      context,
+      initialItemType: SourceCatalogPage.itemTypeFor(
+        ContentMode.values[_tabs.index],
+      ),
+    );
+    if (!mounted) return;
+    // "Use" in the catalogue can switch mode. Land on the tab of the source
+    // now in use so it is visible; _onTabMoved resets the scope.
+    final now = ContentMode.fromId(getIt<HiveService>().getContentMode()).index;
+    if (_tabs.index != now) _tabs.index = now;
+  }
+
   /// One per tab. A shared controller would carry the Manga tab's offset into
   /// the Watch tab the moment the two were alive at once, which is every
   /// swipe.
@@ -317,13 +336,6 @@ class _SourcesHubPageState extends State<SourcesHubPage>
   };
 
   int _lastTab = -1;
-
-  /// Which half of the screen you are in: what you have, or what you could
-  /// have. They were two screens with the same name and a button between
-  /// them — "Sources" listing what was installed, "Add source" listing what
-  /// could be, and a third page behind that for the repositories both came
-  /// from.
-  bool _adding = false;
 
   /// Opening on the source in use is a one-time move, per tab. Re-running it
   /// after a keystroke in the search field would drag the list out from under
@@ -403,8 +415,6 @@ class _SourcesHubPageState extends State<SourcesHubPage>
           ),
           child: open != null
               ? _SourceBrowseView(key: ValueKey(open.id), source: open)
-              : _adding
-              ? _addLevel()
               : _hub(),
         ),
       ),
@@ -467,78 +477,40 @@ class _SourcesHubPageState extends State<SourcesHubPage>
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _LevelPill(
-                  label: 'sources.installed'.tr(),
-                  active: !_adding,
-                  onTap: () => setState(() => _adding = false),
+                // The primary action, labelled, in the header that never
+                // scrolls away. It opens the catalogue directly; "Manage" next
+                // to it is for repositories, DNS and ecosystems.
+                Flexible(
+                  child: FilledButton.icon(
+                    onPressed: _openInstaller,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(0, 36),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
+                    ),
+                    icon: const Icon(Icons.add_rounded, size: 18),
+                    label: Text(
+                      'ext.add_source'.tr(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 6),
-                // Manage, not "Add source".
-                //
-                // This pill used to flip the same screen over to the
-                // installable catalogue — a second list, on the same page,
-                // under the same title, with its own search and its own
-                // chips. Two lists behind one pair of pills is where this
-                // screen got confusing, and it buried the page that actually
-                // organises sources: the ecosystems, the by-language browser
-                // and DNS all live on [SourcesPage], which had become
-                // reachable only through an overflow menu on a page you had
-                // to flip to first. The pill opens that instead, and the
-                // catalogue is reached from there, where it belongs.
-                _LevelPill(
-                  label: 'source_manager.manage'.tr(),
-                  active: false,
-                  onTap: _openExtensions,
+                Flexible(
+                  child: _LevelPill(
+                    label: 'source_manager.manage'.tr(),
+                    active: false,
+                    onTap: _openExtensions,
+                  ),
                 ),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
-
-  /// Everything you could install, and the repositories it comes from.
-  ///
-  /// The catalogue is the same screen it always was, minus its app bar: this
-  /// one already has a title, and two stacked app bars is not a screen. The
-  /// repositories are a row under it rather than a page behind a ⋯ button in
-  /// a corner of it.
-  Widget _addLevel() {
-    return Column(
-      children: [
-        Expanded(
-          child: SourceCatalogPage(
-            embedded: true,
-            initialItemType: switch (ContentMode.values[_tabs.index]) {
-              ContentMode.manga => CatalogItemType.manga,
-              ContentMode.novel => CatalogItemType.novel,
-              ContentMode.video => null,
-            },
-          ),
-        ),
-        const Divider(height: 1),
-        SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.folder_copy_outlined),
-                title: Text('source_manager.manage_repositories'.tr()),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: _openExtensions,
-              ),
-              ListTile(
-                leading: const Icon(Icons.dns_outlined),
-                title: Text('jellyfin.connect_server'.tr()),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => JellyfinServersPage.open(context),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
@@ -1025,8 +997,10 @@ class _SourcesHubPageState extends State<SourcesHubPage>
       // An empty mode is a dead end without this. Manga and novels are both
       // extension ecosystems, so a fresh install has nothing in either tab
       // and the only way out is a gear icon the message never mentions.
-      actionLabel: needle.isEmpty ? 'source_manager.manage'.tr() : null,
-      onAction: needle.isEmpty ? _openExtensions : null,
+      // Straight to the catalogue on this tab's kind; an empty tab is
+      // exactly when somebody wants to add, not to manage.
+      actionLabel: needle.isEmpty ? 'ext.add_source'.tr() : null,
+      onAction: needle.isEmpty ? _openInstaller : null,
     );
   }
 
