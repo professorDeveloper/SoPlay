@@ -1229,6 +1229,15 @@ class _PlayerPageState extends State<PlayerPage>
       label: 'player.fullscreen'.tr(),
       onKey: (_) => _toggleFullscreen(),
     ),
+    // The mini window: above other windows, the same player at 426 wide.
+    // I rather than P, which is already the previous episode.
+    _PlayerShortcut(
+      keys: const [LogicalKeyboardKey.keyI],
+      hint: 'I',
+      label: 'player.pip'.tr(),
+      available: isDesktopPlatform,
+      onKey: (_) => _toggleDesktopMini(),
+    ),
     _PlayerShortcut(
       keys: const [LogicalKeyboardKey.keyS],
       hint: 'S',

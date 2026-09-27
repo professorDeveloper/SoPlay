@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:soplay/features/extensions/presentation/pages/source_catalog_page.dart';
 import 'package:soplay/features/home/data/datasources/home_data_source.dart';
 import 'package:soplay/features/sources/domain/source_ecosystem.dart';
 import 'package:soplay/features/sources/domain/source_scope.dart';
@@ -34,7 +33,7 @@ import 'package:soplay/core/widgets/edge_fade.dart';
 import 'package:soplay/core/widgets/item_appear.dart';
 import 'package:soplay/features/home/presentation/bloc/home/home_bloc.dart';
 import 'package:soplay/features/home/presentation/bloc/home/home_state.dart';
-import 'package:soplay/features/profile/presentation/pages/profile_page.dart';
+import 'package:soplay/features/profile/presentation/pages/sources_page.dart';
 
 /// Changing the active source, from wherever somebody happens to be.
 ///
@@ -249,16 +248,14 @@ Future<void> _openSwitcher(
     ),
   );
   if (result == null || !context.mounted) return;
-  if (result == _kAddSourceAction) {
-    // Straight to the catalogue, opened on this mode's kind of source.
-    await SourceCatalogPage.open(
+  // Both footer buttons open the Sources screen people know — active source,
+  // Add source, one row per ecosystem, Jellyfin, DNS — rather than two
+  // different places. Add source is its first row, so adding is still one tap
+  // from there, and nobody lands on a screen they have never seen before.
+  if (result == _kAddSourceAction || result == _kAllProvidersAction) {
+    await Navigator.of(
       context,
-      initialItemType: SourceCatalogPage.itemTypeFor(mode),
-    );
-    return;
-  }
-  if (result == _kAllProvidersAction) {
-    openProviderPicker(context, bloc);
+    ).push(MaterialPageRoute<void>(builder: (_) => const SourcesPage()));
     return;
   }
   if (result.startsWith(_kCataloguePrefix)) {

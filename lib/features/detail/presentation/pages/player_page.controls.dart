@@ -1643,9 +1643,8 @@ extension _PlayerControls on _PlayerPageState {
               ValueListenableBuilder<bool>(
                 valueListenable: _seekBarDragging,
                 // TV scrubs with the D-pad, with no finger to lift.
-                builder: (_, dragging, card) => dragging || isTvPlatform
-                    ? card!
-                    : const SizedBox.shrink(),
+                builder: (_, dragging, card) =>
+                    dragging || isTvPlatform ? card! : const SizedBox.shrink(),
                 child: Positioned(
                   left: left,
                   bottom: 40,
@@ -2021,10 +2020,13 @@ extension _PlayerControls on _PlayerPageState {
       case 'party':
       case 'pip':
       case 'download':
-        // Phone only in this row: a television reaches all three from its own
-        // top bar, and rendering them here as well is the duplication the
-        // `&& !isTvPlatform` guards used to prevent.
-        if (isTvPlatform || isDesktopPlatform) return null;
+        // A television reaches all three from its own top bar, and rendering
+        // them here as well is the duplication the `&& !isTvPlatform` guards
+        // used to prevent. The desktop has no such bar — it draws the shipped
+        // defaults, where all three live in this row, and never hoists — so
+        // returning null here left it with no mini-player button, no Watch
+        // Party and no download at all.
+        if (isTvPlatform) return null;
         return _topBarControl(id);
       default:
         // No live value to print, so the icon form is the honest one and the
