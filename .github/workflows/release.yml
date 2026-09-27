@@ -67,6 +67,10 @@ on:
           - draft          # attach the builds, leave it unpublished to write
           - publish        # publish immediately, as it used to
           - skip           # build only; artifacts stay on the run
+      announce:
+        description: 'Post the builds to Telegram (off to quietly replace the files of a release that is already out)'
+        type: boolean
+        default: true
   push:
     tags: ['v*']
 
@@ -1155,7 +1159,11 @@ jobs:
     # announcing: it means this run was started by the workflow's own version
     # tag and correctly declined to build anything. Without this guard every
     # release posted a second Telegram message saying nothing was built.
-    if: ${{ always() && !cancelled() && needs.version.result != 'skipped' }}
+    #
+    # `announce: false` is for rebuilding a release that is already out — new
+    # files swapped in under the same version, which is not news. A tag push
+    # has no inputs, so it still announces.
+    if: ${{ always() && !cancelled() && needs.version.result != 'skipped' && inputs.announce != false }}
     runs-on: ubuntu-latest
     steps:
       # Not fatal: when every build failed there is nothing to download, and the
