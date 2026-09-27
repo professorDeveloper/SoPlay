@@ -129,35 +129,58 @@ class _TvShowcaseState extends State<TvShowcase> with TickerProviderStateMixin {
               ),
               _Rise(animation: _steps[1], from: 20, child: const _Stand()),
               const SizedBox(height: 30),
-              _Rise(
-                animation: _steps[2],
-                from: 22,
-                child: _ChannelStrip(
-                  controller: _strips,
-                  reverse: false,
-                  speed: 1,
-                ),
-              ),
-              const SizedBox(height: 9),
-              _Rise(
-                animation: _steps[3],
-                from: 22,
-                child: _ChannelStrip(
-                  controller: _strips,
-                  reverse: true,
-                  speed: 0.78,
-                  offset: 0.33,
-                ),
-              ),
-              const SizedBox(height: 9),
-              _Rise(
-                animation: _steps[4],
-                from: 22,
-                child: _ChannelStrip(
-                  controller: _strips,
-                  reverse: false,
-                  speed: 0.91,
-                  offset: 0.66,
+              // One mask for the three strips rather than one each: the edges
+              // fade to transparent, so the backdrop behind shows through during
+              // the crossfade, and it is one small offscreen pass instead of
+              // three.
+              ShaderMask(
+                blendMode: BlendMode.dstIn,
+                shaderCallback: (rect) => const LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Colors.transparent,
+                    Colors.white,
+                    Colors.white,
+                    Colors.transparent,
+                  ],
+                  stops: [0, 0.12, 0.88, 1],
+                ).createShader(rect),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _Rise(
+                      animation: _steps[2],
+                      from: 22,
+                      child: _ChannelStrip(
+                        controller: _strips,
+                        reverse: false,
+                        speed: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 9),
+                    _Rise(
+                      animation: _steps[3],
+                      from: 22,
+                      child: _ChannelStrip(
+                        controller: _strips,
+                        reverse: true,
+                        speed: 0.78,
+                        offset: 0.33,
+                      ),
+                    ),
+                    const SizedBox(height: 9),
+                    _Rise(
+                      animation: _steps[4],
+                      from: 22,
+                      child: _ChannelStrip(
+                        controller: _strips,
+                        reverse: false,
+                        speed: 0.91,
+                        offset: 0.66,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -415,74 +438,52 @@ class _ChannelStrip extends StatelessWidget {
 
     return SizedBox(
       height: _tileHeight,
-      // The edges fade by painting the page's colour over them, not by
-      // masking: a ShaderMask is an offscreen pass per strip on every frame,
-      // and it kept the whole scene from taking the crossfade's opacity
-      // directly, making the fade one more full-screen layer.
-      child: DecoratedBox(
-        position: DecorationPosition.foreground,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [
-              AppColors.background,
-              AppColors.background.withValues(alpha: 0),
-              AppColors.background.withValues(alpha: 0),
-              AppColors.background,
-            ],
-            stops: const [0, 0.12, 0.88, 1],
-          ),
-        ),
-        child: ClipRect(
-          child: OverflowBox(
-            maxWidth: double.infinity,
-            alignment: AlignmentDirectional.centerStart,
-            child: AnimatedBuilder(
-              animation: controller,
-              builder: (context, child) {
-                // Wrapped rather than scaled, so a slower row still closes its
-                // own loop without a jump.
-                final t = (controller.value * speed) % 1.0;
-                return Transform.translate(
-                  offset: Offset(reverse ? t * strip - strip : -t * strip, 0),
-                  child: child,
-                );
-              },
-              child: RepaintBoundary(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (var pass = 0; pass < 2; pass++)
-                      for (final logo in logos)
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(end: _gap),
-                          child: Container(
-                            width: _tileWidth,
-                            height: _tileHeight,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.card.withValues(alpha: 0.85),
-                              borderRadius: BorderRadius.circular(7),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.08),
-                              ),
-                            ),
-                            child: Image.asset(
-                              logo,
-                              fit: BoxFit.contain,
-                              cacheWidth: (_tileWidth * devicePixelRatio)
-                                  .round(),
-                              errorBuilder: (_, _, _) =>
-                                  const SizedBox.shrink(),
+      child: ClipRect(
+        child: OverflowBox(
+          maxWidth: double.infinity,
+          alignment: AlignmentDirectional.centerStart,
+          child: AnimatedBuilder(
+            animation: controller,
+            builder: (context, child) {
+              // Wrapped rather than scaled, so a slower row still closes its
+              // own loop without a jump.
+              final t = (controller.value * speed) % 1.0;
+              return Transform.translate(
+                offset: Offset(reverse ? t * strip - strip : -t * strip, 0),
+                child: child,
+              );
+            },
+            child: RepaintBoundary(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var pass = 0; pass < 2; pass++)
+                    for (final logo in logos)
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(end: _gap),
+                        child: Container(
+                          width: _tileWidth,
+                          height: _tileHeight,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.card.withValues(alpha: 0.85),
+                            borderRadius: BorderRadius.circular(7),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.08),
                             ),
                           ),
+                          child: Image.asset(
+                            logo,
+                            fit: BoxFit.contain,
+                            cacheWidth: (_tileWidth * devicePixelRatio).round(),
+                            errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                          ),
                         ),
-                  ],
-                ),
+                      ),
+                ],
               ),
             ),
           ),
