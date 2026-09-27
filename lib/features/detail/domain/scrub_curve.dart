@@ -2,38 +2,52 @@ import 'dart:math' as math;
 
 /// Where a horizontal swipe on the video lands.
 ///
-/// Fine near the finger's start, coarse far from it, as VLC does: about two
-/// seconds per centimetre for the first few, then a cubic that reaches half
-/// the video (at least a minute, at most twenty) by eight centimetres. It
-/// used to be 90 seconds per screen width, clamped to one width, so a single
-/// swipe could never move more than a minute and a half — and from the middle
-/// of the screen, about 45 seconds — whatever the length of the video.
+/// Linear, as in MX Player: the same travel always moves the same time, so a
+/// viewer can aim, and a still thumb's wobble moves a fraction of a second,
+/// not several. One swipe across the whole screen covers [spanSec] — about
+/// 4·√duration seconds: half a minute on a short clip, two and a half on an
+/// episode, three at most on a film. The seek bar is there for longer jumps.
 ///
-/// Within [cancelZoneCm] of the start the answer is the start itself: a
+/// It used to be a VLC-style cubic in centimetres that reached half the
+/// video by eight of them, counted at 38 logical pixels a centimetre —
+/// Flutter's desktop figure; a phone has about 60. On a Galaxy S22 two
+/// centimetres of travel already moved over a minute of a film, and past
+/// three every pixel was four seconds.
+///
+/// Within [deadZonePx] of the start the answer is the start itself: a
 /// finger brought back to where it began means "never mind".
 class ScrubCurve {
   ScrubCurve._();
 
-  /// Logical pixels in a centimetre, near enough for a phone.
-  static const double pxPerCm = 38;
-  static const double cancelZoneCm = 0.3;
+  /// Travel that still means "never mind", in logical pixels.
+  static const double deadZonePx = 16;
 
+  /// Seconds that one swipe across the whole screen moves.
+  static double spanSec(int durationMs) =>
+      (4.0 * math.sqrt(durationMs / 1000)).clamp(30.0, 180.0).toDouble();
+
+  /// [widthPx] is the long side of the screen, so turning the phone does not
+  /// change the rate.
   static int targetMs({
     required int baselineMs,
     required int durationMs,
     required double deltaPx,
+    required double widthPx,
   }) {
-    if (durationMs <= 0) return baselineMs;
-    final cm = deltaPx / pxPerCm;
-    final a = cm.abs();
-    if (a < cancelZoneCm) return baselineMs.clamp(0, durationMs);
-    final reach = (durationMs / 1000 * 0.5).clamp(60.0, 1200.0);
-    final seconds = 2.0 * a + reach * math.pow(a / 8, 3);
-    final target = baselineMs + (cm.sign * seconds * 1000).round();
+    if (durationMs <= 0 || !widthPx.isFinite || widthPx <= 0) {
+      return baselineMs;
+    }
+    // Measured from the edge of the dead zone, so leaving it starts at zero
+    // instead of jumping by the zone's width.
+    final travel = deltaPx.abs() - deadZonePx;
+    if (travel <= 0) return baselineMs.clamp(0, durationMs);
+    // Whole seconds: the label reads m:ss, and the seek should land on what
+    // it said.
+    final seconds = (travel / widthPx * spanSec(durationMs)).round();
+    final target = baselineMs + deltaPx.sign.toInt() * seconds * 1000;
     return target.clamp(0, durationMs);
   }
 
-  /// Whether [deltaPx] is inside the cancel zone.
-  static bool cancels(double deltaPx) =>
-      (deltaPx / pxPerCm).abs() < cancelZoneCm;
+  /// Whether [deltaPx] is inside the dead zone.
+  static bool cancels(double deltaPx) => deltaPx.abs() < deadZonePx;
 }

@@ -32,9 +32,11 @@ class SourcesPage extends StatelessWidget {
   static List<Widget> extensionRows(BuildContext context) => <Widget>[
     // Ungated: the catalog is read from the backend, so it works everywhere;
     // what it can offer still depends on what this platform runs.
+    // Named for what it does. "Sources by language" with a translate icon
+    // read as a filter, and this is the row that installs sources.
     SettingsNavTile(
-      icon: Icons.translate_rounded,
-      title: 'catalog.title'.tr(),
+      icon: Icons.add_circle_outline_rounded,
+      title: 'ext.add_source'.tr(),
       subtitle: 'catalog.subtitle'.tr(),
       onTap: () => SourceCatalogPage.open(context),
     ),

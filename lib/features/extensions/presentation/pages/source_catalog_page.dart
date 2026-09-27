@@ -43,9 +43,22 @@ class SourceCatalogPage extends StatefulWidget {
   /// own title and its repositories button are the hub's when it is embedded.
   final bool embedded;
 
-  static Future<void> open(BuildContext context) => Navigator.of(
-    context,
-  ).push(MaterialPageRoute<void>(builder: (_) => const SourceCatalogPage()));
+  static Future<void> open(
+    BuildContext context, {
+    CatalogItemType? initialItemType,
+  }) => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => SourceCatalogPage(initialItemType: initialItemType),
+    ),
+  );
+
+  /// The filter the catalogue opens on for a mode. Video has no single type —
+  /// anime, films and series all play — so it opens unfiltered.
+  static CatalogItemType? itemTypeFor(ContentMode mode) => switch (mode) {
+    ContentMode.manga => CatalogItemType.manga,
+    ContentMode.novel => CatalogItemType.novel,
+    ContentMode.video => null,
+  };
 
   @override
   State<SourceCatalogPage> createState() => _SourceCatalogPageState();
@@ -316,7 +329,9 @@ class _SourceCatalogPageState extends State<SourceCatalogPage> {
         actions: [
           IconButton(
             onPressed: _manage,
-            icon: const Icon(Icons.more_horiz),
+            // Repositories, not "more": this is where a repo URL is added,
+            // and three dots read as an overflow menu nobody opens.
+            icon: const Icon(Icons.folder_copy_outlined),
             tooltip: 'source_manager.manage_repositories'.tr(),
           ),
         ],

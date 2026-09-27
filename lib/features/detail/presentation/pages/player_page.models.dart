@@ -107,16 +107,21 @@ class _ScrubState {
   final Duration duration;
   final double deltaPx;
 
+  /// The screen's long side, what a full swipe is measured against.
+  final double widthPx;
+
   const _ScrubState({
     required this.baseline,
     required this.duration,
     required this.deltaPx,
+    required this.widthPx,
   });
 
   _ScrubState copyWith({double? deltaPx}) => _ScrubState(
     baseline: baseline,
     duration: duration,
     deltaPx: deltaPx ?? this.deltaPx,
+    widthPx: widthPx,
   );
 
   /// Where releasing now would land; see [ScrubCurve].
@@ -125,11 +130,15 @@ class _ScrubState {
       baselineMs: baseline.inMilliseconds,
       durationMs: duration.inMilliseconds,
       deltaPx: deltaPx,
+      widthPx: widthPx,
     ),
   );
 
-  /// Back where it started: releasing now changes nothing.
-  bool get cancels => ScrubCurve.cancels(deltaPx);
+  /// Back where it started, or closer to it than the two seconds the label
+  /// shows: releasing now changes nothing, as the card says.
+  bool get cancels =>
+      ScrubCurve.cancels(deltaPx) ||
+      (previewPosition() - baseline).inSeconds.abs() < 2;
 }
 
 class _VttThumbnail {

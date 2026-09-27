@@ -19,7 +19,11 @@ extension _PlayerGestures on _PlayerPageState {
 
   /// [initialDeltaPx]: how far the finger has already travelled from where
   /// it touched down, by the time the swipe was recognised as horizontal.
-  void _onHDragStart(DragStartDetails _, {double initialDeltaPx = 0}) {
+  void _onHDragStart(
+    DragStartDetails _, {
+    double initialDeltaPx = 0,
+    required double widthPx,
+  }) {
     final c = _controller;
     if (c == null || !c.value.isInitialized) return;
     _hideTimer?.cancel();
@@ -40,6 +44,7 @@ extension _PlayerGestures on _PlayerPageState {
       baseline: c.value.position,
       duration: c.value.duration,
       deltaPx: initialDeltaPx,
+      widthPx: widthPx,
     );
   }
 
@@ -248,6 +253,8 @@ extension _PlayerGestures on _PlayerPageState {
             localPosition: d.localPosition,
           ),
           initialDeltaPx: d.localPosition.dx - from.dx,
+          // The long side, so the rate is the same held either way.
+          widthPx: constraints.biggest.longestSide,
         );
         return;
       } else {
@@ -269,14 +276,14 @@ extension _PlayerGestures on _PlayerPageState {
       final delta = -(d.delta.dy) / (constraints.maxHeight * 0.7);
       if (_dragSwipeType == _SwipeType.brightness) {
         _brightness = (_brightness + delta).clamp(0.0, 1.0).toDouble();
-        unawaited(_setSystemBrightness(_brightness));
+        _pushSystemLevels(brightness: true);
         _swipeIndicator.value = _SwipeIndicator(
           _SwipeType.brightness,
           _brightness,
         );
       } else {
         _volume = (_volume + delta).clamp(0.0, 1.0).toDouble();
-        unawaited(_setSystemVolume(_volume));
+        _pushSystemLevels(volume: true);
         _swipeIndicator.value = _SwipeIndicator(_SwipeType.volume, _volume);
       }
     }

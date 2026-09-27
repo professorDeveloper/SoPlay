@@ -13,7 +13,6 @@ import 'package:soplay/features/history/domain/history_trim.dart';
 import 'package:soplay/features/my_list/data/private_list_service.dart';
 
 class HistoryService {
-
   final ValueNotifier<int> revision = ValueNotifier<int>(0);
 
   Box get _box => Hive.box(ProfileScope.box(AppConstants.historyBox));
@@ -61,8 +60,9 @@ class HistoryService {
       try {
         final raw = _box.get(key);
         if (raw is! String) continue;
-        final item =
-            HistoryItem.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+        final item = HistoryItem.fromJson(
+          jsonDecode(raw) as Map<String, dynamic>,
+        );
         if (latest == null || item.watchedAt > latest.watchedAt) {
           latest = item;
         }
@@ -71,7 +71,29 @@ class HistoryService {
     return latest;
   }
 
-  Future<void> save(HistoryItem item) async {
+  Future<void> save(HistoryItem item) => _write(item, notify: true);
+
+  /// [save] without telling listeners. For the player's five-second progress
+  /// tick: every listener — Home's Continue rail, the episode list, the detail
+  /// header, the home-screen widget — re-reads and re-decodes the box and
+  /// rebuilds, under a player that covers all of them. They catch up from the
+  /// save on pause and on exit.
+  Future<void> saveQuietly(HistoryItem item) => _write(item, notify: false);
+
+  /// Whether a quiet write has landed that listeners have not been told of.
+  bool _quietPending = false;
+
+  /// Tells listeners about quiet writes, if there were any since the last
+  /// notification. For the moments the player hands the screen back — pause,
+  /// exit — when its own final save may write nothing (an episode played to
+  /// its end), and the rows the quiet ticks wrote would otherwise never show.
+  void flushQuiet() {
+    if (!_quietPending) return;
+    _quietPending = false;
+    revision.value++;
+  }
+
+  Future<void> _write(HistoryItem item, {required bool notify}) async {
     // Incognito is enforced here rather than at the call sites. History is
     // written from the player, the detail page, shorts and the sync service's
     // own merge, and a mode whose guarantee depends on every one of those
@@ -86,7 +108,12 @@ class HistoryService {
     }
     await _box.put(item.storageKey, jsonEncode(item.toJson()));
     await _trimIfNeeded();
-    revision.value++;
+    if (notify) {
+      _quietPending = false;
+      revision.value++;
+    } else {
+      _quietPending = true;
+    }
   }
 
   /// Reads a row back so a delete can be described to the server before the

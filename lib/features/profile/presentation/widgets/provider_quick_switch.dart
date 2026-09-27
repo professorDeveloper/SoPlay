@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:soplay/features/extensions/presentation/pages/source_catalog_page.dart';
 import 'package:soplay/features/home/data/datasources/home_data_source.dart';
 import 'package:soplay/features/sources/domain/source_ecosystem.dart';
 import 'package:soplay/features/sources/domain/source_scope.dart';
@@ -248,6 +249,14 @@ Future<void> _openSwitcher(
     ),
   );
   if (result == null || !context.mounted) return;
+  if (result == _kAddSourceAction) {
+    // Straight to the catalogue, opened on this mode's kind of source.
+    await SourceCatalogPage.open(
+      context,
+      initialItemType: SourceCatalogPage.itemTypeFor(mode),
+    );
+    return;
+  }
   if (result == _kAllProvidersAction) {
     openProviderPicker(context, bloc);
     return;
@@ -287,6 +296,11 @@ Future<void> _openSwitcher(
 }
 
 const String _kAllProvidersAction = '__all_providers__';
+
+/// "Open the catalogue to install a source". Its own answer rather than
+/// [_kAllProvidersAction]: that one goes to the installed list, and adding
+/// from there is several screens further on.
+const String _kAddSourceAction = '__add_source__';
 
 /// Marks a sheet result as "make this catalogue the home", the same way
 /// [_kModePrefix] marks a mode. Three kinds of answer share one string channel.
@@ -853,13 +867,47 @@ class ProviderQuickSwitchSheetState extends State<ProviderQuickSwitchSheet> {
           ),
         ),
         const Divider(height: 1),
-        ListTile(
-          // "Add" first, because that is what somebody who cannot find their
-          // source is looking for, and the word was nowhere on this sheet.
-          leading: const Icon(Icons.add_rounded),
-          title: Text('ux.add_or_manage_sources'.tr()),
-          trailing: const Icon(Icons.chevron_right_rounded),
-          onTap: () => Navigator.of(context).pop(_kAllProvidersAction),
+        // Two actions, not one row that claims both. "Add or manage sources"
+        // opened the installed list, which since v3.2.0 has had no add button,
+        // so adding was three screens further on. Adding is the primary
+        // action and now goes straight to the catalogue.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: FilledButton.icon(
+                  onPressed: () => Navigator.of(context).pop(_kAddSourceAction),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(0, 48),
+                  ),
+                  icon: const Icon(Icons.add_rounded),
+                  label: Text(
+                    'ext.add_source'.tr(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 2,
+                child: TextButton(
+                  onPressed: () =>
+                      Navigator.of(context).pop(_kAllProvidersAction),
+                  style: TextButton.styleFrom(minimumSize: const Size(0, 48)),
+                  child: Text(
+                    'source_manager.manage'.tr(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

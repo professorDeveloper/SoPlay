@@ -201,6 +201,9 @@ extension _PlayerControls on _PlayerPageState {
     }
 
     _controller?.addListener(listener);
+    // Checked once now as well: media_kit shows the seek target at once, so
+    // the position may already be there and no later change would say so.
+    listener();
     Future.delayed(const Duration(seconds: 1), () {
       // The user can pop the player within this second — _sliderDragValue is
       // disposed by then, so touching it would throw.
@@ -561,12 +564,18 @@ extension _PlayerControls on _PlayerPageState {
       child: ColoredBox(
         color: Colors.black,
         // Clipped, so a zoomed frame stays inside the video box and never
-        // paints under the controls or the subtitles. At 1.0 Transform.scale is
-        // an identity and costs nothing, so there is no branch for it.
+        // paints under the controls or the subtitles.
         child: ClipRect(
           child: Transform.scale(
             scale: _videoZoom,
-            filterQuality: FilterQuality.medium,
+            // Only while zoomed. With ANY filterQuality, RenderTransform paints
+            // through an ImageFilterLayer even at scale 1.0 (its identity
+            // shortcut is taken only when filterQuality is null), so the whole
+            // video texture went through an offscreen pass and a resample on
+            // every frame the screen drew.
+            filterQuality: _videoZoom == _kMinZoom
+                ? null
+                : FilterQuality.medium,
             child: _FittedVideo(controller: c, fit: _fit),
           ),
         ),
@@ -1186,30 +1195,37 @@ extension _PlayerControls on _PlayerPageState {
         ? ExcludeFocus(excluding: !_controlsVisible, child: overlay)
         : overlay;
 
-    if (!isBuffering) return gated;
     // A stall while the controls are hidden used to show nothing at all — the
     // spinner lived inside the overlay and faded out with it. This one sits
     // outside the fade and cross-fades against it, so exactly one buffering
     // indicator is on screen: this, or the ring on the play button.
-    Widget spinner = const IgnorePointer(
-      child: Center(
-        child: SizedBox(
-          width: 44,
-          height: 44,
-          child: CircularProgressIndicator(
-            color: Colors.white,
-            strokeWidth: 2.8,
+    Widget? spinner;
+    if (isBuffering) {
+      spinner = const IgnorePointer(
+        child: Center(
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2.8,
+            ),
           ),
         ),
-      ),
-    );
-    if (!isDesktopPlatform) {
-      spinner = FadeTransition(
-        opacity: ReverseAnimation(_controlsAnimation),
-        child: spinner,
       );
+      if (!isDesktopPlatform) {
+        spinner = FadeTransition(
+          opacity: ReverseAnimation(_controlsAnimation),
+          child: spinner,
+        );
+      }
     }
-    return Stack(fit: StackFit.expand, children: [gated, spinner]);
+    // One shape whether buffering or not. Returning `gated` bare in one state
+    // and inside a Stack in the other changed the widget type at this slot, so
+    // every buffering flip unmounted and re-inflated the whole overlay —
+    // slider, buttons, focus and all. media_kit reports buffering around every
+    // seek, so each ±10 s tap rebuilt the controls from scratch twice.
+    return Stack(fit: StackFit.expand, children: [gated, ?spinner]);
   }
 
   /// One control of the cluster around play, or null when it does not apply.
@@ -2116,67 +2132,73 @@ extension _PlayerControls on _PlayerPageState {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ValueListenableBuilder<double?>(
-                valueListenable: _sliderDragValue,
-                builder: (_, dragVal, _) {
-                  return ValueListenableBuilder<VideoPlayerValue>(
-                    valueListenable: c,
-                    builder: (_, value, _) {
-                      if (_isLive) return _buildLiveBar();
-                      final duration = value.duration.inMilliseconds == 0
-                          ? Duration.zero
-                          : value.duration;
-                      final maxMs = duration.inMilliseconds.toDouble().clamp(
-                        1.0,
-                        double.infinity,
-                      );
-                      final sliderVal =
-                          dragVal ??
-                          (duration.inMilliseconds == 0
-                              ? 0.0
-                              : value.position.inMilliseconds
-                                    .clamp(0, duration.inMilliseconds)
-                                    .toDouble());
-                      final displayPos = dragVal != null
-                          ? Duration(milliseconds: dragVal.toInt())
-                          : value.position;
+              // Its own layer: the thumb moves on every playhead tick and on
+              // every drag event (120 Hz on a Samsung S22), and without a
+              // boundary each of those repainted the whole controls overlay —
+              // scrim, title, every icon and its text shadow — not the bar.
+              RepaintBoundary(
+                child: ValueListenableBuilder<double?>(
+                  valueListenable: _sliderDragValue,
+                  builder: (_, dragVal, _) {
+                    return ValueListenableBuilder<VideoPlayerValue>(
+                      valueListenable: c,
+                      builder: (_, value, _) {
+                        if (_isLive) return _buildLiveBar();
+                        final duration = value.duration.inMilliseconds == 0
+                            ? Duration.zero
+                            : value.duration;
+                        final maxMs = duration.inMilliseconds.toDouble().clamp(
+                          1.0,
+                          double.infinity,
+                        );
+                        final sliderVal =
+                            dragVal ??
+                            (duration.inMilliseconds == 0
+                                ? 0.0
+                                : value.position.inMilliseconds
+                                      .clamp(0, duration.inMilliseconds)
+                                      .toDouble());
+                        final displayPos = dragVal != null
+                            ? Duration(milliseconds: dragVal.toInt())
+                            : value.position;
 
-                      return Row(
-                        children: [
-                          IgnorePointer(
-                            child: Text(
-                              _positionLabel(displayPos, duration),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                shadows: _kControlShadow,
+                        return Row(
+                          children: [
+                            IgnorePointer(
+                              child: Text(
+                                _positionLabel(displayPos, duration),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  shadows: _kControlShadow,
+                                ),
                               ),
                             ),
-                          ),
-                          Expanded(
-                            child: _buildSeekBar(
-                              value: value,
-                              sliderVal: sliderVal.clamp(0.0, maxMs),
-                              maxMs: maxMs,
-                              scrubbing: dragVal != null,
-                              previewPosition: displayPos,
-                            ),
-                          ),
-                          IgnorePointer(
-                            child: Text(
-                              _formatDuration(duration),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                shadows: _kControlShadow,
+                            Expanded(
+                              child: _buildSeekBar(
+                                value: value,
+                                sliderVal: sliderVal.clamp(0.0, maxMs),
+                                maxMs: maxMs,
+                                scrubbing: dragVal != null,
+                                previewPosition: displayPos,
                               ),
                             ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
+                            IgnorePointer(
+                              child: Text(
+                                _formatDuration(duration),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  shadows: _kControlShadow,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
               const SizedBox(height: 4),
               if (isDesktopPlatform)

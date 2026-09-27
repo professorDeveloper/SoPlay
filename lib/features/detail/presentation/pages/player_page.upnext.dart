@@ -32,10 +32,17 @@ extension _PlayerUpNext on _PlayerPageState {
     final index = _episodeIndex + 1;
     if (!_window.contains(index)) return;
     final ep = _episodes[index];
-    if (ep.mediaRef.isEmpty || _localEpisode(ep) != null) return;
+    if (ep.mediaRef.isEmpty) return;
     final lang = _resolveLangForEpisode(ep);
     final key = _prefetchKey(ep, lang);
-    if (_nextResolve.covers(key)) return;
+    // Asked on every position tick past the threshold. Finding a download is a
+    // synchronous existsSync, and nothing is prefetched for it to short-
+    // circuit, so the answer is remembered.
+    if (_nextResolve.covers(key) || key == _prefetchLocalKey) return;
+    if (_localEpisode(ep) != null) {
+      _prefetchLocalKey = key;
+      return;
+    }
     _plog('prefetching next episode ref=${ep.mediaRef}');
     unawaited(
       _nextResolve.fill(key, () async {

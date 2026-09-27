@@ -337,7 +337,7 @@ void main() {
     await tester.enterText(find.byType(TextField), 'not installed anywhere');
     await tester.pumpAndSettle();
     expect(find.text('No sources match your search.'), findsOneWidget);
-    expect(find.text('Add or manage sources'), findsOneWidget);
+    expect(find.text('Add source'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:soplay/core/theme/app_colors.dart';
 import 'package:soplay/features/onboarding/data/onboarding_posters.dart';
@@ -16,6 +17,7 @@ class PosterWall extends StatefulWidget {
     this.tilesPerColumn = 11,
     this.fadeTop = false,
     this.fadeBottom = true,
+    this.running,
   });
 
   final List<String> posters;
@@ -29,6 +31,10 @@ class PosterWall extends StatefulWidget {
   /// Off where the page already fades the wall into its background: the mask
   /// is a full-screen offscreen pass on every frame of the drift.
   final bool fadeBottom;
+
+  /// Starts and stops the drift from outside, as the intro does mid-swipe.
+  /// Null: it drifts whenever animations are on.
+  final ValueListenable<bool>? running;
 
   @override
   State<PosterWall> createState() => _PosterWallState();
@@ -44,13 +50,35 @@ class _PosterWallState extends State<PosterWall>
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: _cycle,
-  )..repeat();
+  );
+  bool _reduced = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.running?.addListener(_sync);
+  }
+
+  @override
+  void didUpdateWidget(PosterWall old) {
+    super.didUpdateWidget(old);
+    if (old.running == widget.running) return;
+    old.running?.removeListener(_sync);
+    widget.running?.addListener(_sync);
+    _sync();
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final reduced = MediaQuery.disableAnimationsOf(context);
-    if (reduced) {
+    _reduced = MediaQuery.disableAnimationsOf(context);
+    _sync();
+  }
+
+  // Stopped, not muted: a muted ticker's clock keeps counting, so the wall
+  // jumped ahead by however long it had been held once it was let go.
+  void _sync() {
+    if (_reduced || !(widget.running?.value ?? true)) {
       _controller.stop();
     } else if (!_controller.isAnimating) {
       _controller.repeat();
@@ -59,6 +87,7 @@ class _PosterWallState extends State<PosterWall>
 
   @override
   void dispose() {
+    widget.running?.removeListener(_sync);
     _controller.dispose();
     super.dispose();
   }

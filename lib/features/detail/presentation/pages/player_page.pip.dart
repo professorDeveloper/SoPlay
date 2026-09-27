@@ -391,6 +391,31 @@ extension _PlayerPip on _PlayerPageState {
     await WakelockHolds.release(this);
   }
 
+  /// A swipe asks for a new level on every touch sample — 120 a second on a
+  /// fast panel — and each call was a window relayout or an AudioManager IPC
+  /// on the thread that draws the next frame. The first goes at once, then at
+  /// most one per 50 ms; the trailing call lands wherever the finger stopped.
+  void _pushSystemLevels({bool brightness = false, bool volume = false}) {
+    _brightnessDirty |= brightness;
+    _volumeDirty |= volume;
+    if (_systemLevelTimer?.isActive ?? false) return;
+    _flushSystemLevels();
+    _systemLevelTimer = Timer(const Duration(milliseconds: 50), () {
+      if (mounted) _flushSystemLevels();
+    });
+  }
+
+  void _flushSystemLevels() {
+    if (_brightnessDirty) {
+      _brightnessDirty = false;
+      unawaited(_setSystemBrightness(_brightness));
+    }
+    if (_volumeDirty) {
+      _volumeDirty = false;
+      unawaited(_setSystemVolume(_volume));
+    }
+  }
+
   Future<void> _setSystemBrightness(double value) async {
     try {
       await _systemControlsChannel.invokeMethod<double>('setBrightness', {

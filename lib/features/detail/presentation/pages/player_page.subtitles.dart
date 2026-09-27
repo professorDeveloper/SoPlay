@@ -2000,62 +2000,66 @@ extension _PlayerSubtitles on _PlayerPageState {
       left: 16,
       right: 16,
       bottom: _subtitleBottomOffset,
-      child: IgnorePointer(
-        child: ListenableBuilder(
-          listenable: Listenable.merge([
-            _subtitleOffsetMs,
-            _subtitleRate,
-            c,
-            ?embedded,
-          ]),
-          builder: (_, _) {
-            final rate = _subtitleRate.value;
-            var position =
-                c.value.position -
-                Duration(milliseconds: _subtitleOffsetMs.value);
-            // Map the video clock onto the subtitle's own timeline: a 25fps
-            // subtitle over 23.976fps content needs its timestamps stretched,
-            // which is a division here, not a shift.
-            if (rate != 1.0 && rate > 0) {
-              position = Duration(
-                microseconds: (position.inMicroseconds / rate).round(),
+      // Its own layer: the line changes on its own clock, and nothing else on
+      // the page has to repaint with it.
+      child: RepaintBoundary(
+        child: IgnorePointer(
+          child: ListenableBuilder(
+            listenable: Listenable.merge([
+              _subtitleOffsetMs,
+              _subtitleRate,
+              c,
+              ?embedded,
+            ]),
+            builder: (_, _) {
+              final rate = _subtitleRate.value;
+              var position =
+                  c.value.position -
+                  Duration(milliseconds: _subtitleOffsetMs.value);
+              // Map the video clock onto the subtitle's own timeline: a 25fps
+              // subtitle over 23.976fps content needs its timestamps stretched,
+              // which is a division here, not a shift.
+              if (rate != 1.0 && rate > 0) {
+                position = Duration(
+                  microseconds: (position.inMicroseconds / rate).round(),
+                );
+              }
+              final fromStream =
+                  captions == null &&
+                      _activeSubtitleIndex == -1 &&
+                      c.activeSubtitleTrackId != null
+                  ? embedded?.value ?? ''
+                  : '';
+              final primary = captions == null
+                  ? fromStream
+                  : _captionTextAt(captions, position);
+              final secondary = _secondaryCaptionFile == null
+                  ? ''
+                  : _captionTextAt(_secondaryCaptionFile!, position);
+              if (primary.isEmpty && secondary.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return Align(
+                alignment: Alignment.bottomCenter,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // The second track sits ABOVE the first, and smaller. The
+                    // primary is the one being read along with the audio and
+                    // keeps the position the eye is trained on; a translation
+                    // pushed underneath it would move the line everyone actually
+                    // reads every time the other track has something to say.
+                    if (secondary.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: _styledSubtitle(secondary, secondary: true),
+                      ),
+                    if (primary.isNotEmpty) _styledSubtitle(primary),
+                  ],
+                ),
               );
-            }
-            final fromStream =
-                captions == null &&
-                    _activeSubtitleIndex == -1 &&
-                    c.activeSubtitleTrackId != null
-                ? embedded?.value ?? ''
-                : '';
-            final primary = captions == null
-                ? fromStream
-                : _captionTextAt(captions, position);
-            final secondary = _secondaryCaptionFile == null
-                ? ''
-                : _captionTextAt(_secondaryCaptionFile!, position);
-            if (primary.isEmpty && secondary.isEmpty) {
-              return const SizedBox.shrink();
-            }
-            return Align(
-              alignment: Alignment.bottomCenter,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // The second track sits ABOVE the first, and smaller. The
-                  // primary is the one being read along with the audio and
-                  // keeps the position the eye is trained on; a translation
-                  // pushed underneath it would move the line everyone actually
-                  // reads every time the other track has something to say.
-                  if (secondary.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: _styledSubtitle(secondary, secondary: true),
-                    ),
-                  if (primary.isNotEmpty) _styledSubtitle(primary),
-                ],
-              ),
-            );
-          },
+            },
+          ),
         ),
       ),
     );
@@ -2155,10 +2159,7 @@ extension _PlayerSubtitles on _PlayerPageState {
           ),
         ];
       case SubtitleEdge.outline:
-        strokePaint = Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.5
-          ..color = const Color(0xFF000000);
+        strokePaint = _kSubtitleStroke;
     }
 
     Widget textWidget = Text(
@@ -2254,3 +2255,11 @@ class _AiTranslateChip extends StatelessWidget {
     );
   }
 }
+
+/// One stroke for every outlined subtitle line. `Paint` compares by identity
+/// and TextStyle treats a different `foreground` as a LAYOUT change, so a new
+/// Paint per build re-shaped the line on every position tick.
+final Paint _kSubtitleStroke = Paint()
+  ..style = PaintingStyle.stroke
+  ..strokeWidth = 2.5
+  ..color = const Color(0xFF000000);

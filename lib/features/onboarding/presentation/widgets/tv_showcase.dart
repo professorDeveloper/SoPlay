@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:soplay/core/theme/app_colors.dart';
 import 'package:soplay/features/onboarding/data/onboarding_posters.dart';
@@ -10,11 +11,12 @@ import 'package:soplay/features/onboarding/data/onboarding_posters.dart';
 /// pairing are the two things people never guess the app can do, and neither
 /// of them looks like a poster.
 class TvShowcase extends StatefulWidget {
-  const TvShowcase({super.key, this.active = true});
+  const TvShowcase({super.key, this.running});
 
-  /// The entrance waits for this, so a showcase mounted ahead of time does
-  /// not spend it off screen.
-  final bool active;
+  /// Starts and stops the scene from outside. The entrance waits for it too,
+  /// so a showcase mounted ahead of time does not spend it off screen.
+  /// Null: it runs whenever animations are on.
+  final ValueListenable<bool>? running;
 
   @override
   State<TvShowcase> createState() => _TvShowcaseState();
@@ -24,70 +26,91 @@ class _TvShowcaseState extends State<TvShowcase> with TickerProviderStateMixin {
   late final AnimationController _loop = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 9),
-  )..repeat();
+  );
 
   // The line-up gets its own clock. On the screen's 9-second loop a strip of
   // forty marks flies past far too fast to read a single one.
   late final AnimationController _strips = AnimationController(
     vsync: this,
     duration: const Duration(seconds: 78),
-  )..repeat();
+  );
 
   late final AnimationController _entrance = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1300),
   );
 
+  // Made once. A CurvedAnimation hangs a status listener on its parent that
+  // only dispose() takes off, and these were made on every build — five more
+  // on each frame of a swipe.
+  late final List<CurvedAnimation> _steps = [
+    for (final start in const [0.0, 0.1, 0.24, 0.34, 0.44])
+      CurvedAnimation(
+        parent: _entrance,
+        curve: Interval(
+          start,
+          (start + 0.5).clamp(0.0, 1.0),
+          curve: Curves.easeOutCubic,
+        ),
+      ),
+  ];
+
+  bool _reduced = false;
+
   @override
   void initState() {
     super.initState();
-    if (widget.active) _entrance.forward();
+    widget.running?.addListener(_sync);
   }
 
   @override
   void didUpdateWidget(TvShowcase old) {
     super.didUpdateWidget(old);
-    if (widget.active && _entrance.value == 0 && !_entrance.isAnimating) {
-      _entrance.forward();
-    }
+    if (old.running == widget.running) return;
+    old.running?.removeListener(_sync);
+    widget.running?.addListener(_sync);
+    _sync();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final reduced = MediaQuery.disableAnimationsOf(context);
-    if (reduced) {
-      _loop.stop();
-    } else if (!_loop.isAnimating) {
-      _loop.repeat();
+    _reduced = MediaQuery.disableAnimationsOf(context);
+    _sync();
+  }
+
+  // Stopped, not muted: a muted ticker's clock keeps counting, so the scene
+  // jumped ahead by however long it had been held once it was let go.
+  void _sync() {
+    final run = !_reduced && (widget.running?.value ?? true);
+    for (final c in [_loop, _strips]) {
+      if (!run) {
+        c.stop();
+      } else if (!c.isAnimating) {
+        c.repeat();
+      }
     }
-    if (reduced) {
-      _strips.stop();
-    } else if (!_strips.isAnimating) {
-      _strips.repeat();
-    }
-    if (reduced) {
+    if (_reduced) {
       _entrance.stop();
       _entrance.value = 1;
+    } else if (!run) {
+      _entrance.stop();
+    } else if (_entrance.value < 1 && !_entrance.isAnimating) {
+      _entrance.forward();
     }
   }
 
   @override
   void dispose() {
+    widget.running?.removeListener(_sync);
+    for (final s in _steps) {
+      s.dispose();
+    }
     _loop.dispose();
     _strips.dispose();
     _entrance.dispose();
     super.dispose();
   }
-
-  Animation<double> _step(double start) => CurvedAnimation(
-    parent: _entrance,
-    curve: Interval(
-      start,
-      (start + 0.5).clamp(0.0, 1.0),
-      curve: Curves.easeOutCubic,
-    ),
-  );
 
   @override
   Widget build(BuildContext context) {
@@ -100,41 +123,70 @@ class _TvShowcaseState extends State<TvShowcase> with TickerProviderStateMixin {
               // The set assembles itself: screen, then the line-up it carries,
               // then the phone that drives it — the order the sentence reads in.
               _Rise(
-                animation: _step(0),
+                animation: _steps[0],
                 from: 26,
                 child: _Television(controller: _loop),
               ),
-              _Rise(animation: _step(0.1), from: 20, child: const _Stand()),
+              _Rise(animation: _steps[1], from: 20, child: const _Stand()),
               const SizedBox(height: 30),
-              _Rise(
-                animation: _step(0.24),
-                from: 22,
-                child: _ChannelStrip(
-                  controller: _strips,
-                  reverse: false,
-                  speed: 1,
-                ),
-              ),
-              const SizedBox(height: 9),
-              _Rise(
-                animation: _step(0.34),
-                from: 22,
-                child: _ChannelStrip(
-                  controller: _strips,
-                  reverse: true,
-                  speed: 0.78,
-                  offset: 0.33,
-                ),
-              ),
-              const SizedBox(height: 9),
-              _Rise(
-                animation: _step(0.44),
-                from: 22,
-                child: _ChannelStrip(
-                  controller: _strips,
-                  reverse: false,
-                  speed: 0.91,
-                  offset: 0.66,
+              // One mask for the three strips rather than one each: the edges
+              // fade to transparent, so the backdrop behind shows through during
+              // the crossfade, and it is one small offscreen pass instead of
+              // three.
+              ShaderMask(
+                blendMode: BlendMode.dstIn,
+                shaderCallback: (rect) => const LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Colors.transparent,
+                    Colors.white,
+                    Colors.white,
+                    Colors.transparent,
+                  ],
+                  stops: [0, 0.12, 0.88, 1],
+                ).createShader(rect),
+                // Down to where the last strip starts its rise, 22 px lower:
+                // the mask covers only this box, and a strip still rising below
+                // it would show hard edges.
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 22),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _Rise(
+                        animation: _steps[2],
+                        from: 22,
+                        child: _ChannelStrip(
+                          controller: _strips,
+                          reverse: false,
+                          speed: 1,
+                        ),
+                      ),
+                      const SizedBox(height: 9),
+                      _Rise(
+                        animation: _steps[3],
+                        from: 22,
+                        child: _ChannelStrip(
+                          controller: _strips,
+                          reverse: true,
+                          speed: 0.78,
+                          offset: 0.33,
+                        ),
+                      ),
+                      const SizedBox(height: 9),
+                      _Rise(
+                        animation: _steps[4],
+                        from: 22,
+                        child: _ChannelStrip(
+                          controller: _strips,
+                          reverse: false,
+                          speed: 0.91,
+                          offset: 0.66,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -392,68 +444,52 @@ class _ChannelStrip extends StatelessWidget {
 
     return SizedBox(
       height: _tileHeight,
-      child: ShaderMask(
-        blendMode: BlendMode.dstIn,
-        shaderCallback: (rect) => const LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            Colors.transparent,
-            Colors.white,
-            Colors.white,
-            Colors.transparent,
-          ],
-          stops: [0, 0.12, 0.88, 1],
-        ).createShader(rect),
-        child: ClipRect(
-          child: OverflowBox(
-            maxWidth: double.infinity,
-            alignment: AlignmentDirectional.centerStart,
-            child: AnimatedBuilder(
-              animation: controller,
-              builder: (context, child) {
-                // Wrapped rather than scaled, so a slower row still closes its
-                // own loop without a jump.
-                final t = (controller.value * speed) % 1.0;
-                return Transform.translate(
-                  offset: Offset(reverse ? t * strip - strip : -t * strip, 0),
-                  child: child,
-                );
-              },
-              child: RepaintBoundary(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (var pass = 0; pass < 2; pass++)
-                      for (final logo in logos)
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(end: _gap),
-                          child: Container(
-                            width: _tileWidth,
-                            height: _tileHeight,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.card.withValues(alpha: 0.85),
-                              borderRadius: BorderRadius.circular(7),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.08),
-                              ),
-                            ),
-                            child: Image.asset(
-                              logo,
-                              fit: BoxFit.contain,
-                              cacheWidth: (_tileWidth * devicePixelRatio)
-                                  .round(),
-                              errorBuilder: (_, _, _) =>
-                                  const SizedBox.shrink(),
+      child: ClipRect(
+        child: OverflowBox(
+          maxWidth: double.infinity,
+          alignment: AlignmentDirectional.centerStart,
+          child: AnimatedBuilder(
+            animation: controller,
+            builder: (context, child) {
+              // Wrapped rather than scaled, so a slower row still closes its
+              // own loop without a jump.
+              final t = (controller.value * speed) % 1.0;
+              return Transform.translate(
+                offset: Offset(reverse ? t * strip - strip : -t * strip, 0),
+                child: child,
+              );
+            },
+            child: RepaintBoundary(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var pass = 0; pass < 2; pass++)
+                    for (final logo in logos)
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(end: _gap),
+                        child: Container(
+                          width: _tileWidth,
+                          height: _tileHeight,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.card.withValues(alpha: 0.85),
+                            borderRadius: BorderRadius.circular(7),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.08),
                             ),
                           ),
+                          child: Image.asset(
+                            logo,
+                            fit: BoxFit.contain,
+                            cacheWidth: (_tileWidth * devicePixelRatio).round(),
+                            errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                          ),
                         ),
-                  ],
-                ),
+                      ),
+                ],
               ),
             ),
           ),

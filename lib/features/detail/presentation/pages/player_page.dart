@@ -205,6 +205,10 @@ class _PlayerPageState extends State<PlayerPage>
   DateTime? _sleepDeadline;
   bool _sleepAtEpisodeEnd = false;
 
+  /// The next episode's prefetch key when it turned out to be downloaded, so
+  /// the per-tick check does not stat the file again. See _maybePrefetchNext.
+  String? _prefetchLocalKey;
+
   final PrefetchSlot<MediaResolveEntity> _nextResolve =
       PrefetchSlot<MediaResolveEntity>();
 
@@ -548,6 +552,12 @@ class _PlayerPageState extends State<PlayerPage>
 
   double _brightness = 0.5;
   double _volume = 1.0;
+
+  /// Swipe levels not yet handed to the system, and the timer pacing them.
+  /// See _pushSystemLevels in player_page.pip.dart.
+  bool _brightnessDirty = false;
+  bool _volumeDirty = false;
+  Timer? _systemLevelTimer;
   final ValueNotifier<_SwipeIndicator?> _swipeIndicator =
       ValueNotifier<_SwipeIndicator?>(null);
 
@@ -850,6 +860,7 @@ class _PlayerPageState extends State<PlayerPage>
     _hideTimer?.cancel();
     _historyTimer?.cancel();
     _seekRippleTimer?.cancel();
+    _systemLevelTimer?.cancel();
     _tvSeekCommit?.cancel();
     _tvRootFocus.dispose();
     _tvPanelFocus.dispose();
