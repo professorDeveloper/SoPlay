@@ -309,6 +309,8 @@ class _SourcesHubPageState extends State<SourcesHubPage>
   /// Manage, then a settings row called "Sources by language", from the page
   /// people open in order to add one.
   Future<void> _openInstaller() async {
+    final hive = getIt<HiveService>();
+    final before = hive.getContentMode();
     await SourceCatalogPage.open(
       context,
       initialItemType: SourceCatalogPage.itemTypeFor(
@@ -316,9 +318,12 @@ class _SourcesHubPageState extends State<SourcesHubPage>
       ),
     );
     if (!mounted) return;
-    // "Use" in the catalogue can switch mode. Land on the tab of the source
-    // now in use so it is visible; _onTabMoved resets the scope.
-    final now = ContentMode.fromId(getIt<HiveService>().getContentMode()).index;
+    // "Use" in the catalogue can switch mode. Only then land on the tab of
+    // the source now in use; otherwise stay on the tab the viewer came from,
+    // where what they just installed is listed. _onTabMoved resets the scope.
+    final after = hive.getContentMode();
+    if (after == before) return;
+    final now = ContentMode.fromId(after).index;
     if (_tabs.index != now) _tabs.index = now;
   }
 

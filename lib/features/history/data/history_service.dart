@@ -80,6 +80,19 @@ class HistoryService {
   /// save on pause and on exit.
   Future<void> saveQuietly(HistoryItem item) => _write(item, notify: false);
 
+  /// Whether a quiet write has landed that listeners have not been told of.
+  bool _quietPending = false;
+
+  /// Tells listeners about quiet writes, if there were any since the last
+  /// notification. For the moments the player hands the screen back — pause,
+  /// exit — when its own final save may write nothing (an episode played to
+  /// its end), and the rows the quiet ticks wrote would otherwise never show.
+  void flushQuiet() {
+    if (!_quietPending) return;
+    _quietPending = false;
+    revision.value++;
+  }
+
   Future<void> _write(HistoryItem item, {required bool notify}) async {
     // Incognito is enforced here rather than at the call sites. History is
     // written from the player, the detail page, shorts and the sync service's
@@ -95,7 +108,12 @@ class HistoryService {
     }
     await _box.put(item.storageKey, jsonEncode(item.toJson()));
     await _trimIfNeeded();
-    if (notify) revision.value++;
+    if (notify) {
+      _quietPending = false;
+      revision.value++;
+    } else {
+      _quietPending = true;
+    }
   }
 
   /// Reads a row back so a delete can be described to the server before the

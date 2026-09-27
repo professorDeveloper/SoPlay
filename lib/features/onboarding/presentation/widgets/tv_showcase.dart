@@ -146,41 +146,47 @@ class _TvShowcaseState extends State<TvShowcase> with TickerProviderStateMixin {
                   ],
                   stops: [0, 0.12, 0.88, 1],
                 ).createShader(rect),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _Rise(
-                      animation: _steps[2],
-                      from: 22,
-                      child: _ChannelStrip(
-                        controller: _strips,
-                        reverse: false,
-                        speed: 1,
+                // Down to where the last strip starts its rise, 22 px lower:
+                // the mask covers only this box, and a strip still rising below
+                // it would show hard edges.
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 22),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _Rise(
+                        animation: _steps[2],
+                        from: 22,
+                        child: _ChannelStrip(
+                          controller: _strips,
+                          reverse: false,
+                          speed: 1,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 9),
-                    _Rise(
-                      animation: _steps[3],
-                      from: 22,
-                      child: _ChannelStrip(
-                        controller: _strips,
-                        reverse: true,
-                        speed: 0.78,
-                        offset: 0.33,
+                      const SizedBox(height: 9),
+                      _Rise(
+                        animation: _steps[3],
+                        from: 22,
+                        child: _ChannelStrip(
+                          controller: _strips,
+                          reverse: true,
+                          speed: 0.78,
+                          offset: 0.33,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 9),
-                    _Rise(
-                      animation: _steps[4],
-                      from: 22,
-                      child: _ChannelStrip(
-                        controller: _strips,
-                        reverse: false,
-                        speed: 0.91,
-                        offset: 0.66,
+                      const SizedBox(height: 9),
+                      _Rise(
+                        animation: _steps[4],
+                        from: 22,
+                        child: _ChannelStrip(
+                          controller: _strips,
+                          reverse: false,
+                          speed: 0.91,
+                          offset: 0.66,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],

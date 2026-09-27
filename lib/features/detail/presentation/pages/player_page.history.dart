@@ -84,6 +84,10 @@ extension _PlayerHistory on _PlayerPageState {
   }
 
   void _saveHistory({bool notify = true}) {
+    // A notifying save can still write nothing — an episode played to its
+    // end returns below — so the rows the quiet ticks wrote are announced
+    // first, or the screens under the player keep their old progress.
+    if (notify) _history.flushQuiet();
     if (!WatchProgress.countsAsAViewing(_playbackWatch.elapsed)) return;
 
     // Time watched since the last save, banked before anything can return
