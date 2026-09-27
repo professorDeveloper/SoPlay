@@ -87,6 +87,37 @@ jobs:
   # platforms ship the same version — resolving it per job would let a push
   # landing mid-run give Android one version and Windows another.
   #
+  # A tag that already has a release was created BY that release.
+  #
+  # A draft does not create its tag; GitHub creates it the moment somebody
+  # presses Publish. That tag push matched `push: tags: v*`, so publishing a
+  # finished draft started the whole release again: every platform rebuilt,
+  # and the publish job then overwrote the hand-written notes with generated
+  # ones. Only a tag with no release behind it (`git tag vX && git push`) is
+  # a request to build.
+  gate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if [ "${EVENT}" = "push" ] && gh release view "${TAG}" --repo "${REPO}" >/dev/null 2>&1; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "### Skipped: ${TAG} already has a release" >> "$GITHUB_STEP_SUMMARY"
+            echo "This tag was created by publishing that release. Nothing is rebuilt or re-published." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
   # The build number always rises, whatever the name does. It is what Android
   # compares for "is there an update", and what the backend's AppVersion row
   # stores; two releases sharing one build number are invisible to the updater.
@@ -103,9 +134,11 @@ jobs:
     # A hand-cut tag (`git tag v1.0.1 && git push`) still builds, which is the
     # documented way to release without the dispatch form. What is filtered is
     # only this workflow's own bookkeeping commit, which no human writes.
+    needs: gate
     if: >-
+      needs.gate.outputs.run == 'true' && (
       github.event_name != 'push' ||
-      !startsWith(github.event.head_commit.message || '', 'chore: ')
+      !startsWith(github.event.head_commit.message || '', 'chore: '))
     runs-on: ubuntu-latest
     # The bump commit and its tag are pushed with GITHUB_TOKEN, which is
     # read-only in this repository unless a job asks for more. Without this the
@@ -1077,8 +1110,10 @@ jobs:
           # release is left at whatever state it already has: re-running must
           # not publish a draft somebody is still writing, nor un-publish one
           # that is already out.
+          # Its notes are left alone too: once a release exists, somebody may
+          # have written them, and a re-run must not replace them with the
+          # generated ones.
           if gh release view "${TAG}" >/dev/null 2>&1; then
-            gh release edit "${TAG}" --title "Sozo v${V}" --notes-file RELEASE_NOTES.md
             gh release upload "${TAG}" rel/* --clobber
           else
             # --target, not --verify-tag.
