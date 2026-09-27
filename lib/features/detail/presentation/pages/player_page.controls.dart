@@ -1417,6 +1417,15 @@ extension _PlayerControls on _PlayerPageState {
                         onTap: () => _openPanel(_SidePanel.episodes),
                       ),
                     ],
+                    // The mini window: this player at 426 wide, above every
+                    // other window. It had no button at all — the phone's PiP
+                    // control lives in the layout rows, which this row does
+                    // not draw — so only the I key could reach it.
+                    const SizedBox(width: 4),
+                    _IconButton(
+                      icon: Icons.picture_in_picture_alt_rounded,
+                      onTap: _toggleDesktopMini,
+                    ),
                     const SizedBox(width: 4),
                     _IconButton(
                       icon: _isFullscreen
@@ -2020,13 +2029,10 @@ extension _PlayerControls on _PlayerPageState {
       case 'party':
       case 'pip':
       case 'download':
-        // A television reaches all three from its own top bar, and rendering
-        // them here as well is the duplication the `&& !isTvPlatform` guards
-        // used to prevent. The desktop has no such bar — it draws the shipped
-        // defaults, where all three live in this row, and never hoists — so
-        // returning null here left it with no mini-player button, no Watch
-        // Party and no download at all.
-        if (isTvPlatform) return null;
+        // Phone only in this row: a television reaches all three from its own
+        // top bar, and rendering them here as well is the duplication the
+        // `&& !isTvPlatform` guards used to prevent.
+        if (isTvPlatform || isDesktopPlatform) return null;
         return _topBarControl(id);
       default:
         // No live value to print, so the icon form is the honest one and the
