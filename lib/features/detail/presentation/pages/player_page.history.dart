@@ -513,6 +513,7 @@ extension _PlayerHistory on _PlayerPageState {
         // would 403 on every host but the one already on screen.
         headers: selection.headers,
         videoHeight: selection.height,
+        type: selection.type,
         isSerial: widget.args.isSerial,
         episodeNumber: widget.args.isSerial && ep != null ? ep.episode : null,
         episodeLabel: ep?.label,

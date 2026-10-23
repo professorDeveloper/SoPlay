@@ -69,7 +69,9 @@ class SourceLadder {
   static bool isPlayable(VideoSourceEntity s, {required bool hasDirective}) {
     if (!s.accessible) return false;
     if (s.videoUrl.isEmpty) return false;
-    if (s.type == 'iframe' && !hasDirective) return false;
+    if ((s.type == 'iframe' || s.type == 'webview-extract') && !hasDirective) {
+      return false;
+    }
     return true;
   }
 

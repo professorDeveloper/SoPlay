@@ -34,9 +34,8 @@ abstract final class QualityPreference {
   /// Whether the source playing is a lone adaptive stream whose master is
   /// worth reading for renditions.
   ///
-  /// A label that already names a resolution came from the provider, which
-  /// knows its catalogue better than a parsed manifest; and rows hung off this
-  /// label mean the work is already done.
+  /// Provider labels can describe the maximum, even when the URL is adaptive.
+  /// Read that master; existing sibling rendition rows prevent duplicate work.
   static bool shouldExpand({
     required String label,
     required String url,
@@ -44,7 +43,6 @@ abstract final class QualityPreference {
     required Iterable<String> siblingLabels,
   }) {
     if (url.isEmpty) return false;
-    if (VideoOptionGroups.resolutionOf(label) != null) return false;
     final kind = type?.toLowerCase();
     final lower = url.toLowerCase();
     final looksHls = kind == 'hls' || kind == 'm3u8' || lower.contains('.m3u8');

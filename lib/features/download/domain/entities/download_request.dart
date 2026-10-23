@@ -45,6 +45,7 @@ class DownloadRequest {
     required String sourceUrl,
     String? thumbnailUrl,
     int? videoHeight,
+    String? type,
     Map<String, String> headers = const {},
     bool isSerial = false,
     int? episodeNumber,
@@ -57,7 +58,9 @@ class DownloadRequest {
     provider: provider,
     title: title,
     sourceUrl: sourceUrl,
-    kind: DownloadKind.fromLegacy('video', sourceUrl),
+    kind: type == 'hls' || type == 'm3u8'
+        ? DownloadKind.hls
+        : DownloadKind.fromLegacy('video', sourceUrl),
     videoHeight: videoHeight,
     thumbnailUrl: thumbnailUrl,
     headers: headers,

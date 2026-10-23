@@ -68,8 +68,8 @@ void main() {
       expect(expand('Server 1', 'https://cdn.test/play', type: 'hls'), isTrue);
     });
 
-    test('a label with a resolution is the provider\'s own and is kept', () {
-      expect(expand('1080p', 'https://cdn.test/master.m3u8'), isFalse);
+    test('a provider label does not hide the actual HLS renditions', () {
+      expect(expand('1080p', 'https://cdn.test/master.m3u8'), isTrue);
     });
 
     test('a progressive file has no master to read', () {

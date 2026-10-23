@@ -98,7 +98,9 @@ abstract class PlayerController extends ValueNotifier<vp.VideoPlayerValue> {
     // but if it somehow does, falling through to the native backend is the
     // safe answer, not a crash.
     if (!preferPlatform && _useMediaKit() && _mediaKitUsable()) {
-      return _MediaKitController(_MediaKitSource.uri(url, httpHeaders));
+      return _MediaKitController(
+        _MediaKitSource.uri(url, httpHeaders, formatHint: formatHint),
+      );
     }
     return _NativeController(
       vp.VideoPlayerController.networkUrl(
@@ -554,11 +556,12 @@ class _NativeController extends PlayerController {
 }
 
 class _MediaKitSource {
-  _MediaKitSource.uri(Uri uri, this.headers)
+  _MediaKitSource.uri(Uri uri, this.headers, {this.formatHint})
     : source = uri.isScheme('file') ? uri.toFilePath() : uri.toString(),
       uri = uri.isScheme('file') ? null : uri;
   _MediaKitSource.path(this.source)
     : headers = const <String, String>{},
+      formatHint = null,
       uri = null;
 
   /// What libmpv is given: a URL string, or a path for a local file.
@@ -568,6 +571,7 @@ class _MediaKitSource {
   /// as one string and the platform backend does not — it has a separate
   /// constructor for each, and by then the distinction is gone.
   final Uri? uri;
+  final vp.VideoFormat? formatHint;
 
   final Map<String, String> headers;
 }
@@ -721,26 +725,21 @@ class _MediaKitController extends PlayerController {
         debugPrint('[player] hr-seek-framedrop not applied: $e');
       }
     }
-    await _player.open(
-      mk.Media(
-        _src.source,
-        httpHeaders: _src.headers.isEmpty ? null : _src.headers,
-      ),
-      play: false,
-    );
-    try {
-      await _awaitReady();
-    } on TimeoutException {
-      if (_disposed) return;
-      if (!kIsWeb && Platform.isAndroid) {
-        debugPrint(
-          '[player] libmpv never produced video parameters; trying platform playback',
+    final recovered = await initializeWithDecoderFallback(
+      initialize: () async {
+        await _player.open(
+          mk.Media(
+            _src.source,
+            httpHeaders: _src.headers.isEmpty ? null : _src.headers,
+          ),
+          play: false,
         );
-        await _swapToPlatformBackend();
-        return;
-      }
-      rethrow;
-    }
+        await _awaitReady();
+      },
+      canFallback: () => !_disposed && !kIsWeb && Platform.isAndroid,
+      fallback: _swapToPlatformBackend,
+    );
+    if (recovered) return;
     if (_disposed) return;
     final w = _player.state.width ?? 0;
     final h = _player.state.height ?? 0;
@@ -780,12 +779,13 @@ class _MediaKitController extends PlayerController {
     await _teardownMpv();
     if (_disposed) return;
 
-    final replacement = _src.uri == null
+    final replacement = _src.uri == null && _src.formatHint == null
         ? _NativeController(vp.VideoPlayerController.file(File(_src.source)))
         : _NativeController(
             vp.VideoPlayerController.networkUrl(
-              _src.uri!,
+              _src.uri ?? Uri.file(_src.source),
               httpHeaders: _src.headers,
+              formatHint: _src.formatHint,
             ),
           );
     _fallback = replacement;

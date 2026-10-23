@@ -1,3 +1,4 @@
+import 'package:soplay/core/constants/app_constants.dart';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -100,6 +101,7 @@ class DownloadNativeDataSource {
     required List<String> pageUrls,
     List<Map<String, String>> imageHeaders = const [],
     required bool wifiOnly,
+    int? videoHeight,
   }) async {
     if (!isSupported) return false;
     try {
@@ -113,6 +115,8 @@ class DownloadNativeDataSource {
             'pageUrls': pageUrls,
             'imageHeaders': imageHeaders,
             'wifiOnly': wifiOnly,
+            'videoHeight': videoHeight,
+            'segmentRelay': '${AppConstants.baseUrl}/contents/media-segment',
           }) ??
           false;
     } on PlatformException catch (e) {

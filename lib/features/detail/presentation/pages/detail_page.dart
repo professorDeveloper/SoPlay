@@ -1,3 +1,4 @@
+import 'package:soplay/features/download/domain/usecases/download_request_builder.dart';
 import 'package:soplay/core/content/content_mode.dart';
 import 'package:soplay/features/detail/presentation/widgets/detail_about_tab.dart';
 import 'package:soplay/core/content/catalogue.dart';
@@ -694,7 +695,10 @@ class _DetailViewState extends State<_DetailView>
         ? playback.episodes.first.mediaRef
         : '';
     final needsResolve =
-        playback.type == 'webview-extract' || url == null || url.isEmpty;
+        playback.type == 'webview-extract' ||
+        playback.type == 'iframe' ||
+        url == null ||
+        url.isEmpty;
     if (needsResolve && ref.isNotEmpty) {
       final result = await getIt<ResolveMediaUseCase>()(
         ref: ref,
@@ -703,21 +707,19 @@ class _DetailViewState extends State<_DetailView>
       if (!mounted) return;
       if (result is Success<MediaResolveEntity> &&
           result.value.videoUrl.isNotEmpty) {
-        // Same hazard as the episode list: under a directive this url is the
-        // embed page, and nothing here will sniff it. Refuse with advice
-        // rather than downloading an HTML file that fails on first open.
-        if (!DownloadChoices.isDownloadableUrl(
-          url: result.value.videoUrl,
-          type: result.value.type,
-          hasDirective: result.value.extractor != null,
-        )) {
+        final prepared = await getIt<DownloadRequestBuilder>().prepareVideo(
+          result.value,
+        );
+        if (!mounted) return;
+        final media = prepared.media;
+        if (media == null) {
           _showSnack('detail.download_needs_playback'.tr());
           return;
         }
-        url = result.value.videoUrl;
-        headers = result.value.headers;
-        sources = result.value.videoSources;
-        type = result.value.type;
+        url = media.videoUrl;
+        headers = media.headers;
+        sources = media.videoSources;
+        type = media.type;
         if (result.value.subtitles.isNotEmpty) {
           subtitles = result.value.subtitles;
         }
@@ -727,6 +729,32 @@ class _DetailViewState extends State<_DetailView>
     if (url == null || url.isEmpty) {
       _showSnack('detail.download_resolve_failed'.tr());
       return;
+    }
+
+    if (!DownloadChoices.isDownloadableUrl(
+          url: url,
+          type: type,
+          hasDirective: false,
+        ) ||
+        sources.any((s) => s.type == 'iframe' || s.type == 'webview-extract')) {
+      final prepared = await getIt<DownloadRequestBuilder>().prepareVideo(
+        MediaResolveEntity(
+          videoUrl: url,
+          headers: headers,
+          type: type,
+          videoSources: sources,
+        ),
+      );
+      if (!mounted) return;
+      final media = prepared.media;
+      if (media == null) {
+        _showSnack('detail.download_needs_playback'.tr());
+        return;
+      }
+      url = media.videoUrl;
+      headers = media.headers;
+      sources = media.videoSources;
+      type = media.type;
     }
 
     final selection = await chooseDownload(
@@ -745,6 +773,7 @@ class _DetailViewState extends State<_DetailView>
         title: widget.detail.title,
         sourceUrl: selection.url,
         videoHeight: selection.height,
+        type: selection.type,
         thumbnailUrl: widget.detail.thumbnail,
         headers: selection.headers,
         subtitles: subtitles,

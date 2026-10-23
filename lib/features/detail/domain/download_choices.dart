@@ -108,7 +108,7 @@ abstract final class DownloadChoices {
     // They say which they sent: `iframe` for the embed page, `hls` for the
     // manifest.
     final kind = type?.toLowerCase();
-    if (kind == 'iframe') return false;
+    if (kind == 'iframe' || kind == 'webview-extract') return false;
     // Unknown shape plus an expected sniff is the one case worth refusing on
     // the directive alone — there is nothing else to go on.
     if (kind == null && hasDirective) return false;
@@ -175,7 +175,11 @@ abstract final class DownloadChoices {
         s.videoUrl,
         isCurrent: false,
         headers: s.headers,
-        needsSniff: hasDirective,
+        needsSniff:
+            hasDirective &&
+            (s.type == null ||
+                s.type == 'iframe' ||
+                s.type == 'webview-extract'),
       );
     }
     return offers;

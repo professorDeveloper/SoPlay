@@ -37,11 +37,8 @@ List<HlsVariant> parseHlsVariants(String playlist, Uri base) {
     final uri = lines[i + 1].trim();
     if (uri.isEmpty || uri.startsWith('#')) continue;
 
-    // The packager's own name for the variant beats RESOLUTION, because the two
-    // disagree more often than not: a 2.40:1 film encoded at 1080p carries
-    // RESOLUTION=1920x800, and naming it after the pixel height would offer
-    // `800p` for the stream every other player calls 1080p. The `s1080p` token
-    // in `index-s1080p-v1-a1` is what the packager called it.
+    // Trust manifest dimensions before a filename's marketing label. The
+    // aspect-ratio normalization still calls a 1920x800 film 1080p.
     final named = _namedHeight.firstMatch(uri);
     final res = _resolution.firstMatch(tag);
     // Without a name, the height a viewer would call it by both sides —
@@ -49,8 +46,8 @@ List<HlsVariant> parseHlsVariants(String playlist, Uri base) {
     final width = int.tryParse(res?.group(1) ?? '') ?? 0;
     final pixels = int.tryParse(res?.group(2) ?? '') ?? 0;
     final height =
-        int.tryParse(named?.group(1) ?? '') ??
         QualityPreference.displayHeight(width, pixels) ??
+        int.tryParse(named?.group(1) ?? '') ??
         pixels;
     if (height <= 0) continue;
 
@@ -59,11 +56,7 @@ List<HlsVariant> parseHlsVariants(String playlist, Uri base) {
     // renditions by the wrong number.
     final bw = int.tryParse(_bandwidth.firstMatch(tag)?.group(1) ?? '') ?? 0;
 
-    out.add((
-      height: height,
-      bandwidth: bw,
-      url: base.resolve(uri).toString(),
-    ));
+    out.add((height: height, bandwidth: bw, url: base.resolve(uri).toString()));
   }
   // Best first, and by bitrate within a height — so the 1080p a caller takes
   // when it just wants "the best" is the better of the two 1080p renditions
@@ -102,4 +95,44 @@ String describeVariant(HlsVariant v) {
       ? '${mbps.toStringAsFixed(mbps >= 10 ? 0 : 1)} Mbps'
       : '${(v.bandwidth / 1000).round()} kbps';
   return '${v.height}p · $rate';
+}
+
+/// Select by measured resolution, with bitrate only breaking equal-height ties.
+HlsVariant? selectHlsVariant(String playlist, Uri base, int? height) {
+  final variants = parseHlsVariants(playlist, base);
+  if (variants.isEmpty) return null;
+  final wanted = QualityPreference.pick(
+    variants.map((v) => v.height),
+    height ?? 0,
+  );
+  return wanted == null
+      ? variants.first
+      : variants.firstWhere((v) => v.height == wanted);
+}
+
+/// Keep a single video rendition while retaining audio, subtitles and keys.
+String narrowHlsMaster(String playlist, Uri base, int height) {
+  final selected = selectHlsVariant(playlist, base, height);
+  if (selected == null) return playlist;
+  final lines = playlist.split(RegExp(r'\r?\n'));
+  final out = <String>[];
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i].trim().startsWith('#EXT-X-STREAM-INF:')) {
+      final tag = lines[i];
+      var j = i + 1;
+      while (j < lines.length &&
+          (lines[j].trim().isEmpty || lines[j].trim().startsWith('#'))) {
+        j++;
+      }
+      if (j >= lines.length) continue;
+      if (base.resolve(lines[j].trim()).toString() == selected.url) {
+        out.add(tag);
+        out.add(lines[j]);
+      }
+      i = j;
+    } else {
+      out.add(lines[i]);
+    }
+  }
+  return out.join('\n');
 }

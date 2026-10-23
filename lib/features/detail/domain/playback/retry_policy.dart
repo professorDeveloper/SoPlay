@@ -75,6 +75,7 @@ abstract final class RetryPolicy {
         l.contains('exceeds selected codec') ||
         l.contains('mediacodecvideodecoderexception') ||
         l.contains('decoder failed') ||
+        l.contains('could not open codec') ||
         l.contains('decoderinitializationexception') ||
         l.contains('no_unsupported_type');
   }

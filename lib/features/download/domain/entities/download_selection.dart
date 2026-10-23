@@ -4,8 +4,10 @@ class DownloadSelection {
     required this.url,
     required this.headers,
     this.height,
+    this.type,
   });
   final String url;
   final Map<String, String> headers;
   final int? height;
+  final String? type;
 }

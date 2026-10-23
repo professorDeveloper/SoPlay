@@ -28,6 +28,7 @@ void main() {
         'MediaCodecVideoDecoderException',
         'DecoderInitializationException',
         'Decoder failed',
+        'Bad state: Could not open codec.',
       ]) {
         expect(RetryPolicy.isDecoderError(raw), isTrue, reason: raw);
       }

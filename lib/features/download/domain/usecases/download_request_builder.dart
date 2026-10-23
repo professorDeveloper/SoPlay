@@ -66,11 +66,18 @@ class DownloadRequestBuilder {
   const DownloadRequestBuilder({
     required ResolveMediaUseCase resolve,
     required GetPagesUseCase getPages,
+    Future<MediaResolveEntity?> Function(MediaResolveEntity)? resolveEmbed,
+    Future<bool> Function(MediaResolveEntity)? canDownload,
   }) : _resolve = resolve,
-       _getPages = getPages;
+       _getPages = getPages,
+       _resolveEmbed = resolveEmbed,
+       _canDownload = canDownload;
 
   final ResolveMediaUseCase _resolve;
   final GetPagesUseCase _getPages;
+  final Future<MediaResolveEntity?> Function(MediaResolveEntity)? _resolveEmbed;
+
+  final Future<bool> Function(MediaResolveEntity)? _canDownload;
 
   /// The stream URL does not exist until the provider is asked for it, so a
   /// video download always starts with the same resolve the player makes.
@@ -83,17 +90,85 @@ class DownloadRequestBuilder {
         result.value.videoUrl.isEmpty) {
       return const VideoResolution.failed(DownloadBuildFailure.resolveFailed);
     }
-    final media = result.value;
-    // A directive means `videoUrl` is the embed PAGE. Saving it would produce
-    // an HTML file under a video's name that fails on first open.
-    if (!DownloadChoices.isDownloadableUrl(
-      url: media.videoUrl,
-      type: media.type,
-      hasDirective: media.extractor != null,
-    )) {
-      return const VideoResolution.failed(DownloadBuildFailure.needsPlayback);
+    return prepareVideo(result.value);
+  }
+
+  /// Both film and episode downloads must turn an embed into media first.
+  Future<VideoResolution> prepareVideo(MediaResolveEntity media) async {
+    bool direct(MediaResolveEntity item) => DownloadChoices.isDownloadableUrl(
+      url: item.videoUrl,
+      type: item.type,
+      hasDirective: item.extractor != null,
+    );
+    // Plain direct downloads keep their existing path. Mixed embed/direct
+    // results need validation: backend-issued tokens can be IP-bound or stale.
+    final hasEmbeds =
+        !direct(media) ||
+        media.videoSources.any(
+          (s) => !DownloadChoices.isDownloadableUrl(
+            url: s.videoUrl,
+            type: s.type,
+            hasDirective: false,
+          ),
+        );
+    if (!hasEmbeds) return VideoResolution.resolved(media);
+
+    final candidates = <MediaResolveEntity>[];
+    if (direct(media)) candidates.add(media);
+    final ladder = SourceLadder(
+      sources: media.videoSources,
+      hasDirective: false,
+    );
+    final preferred = ladder.initialPick();
+    final order = <int>[
+      ?preferred,
+      for (var i = 0; i < media.videoSources.length; i++)
+        if (i != preferred) i,
+    ];
+    for (final i in order) {
+      final source = media.videoSources[i];
+      candidates.add(
+        MediaResolveEntity(
+          videoUrl: source.videoUrl,
+          type: source.type,
+          headers: source.headers.isEmpty ? media.headers : source.headers,
+          subtitles: media.subtitles,
+          videoSources: [source],
+        ),
+      );
     }
-    return VideoResolution.resolved(media);
+    if (!direct(media)) candidates.insert(0, media);
+    // Direct candidates first, then each embed. Never let quietPick re-select
+    // an unvalidated sibling from the original response after a fallback.
+    final ordered = [
+      ...candidates.where(direct),
+      ...candidates.where((c) => !direct(c)),
+    ];
+    final seen = <String>{};
+    for (final candidate in ordered) {
+      if (!seen.add(candidate.videoUrl)) continue;
+      try {
+        final resolved = direct(candidate)
+            ? candidate
+            : await _resolveEmbed?.call(candidate);
+        if (resolved == null || !direct(resolved)) continue;
+        if (_canDownload != null && !await _canDownload(resolved)) continue;
+        return VideoResolution.resolved(
+          MediaResolveEntity(
+            videoUrl: resolved.videoUrl,
+            type: resolved.type,
+            headers: resolved.headers,
+            subtitles: resolved.subtitles,
+            videoSources: resolved.videoSources
+                .where((s) => s.videoUrl == resolved.videoUrl)
+                .toList(),
+          ),
+        );
+      } catch (_) {
+        /* This mirror failed; try the next candidate. */
+      }
+    }
+    return const VideoResolution.failed(DownloadBuildFailure.needsPlayback);
   }
 
   /// The mirror a download takes when nobody is asked.
@@ -107,13 +182,18 @@ class DownloadRequestBuilder {
         ? null
         : SourceLadder(sources: sources, hasDirective: false).initialPick();
     if (pick == null) {
-      return DownloadSelection(url: media.videoUrl, headers: media.headers);
+      return DownloadSelection(
+        url: media.videoUrl,
+        headers: media.headers,
+        type: media.type,
+      );
     }
     final source = sources[pick];
     return DownloadSelection(
       url: source.videoUrl,
       headers: source.headers.isNotEmpty ? source.headers : media.headers,
       height: source.height,
+      type: source.type,
     );
   }
 
@@ -128,6 +208,7 @@ class DownloadRequestBuilder {
     title: title.title,
     sourceUrl: selection.url,
     videoHeight: selection.height,
+    type: selection.type,
     thumbnailUrl: title.thumbnail,
     headers: selection.headers,
     isSerial: true,

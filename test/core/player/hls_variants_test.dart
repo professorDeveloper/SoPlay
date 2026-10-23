@@ -5,6 +5,24 @@ const _base = 'https://cdn.example.test/hls/master.m3u8';
 
 void main() {
   final base = Uri.parse(_base);
+  test('manual height uses resolution even at a higher-than-typical bitrate', () {
+    const master =
+        '#EXTM3U\n#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="a",URI="audio.m3u8"\n'
+        '#EXT-X-STREAM-INF:BANDWIDTH=12000000,RESOLUTION=1280x720,AUDIO="a"\n720.m3u8\n'
+        '#EXT-X-STREAM-INF:BANDWIDTH=18000000,RESOLUTION=1920x1080,AUDIO="a"\n1080.m3u8\n'
+        '#EXT-X-STREAM-INF:BANDWIDTH=2000000,RESOLUTION=854x480,AUDIO="a"\n480.m3u8\n';
+    expect(selectHlsVariant(master, base, 720)?.url, endsWith('/720.m3u8'));
+    final pinned = narrowHlsMaster(master, base, 720);
+    expect(parseHlsVariants(pinned, base).single.height, 720);
+    expect(pinned, contains('URI="audio.m3u8"'));
+    expect(pinned, isNot(contains('480.m3u8')));
+  });
+
+  test('a filename cannot advertise 1080p for measured 480p', () {
+    const master =
+        '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=854x480\nindex-s1080p.m3u8\n';
+    expect(parseHlsVariants(master, base).single.height, 480);
+  });
 
   test('the best rendition wins, not the first one listed', () {
     // The shape that caused the bug: packagers list the lowest bitrate first so
@@ -53,7 +71,10 @@ high/playlist.m3u8
     final variants = parseHlsVariants(master, base);
 
     expect(variants.first.height, 1080);
-    expect(variants.first.url, 'https://cdn.example.test/hls/high/playlist.m3u8');
+    expect(
+      variants.first.url,
+      'https://cdn.example.test/hls/high/playlist.m3u8',
+    );
   });
 
   test('relative and absolute variant uris both resolve', () {
@@ -80,12 +101,16 @@ https://other.example.test/v/1080.m3u8
 index-s1080p-v1-a1.m3u8
 ''';
     final fromMaster = parseHlsVariants(master, base);
-    final fromDir =
-        parseHlsVariants(master, Uri.parse('https://cdn.example.test/hls/'));
+    final fromDir = parseHlsVariants(
+      master,
+      Uri.parse('https://cdn.example.test/hls/'),
+    );
 
     expect(fromDir.single.url, fromMaster.single.url);
-    expect(fromDir.single.url,
-        'https://cdn.example.test/hls/index-s1080p-v1-a1.m3u8');
+    expect(
+      fromDir.single.url,
+      'https://cdn.example.test/hls/index-s1080p-v1-a1.m3u8',
+    );
   });
 
   test('a media playlist yields nothing, so the caller keeps its own url', () {

@@ -73,6 +73,110 @@ DownloadRequestBuilder _builder({
 );
 
 void main() {
+  test(
+    'film and episode embeds are extracted before enqueueing media',
+    () async {
+      var sniffed = 0;
+      final builder = DownloadRequestBuilder(
+        resolve: _Resolve(
+          const Success(
+            MediaResolveEntity(
+              videoUrl: 'https://luluvdoo.test/e/movie',
+              headers: {},
+              type: 'iframe',
+            ),
+          ),
+        ),
+        getPages: _Pages(Failure(Exception('unused'))),
+        resolveEmbed: (media) async {
+          sniffed++;
+          expect(media.type, 'iframe');
+          return const MediaResolveEntity(
+            videoUrl: 'https://cdn.test/playlist/token',
+            headers: {'Referer': 'https://luluvdoo.test/'},
+            type: 'hls',
+          );
+        },
+      );
+      final built = await builder.quietVideo(_title, _ep);
+      expect(sniffed, 1);
+      expect(built.request!.kind, DownloadKind.hls);
+      expect(built.request!.sourceUrl, 'https://cdn.test/playlist/token');
+      expect(built.request!.headers['Referer'], 'https://luluvdoo.test/');
+    },
+  );
+
+  test(
+    'rejected direct and embed mirrors fall through to a verified download',
+    () async {
+      final tried = <String>[];
+      final builder = DownloadRequestBuilder(
+        resolve: _Resolve(Failure(Exception('unused'))),
+        getPages: _Pages(Failure(Exception('unused'))),
+        canDownload: (media) async => !media.videoUrl.contains('expired'),
+        resolveEmbed: (media) async {
+          tried.add(media.videoUrl);
+          return MediaResolveEntity(
+            videoUrl: media.videoUrl.contains('dead')
+                ? 'https://cdn/expired.m3u8'
+                : 'https://cdn/good.m3u8',
+            headers: const {},
+            type: 'hls',
+          );
+        },
+      );
+      final media = MediaResolveEntity(
+        videoUrl: 'https://embed/dead',
+        headers: const {},
+        type: 'iframe',
+        videoSources: [
+          _source('1080p', 1080, url: 'https://cdn/expired.m3u8'),
+          const VideoSourceEntity(
+            quality: 'alternative',
+            videoUrl: 'https://embed/good',
+            isDefault: false,
+            accessible: true,
+            type: 'iframe',
+          ),
+        ],
+      );
+      final result = await builder.prepareVideo(media);
+      expect(result.media!.videoUrl, 'https://cdn/good.m3u8');
+      expect(
+        DownloadRequestBuilder.quietPick(result.media!).url,
+        'https://cdn/good.m3u8',
+      );
+      expect(tried, ['https://embed/dead', 'https://embed/good']);
+    },
+  );
+
+  test('a direct mirror is used before sniffing an embed default', () async {
+    final media = MediaResolveEntity(
+      videoUrl: 'https://embed.test/page',
+      headers: const {},
+      type: 'iframe',
+      videoSources: [_source('720p', 720)],
+    );
+    final prepared = await _builder().prepareVideo(media);
+    expect(prepared.media!.videoUrl, 'https://cdn/720.m3u8');
+  });
+
+  test(
+    'extensionless HLS keeps its format when queued for offline playback',
+    () async {
+      final built = await _builder(
+        media: const Success(
+          MediaResolveEntity(
+            videoUrl: 'https://og.bakayaro.live/m3u8/token',
+            headers: {},
+            type: 'hls',
+          ),
+        ),
+      ).quietVideo(_title, _ep);
+      expect(built.request!.kind, DownloadKind.hls);
+    },
+  );
+
   test('an empty or failed resolve is resolveFailed', () async {
     final failed = await _builder().quietVideo(_title, _ep);
     expect(failed.failure, DownloadBuildFailure.resolveFailed);

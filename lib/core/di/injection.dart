@@ -1,3 +1,6 @@
+import 'package:soplay/core/player/download_media_probe.dart';
+import 'package:soplay/features/detail/domain/entities/extractor_config_entity.dart';
+import 'package:soplay/features/detail/domain/entities/media_resolve_entity.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
 
@@ -949,6 +952,32 @@ Future<void> configureDependencies() async {
     DownloadRequestBuilder(
       resolve: getIt<ResolveMediaUseCase>(),
       getPages: getIt<GetPagesUseCase>(),
+      canDownload: DownloadMediaProbe(getIt<DartFetch>().dio).accepts,
+      resolveEmbed: (media) async {
+        final stream = await getIt<WebViewStreamExtractor>().extract(
+          pageUrl: media.videoUrl,
+          pageHeaders: media.headers,
+          config:
+              media.extractor ??
+              ExtractorConfigEntity(
+                hostPattern: Uri.tryParse(media.videoUrl)?.host ?? '',
+                urlPatterns: const ['.m3u8', '.mpd', '.mp4'],
+                captureHeaders: const [
+                  'Referer',
+                  'Origin',
+                  'User-Agent',
+                  'Cookie',
+                ],
+              ),
+        );
+        if (stream == null) return null;
+        return MediaResolveEntity(
+          videoUrl: stream.url,
+          headers: stream.headers,
+          type: stream.playType,
+          subtitles: media.subtitles,
+        );
+      },
     ),
   );
   getIt.registerSingleton<AutomationSettings>(AutomationSettings());
