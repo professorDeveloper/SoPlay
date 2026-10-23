@@ -127,6 +127,8 @@ class DownloadForegroundService : Service() {
             (0 until entries.length()).map { parseHeaders(entries.optJSONObject(it)?.toString() ?: "{}") }
         }.getOrDefault(emptyList())
         val wifiOnly = intent.getBooleanExtra(EXTRA_WIFI_ONLY, false)
+        val videoHeight = intent.getIntExtra(EXTRA_VIDEO_HEIGHT, 0)
+        val segmentRelay = intent.getStringExtra(EXTRA_SEGMENT_RELAY)
 
         if (id.isEmpty() || artefactPath.isEmpty()) return
         if (kind == KIND_MANGA) {
@@ -189,7 +191,7 @@ class DownloadForegroundService : Service() {
                 updateState(id, title, url, artefactPath, STATUS_DOWNLOADING, 0, 0, 0, null)
                 val result = when (kind) {
                     KIND_MANGA -> downloadPages(id, title, artefactPath, pageUrls, headers, imageHeaders, token)
-                    KIND_HLS -> downloadHls(id, title, url, artefactPath, headers, token)
+                    KIND_HLS -> downloadHls(id, title, url, artefactPath, headers, token, videoHeight, segmentRelay)
                     else -> downloadFile(id, title, url, artefactPath, headers, token)
                 }
                 when {
@@ -371,7 +373,9 @@ class DownloadForegroundService : Service() {
         url: String,
         artefactPath: String,
         headers: Map<String, String>,
-        token: AtomicBoolean
+        token: AtomicBoolean,
+        videoHeight: Int,
+        segmentRelay: String?
     ): Transferred {
         val target = File(artefactPath)
         val folder = target.parentFile ?: throw IOException("no folder for the playlist")
@@ -382,7 +386,7 @@ class DownloadForegroundService : Service() {
         var master: String? = null
         var audio: HlsDownloadPlaylist.AudioRendition? = null
         if (playlist.contains("#EXT-X-STREAM-INF")) {
-            playlistUrl = HlsDownloadPlaylist.pickVariantUrl(playlist, HlsDownloadPlaylist.baseUrlOf(url))
+            playlistUrl = HlsDownloadPlaylist.pickVariantUrl(playlist, HlsDownloadPlaylist.baseUrlOf(url), videoHeight)
                 ?: throw IOException("no variant in the master playlist")
             master = playlist
             audio = HlsDownloadPlaylist.audioRendition(playlist, HlsDownloadPlaylist.baseUrlOf(url), playlistUrl)
@@ -459,7 +463,9 @@ class DownloadForegroundService : Service() {
             // process was never fetched again and the episode played to that
             // point and stopped.
             if (!segment.exists() || segment.length() == 0L) {
-                fetchPart(part.segments[i].url, segment, headers, token, part.segments[i].range)
+                val original = part.segments[i].url
+                val relayed = MediaSegmentRelay.rewrite(original, segmentRelay)
+                fetchPart(relayed ?: original, segment, if (relayed == null) headers else emptyMap(), token, part.segments[i].range)
             }
             if (token.get()) return@inParallel
             val size = bytes.addAndGet(segment.length())
@@ -1129,11 +1135,13 @@ class DownloadForegroundService : Service() {
         const val EXTRA_TITLE = "title"
         const val EXTRA_URL = "url"
         const val EXTRA_LOCAL_PATH = "local_path"
+        const val EXTRA_SEGMENT_RELAY = "segment_relay"
         const val EXTRA_HEADERS_JSON = "headers_json"
         const val EXTRA_KIND = "kind"
         const val EXTRA_PAGE_URLS_JSON = "page_urls_json"
         const val EXTRA_IMAGE_HEADERS_JSON = "image_headers_json"
         const val EXTRA_WIFI_ONLY = "wifi_only"
+        const val EXTRA_VIDEO_HEIGHT = "video_height"
 
         // Kinds, matching DownloadKind on the Dart side byte for byte.
         const val KIND_VIDEO = "video"

@@ -90,6 +90,7 @@ class _DownloadChoiceSheetState extends State<DownloadChoiceSheet> {
             matching?.height ??
             VideoOptionGroups.resolutionOf(matching?.quality ?? ''),
         sizeBytes: matching?.sizeBytes,
+        signer: matching?.signer,
       ),
     ];
     final seen = {widget.url};
@@ -309,7 +310,7 @@ class _DownloadChoiceSheetState extends State<DownloadChoiceSheet> {
                         // A file the host signs per device (asilmedia):
                         // fetched unsigned it is a 403, so sign it first,
                         // with the headers the download will send.
-                        var url = variant?.url ?? source.videoUrl;
+                        var url = source.videoUrl;
                         final signer = source.signer;
                         if (variant == null && signer != null) {
                           setState(() => _loading = true);
@@ -321,6 +322,7 @@ class _DownloadChoiceSheetState extends State<DownloadChoiceSheet> {
                           DownloadSelection(
                             url: url,
                             headers: source.headers,
+                            type: variant != null ? 'hls' : source.type,
                             // The label is a last resort, but it is a real
                             // one: plenty of sources declare no height and
                             // call the rendition "1080p" in words. Without

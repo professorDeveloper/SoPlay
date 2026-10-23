@@ -523,6 +523,7 @@ class DownloadRepositoryImpl implements DownloadRepository {
       pageUrls: item.pageUrls,
       imageHeaders: item.imageHeaders,
       wifiOnly: _hive.downloadWifiOnly,
+      videoHeight: item.videoHeight,
     );
     if (!started) {
       await _fail(
@@ -553,6 +554,7 @@ class DownloadRepositoryImpl implements DownloadRepository {
         dirPath: dir.path,
         kind: item.kind,
         sourceUrl: item.sourceUrl,
+        videoHeight: item.videoHeight,
         headers: item.headers,
         pageUrls: item.pageUrls,
         chapterHtml: item.chapterHtml,

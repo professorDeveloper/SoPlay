@@ -612,7 +612,9 @@ extension _PlayerMedia on _PlayerPageState {
     required bool hasDirective,
   }) => SourceLadder(
     sources: sources,
-    hasDirective: hasDirective,
+    hasDirective:
+        hasDirective ||
+        sources.any((s) => s.type == 'iframe' || s.type == 'webview-extract'),
     rememberedQuality: SourceLadder.rememberedQualityFor(
       _titlePrefs,
       provider: widget.args.provider,
@@ -841,6 +843,14 @@ extension _PlayerMedia on _PlayerPageState {
     //
     // The url is the one thing that is true at this point, so it is what the
     // lookup uses.
+    if (MediaSegmentRelay.needsManifestProxy(url)) {
+      final proxied = await getIt<LocalHlsProxy>().register(
+        upstreamUrl: url,
+        headers: headers,
+        keepOriginHeaders: true,
+      );
+      return _ProxiedTarget(url: proxied, headers: const {});
+    }
     final source = _sourceForUrl(url);
     if (source == null) {
       _plog(
@@ -989,10 +999,32 @@ extension _PlayerMedia on _PlayerPageState {
       }
     }
 
-    // Only when the server sent a directive — no provider check, no url
-    // pattern-matching. See `_extractorConfig`.
-    final cfg = _extractorConfig;
-    if (cfg != null && url.isNotEmpty && !_variantUrls.contains(url)) {
+    // Explicit embeds from older server builds also need device extraction.
+    // A direct stream in a mixed response must never be opened as a web page.
+    final cfg =
+        _extractorConfig ??
+        (type?.toLowerCase() == 'iframe' ||
+                type?.toLowerCase() == 'webview-extract'
+            ? ExtractorConfigEntity(
+                hostPattern: Uri.tryParse(url)?.host ?? '',
+                urlPatterns: const ['.m3u8', '.mpd', '.mp4'],
+                captureHeaders: const [
+                  'Referer',
+                  'Origin',
+                  'User-Agent',
+                  'Cookie',
+                ],
+              )
+            : null);
+    _extractorConfig ??= cfg;
+    final needsExtraction =
+        type == null ||
+        type.toLowerCase() == 'iframe' ||
+        type.toLowerCase() == 'webview-extract';
+    if (cfg != null &&
+        needsExtraction &&
+        url.isNotEmpty &&
+        !_variantUrls.contains(url)) {
       _plog(
         'webview sniff: host=${cfg.hostPattern} patterns=${cfg.urlPatterns}',
       );
@@ -1007,7 +1039,7 @@ extension _PlayerMedia on _PlayerPageState {
         effUrl = sniffed.url;
         // Sniffed headers win: they are the ones the page actually sent, and
         // the CDN gates on exactly those.
-        effHeaders = {...headers, ...sniffed.headers};
+        effHeaders = sniffed.headers;
         effType = sniffed.playType;
         _plog('sniff ok in ${sw.elapsedMilliseconds}ms -> $effUrl');
         effUrl = await _applyRewrite(cfg.rewrite, effUrl, effHeaders);
@@ -1046,20 +1078,15 @@ extension _PlayerMedia on _PlayerPageState {
     // menu, and it used to hold the first frame back for up to 23 s on a slow
     // CDN. Left running otherwise, it still fills the sheet when it lands.
     //
-    // On libmpv nothing is pinned by URL. The master plays, and the
-    // remembered height is picked from mpv's own renditions once they are
-    // known: swapping the master for one variant's playlist dropped audio
-    // that lives in a separate rendition, and turned every later quality
-    // change from an instant track switch into a full reload.
+    // Pin a requested height using the manifest rather than a guessed bitrate.
+    // Split audio is retained in the narrowed master served by the local proxy.
     final expansion = _maybeExpandQualities(
       effUrl,
       effHeaders,
       effType,
       generation,
     );
-    final wantsUrlPin =
-        _qualityPreference != QualityPreference.auto &&
-        !(_playsOnMpv && !_isDashType(effType, effUrl));
+    final wantsUrlPin = _qualityPreference != QualityPreference.auto;
     VideoSourceEntity? pinned;
     if (wantsUrlPin) {
       pinned = await expansion.timeout(
@@ -1164,7 +1191,7 @@ extension _PlayerMedia on _PlayerPageState {
       return _expandDash(parent, idx, url, headers, generation);
     }
 
-    final base = Uri.tryParse(url);
+    var base = Uri.tryParse(url);
     if (base == null) return null;
 
     String body;
@@ -1183,6 +1210,7 @@ extension _PlayerMedia on _PlayerPageState {
       );
       if (res.statusCode != 200) return null;
       body = res.data ?? '';
+      base = res.realUri;
     } catch (_) {
       // A master that will not load is the player's problem to report, not
       // this one's — it is about to request the same url.
@@ -1190,46 +1218,42 @@ extension _PlayerMedia on _PlayerPageState {
     }
     if (!body.trimLeft().startsWith('#EXTM3U')) return null;
 
-    // Audio (or subtitles) in renditions of their own: a variant's playlist
-    // then holds only the picture, and a row playing it had no sound. The
-    // master stays the only entry — ExoPlayer adapts across it, and on mpv
-    // the sheet lists the engine's own renditions instead.
-    if (RegExp(
-      r'#EXT-X-MEDIA:[^\n]*TYPE=AUDIO[^\n]*URI=',
-    ).hasMatch(body)) {
-      _plog('master has separate audio renditions — no per-variant rows');
-      return null;
+    // Keep the master for separate audio/subtitles. Narrow only its video
+    // ladder, so a manual height cannot silently adapt down to 480p.
+    final separateRenditions = RegExp(
+      r'#EXT-X-MEDIA:[^\n]*URI=',
+    ).hasMatch(body);
+    final variants = bestPerHeight(parseHlsVariants(body, base));
+    final rows = <VideoSourceEntity>[];
+    for (final v in variants) {
+      final upHeaders = headers.isNotEmpty ? headers : parent.headers;
+      final selectedUrl = separateRenditions
+          ? await getIt<LocalHlsProxy>().register(
+              upstreamUrl: url,
+              headers: upHeaders,
+              hlsHeight: v.height,
+              keepOriginHeaders: true,
+              localProxy: parent.localProxy,
+              requestTransform: parent.requestTransform,
+              longLived: true,
+            )
+          : v.url;
+      rows.add(
+        VideoSourceEntity(
+          quality: '${parent.quality} · ${v.height}p',
+          videoUrl: selectedUrl,
+          isDefault: false,
+          accessible: parent.accessible,
+          height: v.height,
+          type: 'hls',
+          headers: upHeaders,
+          useLocalProxy: !separateRenditions && parent.useLocalProxy,
+          localProxy: parent.localProxy,
+          requestTransform: parent.requestTransform,
+          drm: parent.drm,
+        ),
+      );
     }
-
-    // Shared with the downloader, so the file saved matches the rendition the
-    // sheet offered.
-    final variants = parseHlsVariants(body, base);
-
-    // One row per height: a master often carries the same resolution twice at
-    // different bitrates, which would list `1080p` twice.
-    final seen = <int>{};
-    final rows = <VideoSourceEntity>[
-      for (final v in variants)
-        if (v.height > 0 && seen.add(v.height))
-          VideoSourceEntity(
-            quality: '${parent.quality} · ${v.height}p',
-            videoUrl: v.url,
-            isDefault: false,
-            accessible: parent.accessible,
-            height: v.height,
-            // Parsed out of an #EXTM3U master, whatever the parent was (an
-            // iframe entry, say): the format hint must say HLS.
-            type: 'hls',
-            // The headers the master was just fetched with: after a sniff
-            // those carry what the CDN gates on, which the parent's own
-            // page headers do not.
-            headers: headers.isNotEmpty ? headers : parent.headers,
-            useLocalProxy: parent.useLocalProxy,
-            localProxy: parent.localProxy,
-            requestTransform: parent.requestTransform,
-            drm: parent.drm,
-          ),
-    ];
     return _insertQualityRows(parent, idx, rows, generation, 'master playlist');
   }
 
@@ -1341,17 +1365,6 @@ extension _PlayerMedia on _PlayerPageState {
     if (want == null) return null;
     return rows.where((r) => r.height == want).firstOrNull;
   }
-
-  /// On libmpv the renditions are the engine's own tracks: the preferred
-  /// height is picked from them once they are listed.
-  /// This stream plays on libmpv, where a rendition is a track of the master
-  /// rather than a URL of its own.
-  bool get _playsOnMpv =>
-      resolvePlayerEngine() == PlayerEngine.mediaKit && !_preferPlatformPlayer;
-
-  bool _isDashType(String? type, String url) =>
-      type?.trim().toLowerCase() == 'dash' ||
-      url.toLowerCase().contains('.mpd');
 
   void _applyRememberedVideoTrack() {
     final c = _controller;
@@ -1561,26 +1574,9 @@ extension _PlayerMedia on _PlayerPageState {
         return;
       }
       if (controller.value.hasError) {
-        final raw = controller.value.errorDescription;
-        _plog('init error: $raw', level: LogLevel.error);
-        // The other half of the pair. Only the CATEGORY of failure travels —
-        // "codec", "network" — never the url or the message, which carry the
-        // token and the title.
-        getIt<Analytics>().track(
-          AnalyticsEvent.playbackFailed,
-          props: {
-            AnalyticsProp.provider: widget.args.provider,
-            AnalyticsProp.engine: resolvePlayerEngine().id,
-            AnalyticsProp.reason: _isCodecError ? 'codec' : 'load',
-          },
+        throw StateError(
+          controller.value.errorDescription ?? 'Player initialization failed',
         );
-        setState(() {
-          _initializing = false;
-          _errorMessage = raw == null
-              ? PlaybackFaultKind.unknown.messageKey.tr()
-              : _humanizeError(raw);
-        });
-        return;
       }
       final dur = controller.value.duration;
       // What the caller said, OR what the duration implies. The declared type is
@@ -1714,14 +1710,20 @@ extension _PlayerMedia on _PlayerPageState {
       // one of them already reads in the viewer's language. Unawaited and
       // silent unless it finds something: playback must never wait on it.
       unawaited(_maybeAutoTranslate());
-    } on PlatformException catch (e) {
-      _plog(
-        'platform exception ${e.code}: ${e.message}',
-        level: LogLevel.error,
-      );
+    } catch (e) {
+      _plog('initialization failed: $e', level: LogLevel.error);
       if (!mounted || generation != _mediaGeneration) return;
-      final raw = e.message ?? '';
-      if (e.code != 'channel-error' &&
+      final code = e is PlatformException ? e.code : null;
+      final raw = e is PlatformException ? (e.message ?? e.code) : e.toString();
+      getIt<Analytics>().track(
+        AnalyticsEvent.playbackFailed,
+        props: {
+          AnalyticsProp.provider: widget.args.provider,
+          AnalyticsProp.engine: resolvePlayerEngine().id,
+          AnalyticsProp.reason: _isDecoderError(raw) ? 'codec' : 'load',
+        },
+      );
+      if (code != 'channel-error' &&
           !_isDecoderError(raw) &&
           !_isLive &&
           await _solveStreamCloudflare(generation)) {
@@ -1729,7 +1731,7 @@ extension _PlayerMedia on _PlayerPageState {
       }
       if (!mounted || generation != _mediaGeneration) return;
       String msg;
-      if (e.code == 'channel-error') {
+      if (code == 'channel-error') {
         msg = PlaybackFaultKind.engineUnavailable.messageKey.tr();
       } else if (_isDecoderError(raw)) {
         // The codec is the likeliest culprit, so siblings encoded the same way
@@ -1813,13 +1815,6 @@ extension _PlayerMedia on _PlayerPageState {
         _initializing = false;
         _errorMessage = msg;
         _errorRaw = raw;
-      });
-    } catch (e) {
-      _plog('init threw: $e', level: LogLevel.error);
-      if (!mounted || generation != _mediaGeneration) return;
-      setState(() {
-        _initializing = false;
-        _errorMessage = e.toString().replaceFirst('Exception: ', '');
       });
     }
   }

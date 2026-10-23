@@ -1,4 +1,7 @@
 import 'dart:async';
+import 'dart:collection';
+
+import 'package:soplay/core/player/extracted_media_headers.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -141,7 +144,8 @@ class WebViewStreamExtractor {
   function __report(url, headers) {
     try {
       if (window.flutter_inappwebview && window.flutter_inappwebview.callHandler) {
-        window.flutter_inappwebview.callHandler('streamCaptured', url, headers || {});
+        var h = Object.assign({Referer: location.origin + '/', Origin: location.origin}, headers || {});
+        window.flutter_inappwebview.callHandler('streamCaptured', url, h);
       }
     } catch (_) {}
   }
@@ -292,27 +296,13 @@ class WebViewStreamExtractor {
           : lower.contains('.mp4')
           ? 'progressive'
           : config.playType;
-      final headers = <String, String>{};
-      rawHeaders.forEach((k, v) {
-        if (v == null || k.isEmpty) return;
-        final keep =
-            config.captureHeaders.any(
-              (h) => h.toLowerCase() == k.toLowerCase(),
-            ) ||
-            k.toLowerCase().startsWith('x-');
-        if (keep) headers[k] = v.toString();
-      });
-      pageHeaders.forEach((k, v) {
-        if (!headers.keys.any((e) => e.toLowerCase() == k.toLowerCase())) {
-          headers[k] = v;
-        }
-      });
-      headers.putIfAbsent('User-Agent', () => userAgent);
-      headers.putIfAbsent(
-        'Referer',
-        () => 'https://${Uri.parse(pageUrl).host}/',
+      final headers = extractedMediaHeaders(
+        pageUrl: pageUrl,
+        userAgent: userAgent,
+        pageHeaders: pageHeaders,
+        capturedHeaders: rawHeaders,
+        captureHeaders: config.captureHeaders,
       );
-      headers.putIfAbsent('Origin', () => 'https://${Uri.parse(pageUrl).host}');
 
       if (kDebugMode) {
         debugPrint('[WebViewExtractor] captured $url headers=$headers');
@@ -348,6 +338,30 @@ class WebViewStreamExtractor {
 
     headless = HeadlessInAppWebView(
       webViewEnvironment: await WebViewEnv.ensure(),
+      // Register before navigation. Adding these asynchronously in
+      // onWebViewCreated races cached/fast pages and misses their first fetch.
+      initialUserScripts: UnmodifiableListView([
+        UserScript(
+          source: _antiDebuggerShim,
+          injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+        ),
+        UserScript(
+          source: kWebViewMediaGuard,
+          injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+        ),
+        UserScript(
+          source: _xhrCaptureShim([config.hostPattern], config.urlPatterns),
+          forMainFrameOnly: false,
+          injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+        ),
+        UserScript(
+          // Android document-end evaluation runs only in the top frame.
+          // The delayed nudge must also run inside cross-origin players.
+          source: _gestureShim,
+          forMainFrameOnly: false,
+          injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+        ),
+      ]),
       initialUrlRequest: URLRequest(
         url: WebUri(pageUrl),
         headers: referer != null ? {'Referer': referer} : null,
@@ -371,32 +385,6 @@ class WebViewStreamExtractor {
       ),
       onWebViewCreated: (controller) async {
         try {
-          await controller.addUserScript(
-            userScript: UserScript(
-              source: _antiDebuggerShim,
-              injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
-            ),
-          );
-          // Muted, no picture-in-picture, paused once it has asked for what
-          // was worth sniffing — see [kWebViewMediaGuard].
-          await controller.addUserScript(
-            userScript: UserScript(
-              source: kWebViewMediaGuard,
-              injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
-            ),
-          );
-          await controller.addUserScript(
-            userScript: UserScript(
-              source: _xhrCaptureShim([config.hostPattern], config.urlPatterns),
-              injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
-            ),
-          );
-          await controller.addUserScript(
-            userScript: UserScript(
-              source: _gestureShim,
-              injectionTime: UserScriptInjectionTime.AT_DOCUMENT_END,
-            ),
-          );
           controller.addJavaScriptHandler(
             handlerName: 'streamCaptured',
             callback: (args) {

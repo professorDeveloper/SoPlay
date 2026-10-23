@@ -23,6 +23,57 @@ void main() {
       dio.close(force: true);
     });
 
+    test(
+      'manual HLS quality keeps audio and removes the lower video ladder',
+      () async {
+        upstream.respond(
+          path: '/master.m3u8',
+          contentType: 'application/vnd.apple.mpegurl',
+          body:
+              '#EXTM3U\n#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="a",URI="audio.m3u8"\n'
+              '#EXT-X-STREAM-INF:BANDWIDTH=12000000,RESOLUTION=1280x720,AUDIO="a"\n720.m3u8\n'
+              '#EXT-X-STREAM-INF:BANDWIDTH=1000000,RESOLUTION=854x480,AUDIO="a"\n480.m3u8\n',
+        );
+        final url = await proxy.register(
+          upstreamUrl: '${upstream.origin}/master.m3u8',
+          headers: const {'Referer': 'https://embed.test/'},
+          hlsHeight: 720,
+          keepOriginHeaders: true,
+        );
+        final body = await _httpGetString(url);
+        expect(body, contains('720.m3u8'));
+        expect(body, isNot(contains('480.m3u8')));
+        expect(body, contains('audio.m3u8'));
+        expect(
+          upstream.lastHeaders!['referer'],
+          contains('https://embed.test/'),
+        );
+      },
+    );
+
+    test(
+      'image-wrapped TS segments use relay but playlists stay on device',
+      () async {
+        const segment =
+            'https://p16-ad-site-sign-sg.tiktokcdn.com/ad-site-i18n-sg/a.image?x-signature=a%2Bb';
+        upstream.respond(
+          path: '/master.m3u8',
+          contentType: 'application/vnd.apple.mpegurl',
+          body: '#EXTM3U\n#EXTINF:10,\n$segment\n#EXT-X-ENDLIST\n',
+        );
+        final url = await proxy.register(
+          upstreamUrl: '${upstream.origin}/master.m3u8',
+          headers: const {},
+        );
+        final body = await _httpGetString(url);
+        final target = Uri.parse(
+          body.split('\n').firstWhere((line) => line.startsWith('https://')),
+        );
+        expect(target.path, '/api/contents/media-segment');
+        expect(target.queryParameters['url'], segment);
+      },
+    );
+
     test('does not forward Origin to upstream', () async {
       upstream.respond(
         path: '/cdn/manifest/video/x.m3u8',

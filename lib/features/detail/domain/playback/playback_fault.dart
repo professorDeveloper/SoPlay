@@ -88,11 +88,13 @@ class PlaybackFault {
       return PlaybackFault(PlaybackFaultKind.unsupportedFormat, raw: raw);
     }
     if (lower.contains('mediacodec') ||
+        lower.contains('could not open codec') ||
         lower.contains('decoder') ||
         lower.contains('renderer')) {
       return PlaybackFault(PlaybackFaultKind.decoder, raw: raw);
     }
     if (lower.contains('source error') ||
+        lower.contains('failed to recognize file format') ||
         lower.contains('unrecognizedinputformat') ||
         lower.contains('nodeclaredbrand')) {
       return PlaybackFault(PlaybackFaultKind.sourceBlocked, raw: raw);

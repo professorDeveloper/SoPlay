@@ -469,7 +469,8 @@ void main() {
       await tester.pump();
       await tester.tap(find.byType(FilledButton));
       await tester.pumpAndSettle();
-      expect(selected?.url, 'https://example.test/movie/480/index.m3u8');
+      expect(selected?.url, 'https://example.test/movie/master.m3u8');
+      expect(selected?.type, 'hls');
       expect(selected?.height, 480);
     },
   );

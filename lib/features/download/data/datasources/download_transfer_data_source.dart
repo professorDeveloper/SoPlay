@@ -124,6 +124,7 @@ class DownloadTransferDataSource {
     required String dirPath,
     required DownloadKind kind,
     required String sourceUrl,
+    int? videoHeight,
     required Map<String, String> headers,
     required List<String> pageUrls,
     String? chapterHtml,
@@ -142,6 +143,7 @@ class DownloadTransferDataSource {
           onProgress: onProgress,
         ),
         DownloadKind.hls => await _hls(
+          videoHeight: videoHeight,
           dirPath: dirPath,
           url: sourceUrl,
           headers: headers,
@@ -151,23 +153,24 @@ class DownloadTransferDataSource {
         // One kind, two shapes. A comic chapter is a folder of images; a
         // novel chapter is one document, whose pictures are fetched into the
         // same folder so the words and the illustrations are deleted together.
-        DownloadKind.manga => (chapterHtml ?? '').trim().isNotEmpty
-            ? await _prose(
-                dirPath: dirPath,
-                html: chapterHtml!,
-                sourceUrl: sourceUrl,
-                headers: headers,
-                cancel: cancel,
-                onProgress: onProgress,
-              )
-            : await _pages(
-                dirPath: dirPath,
-                pageUrls: pageUrls,
-                imageHeaders: imageHeaders,
-                headers: headers,
-                cancel: cancel,
-                onProgress: onProgress,
-              ),
+        DownloadKind.manga =>
+          (chapterHtml ?? '').trim().isNotEmpty
+              ? await _prose(
+                  dirPath: dirPath,
+                  html: chapterHtml!,
+                  sourceUrl: sourceUrl,
+                  headers: headers,
+                  cancel: cancel,
+                  onProgress: onProgress,
+                )
+              : await _pages(
+                  dirPath: dirPath,
+                  pageUrls: pageUrls,
+                  imageHeaders: imageHeaders,
+                  headers: headers,
+                  cancel: cancel,
+                  onProgress: onProgress,
+                ),
       };
     } on _NotMediaException catch (e) {
       return TransferResult.failed(DownloadFailureKind.notMedia, e.message);
@@ -375,6 +378,7 @@ class DownloadTransferDataSource {
   // --- playlist ------------------------------------------------------------
 
   Future<TransferResult> _hls({
+    int? videoHeight,
     required String dirPath,
     required String url,
     required Map<String, String> headers,
@@ -387,7 +391,7 @@ class DownloadTransferDataSource {
     ({String url, String mediaTag, String streamTag})? audio;
 
     if (playlist.contains('#EXT-X-STREAM-INF')) {
-      final variant = _pickVariant(playlist, _baseOf(url));
+      final variant = _pickVariant(playlist, _baseOf(url), videoHeight);
       if (variant == null) {
         return const TransferResult.failed(
           DownloadFailureKind.notMedia,
@@ -1086,11 +1090,11 @@ class DownloadTransferDataSource {
   ///
   /// Nobody downloads a film in order to watch the smallest copy of it, so the
   /// best rendition is the answer rather than a setting.
-  String? _pickVariant(String playlist, String base) {
+  String? _pickVariant(String playlist, String base, int? height) {
     final uri = Uri.tryParse(base);
     if (uri == null) return null;
-    final variants = parseHlsVariants(playlist, uri);
-    if (variants.isNotEmpty) return variants.first.url;
+    final variant = selectHlsVariant(playlist, uri, height);
+    if (variant != null) return variant.url;
 
     // A master whose variants state neither a name nor a RESOLUTION: the
     // highest bitrate that carries a picture. "First" was the smallest here

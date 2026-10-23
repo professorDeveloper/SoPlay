@@ -13,6 +13,13 @@ import org.junit.Test
  */
 class HlsDownloadPlaylistTest {
 
+    @Test
+    fun `manual height keeps the selected rendition instead of highest bitrate`() {
+        val master = "#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=12000000,RESOLUTION=1280x720\n720.m3u8\n" +
+            "#EXT-X-STREAM-INF:BANDWIDTH=18000000,RESOLUTION=1920x1080\n1080.m3u8\n"
+        assertEquals("https://cdn.test/720.m3u8", HlsDownloadPlaylist.pickVariantUrl(master, "https://cdn.test/", 720))
+    }
+
     private val base = "https://cdn.test/v/"
 
     @Test

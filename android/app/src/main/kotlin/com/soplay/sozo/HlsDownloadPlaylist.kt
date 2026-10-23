@@ -20,8 +20,19 @@ object HlsDownloadPlaylist {
      * the packager's own `s1080p` name, else RESOLUTION's height, bitrate to
      * break a tie.
      */
-    fun pickVariantUrl(playlist: String, baseUrl: String): String? {
+    fun pickVariantUrl(playlist: String, baseUrl: String, preferredHeight: Int = 0): String? {
         val lines = playlist.lines()
+        val heights = lines.mapNotNull { tag ->
+            val match = Regex("RESOLUTION=(\\d+)x(\\d+)").find(tag) ?: return@mapNotNull null
+            val w = match.groupValues[1].toInt()
+            val h = match.groupValues[2].toInt()
+            displayHeight(w, h)
+        }
+        val wanted = when {
+            preferredHeight < 0 -> heights.minOrNull()
+            preferredHeight > 0 -> heights.filter { it <= preferredHeight }.maxOrNull() ?: heights.minOrNull()
+            else -> null
+        }
         var best: String? = null
         var bestHeight = 0
         var bestBandwidth = 0L
@@ -30,10 +41,10 @@ object HlsDownloadPlaylist {
             if (!tag.startsWith("#EXT-X-STREAM-INF")) continue
             val uri = lines[i + 1].trim()
             if (uri.isEmpty() || uri.startsWith("#")) continue
-            val height = NAMED_HEIGHT.find(uri)?.groupValues?.get(1)?.toIntOrNull()
-                ?: RESOLUTION.find(tag)?.groupValues?.get(1)?.toIntOrNull()
-                ?: 0
-            if (height <= 0) continue
+            val dimensions = Regex("RESOLUTION=(\\d+)x(\\d+)").find(tag)
+            val height = dimensions?.let { displayHeight(it.groupValues[1].toInt(), it.groupValues[2].toInt()) }
+                ?: NAMED_HEIGHT.find(uri)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+            if (height <= 0 || (wanted != null && height != wanted)) continue
             val bandwidth = BANDWIDTH.find(tag)?.groupValues?.get(1)?.toLongOrNull() ?: 0L
             if (height > bestHeight || (height == bestHeight && bandwidth > bestBandwidth)) {
                 best = resolveUrl(uri, baseUrl)
@@ -70,6 +81,12 @@ object HlsDownloadPlaylist {
             }
         }
         return null
+    }
+
+    private fun displayHeight(width: Int, height: Int): Int {
+        val effective = maxOf(minOf(width, height).toDouble(), maxOf(width, height) * 9.0 / 16)
+        return listOf(2160, 1440, 1080, 720, 480, 360, 240)
+            .firstOrNull { kotlin.math.abs(effective - it) <= it * 0.08 } ?: effective.toInt()
     }
 
     data class ByteRange(val offset: Long, val length: Long)

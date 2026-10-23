@@ -6,6 +6,8 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show debugPrint, visibleForTesting;
 import 'package:soplay/core/player/dash_manifest.dart';
+import 'package:soplay/core/player/hls_variants.dart';
+import 'package:soplay/core/player/media_segment_relay.dart';
 
 class LocalHlsProxy {
   LocalHlsProxy(this._dio);
@@ -32,6 +34,7 @@ class LocalHlsProxy {
     // manifest — how a DASH quality is picked, since neither engine exposes
     // DASH track selection.
     String? dashRepresentation,
+    int? hlsHeight,
     // Send the Origin and Referer given here upstream. Off by default: the
     // sources routed through the proxy for playback are the ones whose CDN
     // refuses them. The seek-bar preview wants the opposite — the exact
@@ -59,6 +62,7 @@ class LocalHlsProxy {
       ),
       lastAccess: DateTime.now(),
       dashRepresentation: dashRepresentation,
+      hlsHeight: hlsHeight,
       keepOriginHeaders: keepOriginHeaders,
       longLived: longLived,
     );
@@ -241,7 +245,13 @@ class LocalHlsProxy {
         String rewritten;
         try {
           rewritten = _rewriteM3u8(
-            text,
+            sess.hlsHeight == null
+                ? text
+                : narrowHlsMaster(
+                    text,
+                    Uri.parse(upstreamUrl),
+                    sess.hlsHeight!,
+                  ),
             base: '/hls/$sid',
             sessionOrigin: sess.origin,
             upstreamUrl: upstreamUrl,
@@ -345,6 +355,8 @@ class LocalHlsProxy {
       } catch (_) {
         return '$base/$trimmed';
       }
+      final relay = MediaSegmentRelay.rewrite(abs);
+      if (relay != null) return relay;
       final query = abs.hasQuery ? '?${abs.query}' : '';
       if (abs.authority == sessionAuthority) {
         return '$base${abs.path}$query';
@@ -582,11 +594,13 @@ class _Session {
     required this.transform,
     required this.lastAccess,
     this.dashRepresentation,
+    this.hlsHeight,
     this.keepOriginHeaders = false,
     this.longLived = false,
   });
 
   final String? dashRepresentation;
+  final int? hlsHeight;
   final bool keepOriginHeaders;
   final bool longLived;
   final String origin;

@@ -308,6 +308,8 @@ class MainActivity : FlutterFragmentActivity() {
                         .putExtra(DownloadForegroundService.EXTRA_URL, url)
                         .putExtra(DownloadForegroundService.EXTRA_LOCAL_PATH, localPath)
                         .putExtra(DownloadForegroundService.EXTRA_KIND, kind)
+                        .putExtra(DownloadForegroundService.EXTRA_VIDEO_HEIGHT, call.argument<Int>("videoHeight") ?: 0)
+                        .putExtra(DownloadForegroundService.EXTRA_SEGMENT_RELAY, call.argument<String>("segmentRelay"))
                         .putExtra(
                             DownloadForegroundService.EXTRA_WIFI_ONLY,
                             call.argument<Boolean>("wifiOnly") ?: false

@@ -105,12 +105,13 @@ audio/prog_index.m3u8
       await dir.delete(recursive: true);
     });
 
-    Future<TransferResult> run(DownloadKind kind, String url) =>
+    Future<TransferResult> run(DownloadKind kind, String url, {int? height}) =>
         DownloadTransferDataSource(dio: Dio()).run(
           id: 'x',
           dirPath: dir.path,
           kind: kind,
           sourceUrl: url,
+          videoHeight: height,
           headers: const {},
           pageUrls: const [],
           cancel: CancelToken(),
@@ -212,6 +213,8 @@ main.mp4
 #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",NAME="English",LANGUAGE="en",DEFAULT=NO,URI="audio/en.m3u8"
 #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",NAME="Japanese",LANGUAGE="ja",DEFAULT=YES,URI="audio/ja.m3u8"
 #EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="en",URI="subs/en.m3u8"
+#EXT-X-STREAM-INF:BANDWIDTH=6000000,RESOLUTION=1920x1080,AUDIO="aud",SUBTITLES="subs"
+video/1080.m3u8
 #EXT-X-STREAM-INF:BANDWIDTH=900000,RESOLUTION=1280x720,AUDIO="aud",SUBTITLES="subs"
 video/720.m3u8
 #EXT-X-STREAM-INF:BANDWIDTH=300000,RESOLUTION=640x360,AUDIO="aud",SUBTITLES="subs"
@@ -228,7 +231,11 @@ video/360.m3u8
           }
           await r.response.close();
         };
-        final result = await run(DownloadKind.hls, '$base/master.m3u8');
+        final result = await run(
+          DownloadKind.hls,
+          '$base/master.m3u8',
+          height: 720,
+        );
         expect(result.ok, isTrue, reason: result.detail);
         expect(result.totalUnits, 4);
         String read(String name) =>
@@ -246,6 +253,7 @@ video/360.m3u8
         expect(index, isNot(contains('SUBTITLES')));
         expect(index.trim().split('\n').last, 'video.m3u8');
         expect(hits, isNot(contains('/audio/en.m3u8')));
+        expect(hits, isNot(contains('/video/1080.m3u8')));
       },
     );
 

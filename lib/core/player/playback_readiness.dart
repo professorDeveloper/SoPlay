@@ -1,5 +1,25 @@
 import 'dart:async';
 
+/// A failed mpv decoder can still be supported by Android's platform player.
+/// Network and format failures must go back to source recovery instead.
+Future<bool> initializeWithDecoderFallback({
+  required Future<void> Function() initialize,
+  required Future<void> Function() fallback,
+  required bool Function() canFallback,
+}) async {
+  try {
+    await initialize();
+    return false;
+  } catch (error) {
+    final decoder = error.toString().toLowerCase().contains(
+      'could not open codec',
+    );
+    if (!canFallback() || !(decoder || error is TimeoutException)) rethrow;
+    await fallback();
+    return true;
+  }
+}
+
 /// Metadata (notably duration) can arrive before the video decoder has output.
 /// Only dimensions or an explicitly audio-only track list establish readiness.
 class PlaybackReadiness {
